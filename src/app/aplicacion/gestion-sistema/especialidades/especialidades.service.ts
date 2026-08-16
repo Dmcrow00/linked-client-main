@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Especialidad } from './especialidades.model';
 
@@ -14,23 +15,23 @@ private endpoint = `${environment.urlApi}especialidades`;
   }
 
   createEspecialidad(especialidad: Especialidad): Observable<Especialidad> {
-    return this.http.post<Especialidad>(`${this.endpoint}/create`, especialidad);
+    return this.http.post<any>(`${this.endpoint}`, especialidad).pipe(map(res => res.data));
   }
 
-  updateEspecialidad(id: number,especialidad: Especialidad): Observable<Especialidad> {
-    return this.http.put<Especialidad>(`${this.endpoint}/${id}`, especialidad);
+  updateEspecialidad(id: number, especialidad: Especialidad): Observable<Especialidad> {
+    return this.http.put<any>(`${this.endpoint}/${id}`, especialidad).pipe(map(res => res.data));
   }
 
   getAllEspecialidades(): Observable<Especialidad[]> {
-    return this.http.get<Especialidad[]>(`${this.endpoint}/findall`);
+    return this.http.get<any>(`${this.endpoint}`).pipe(map(res => res.data));
   }
 
   getEspecialidad(id: number): Observable<Especialidad> {
-    return this.http.get<Especialidad>(`${this.endpoint}/${id}`);
+    return this.http.get<any>(`${this.endpoint}/${id}`).pipe(map(res => res.data));
   }
 
   deleteEspecialidad(id: number): Observable<Especialidad> {
-    return this.http.delete<Especialidad>(`${this.endpoint}/${id}`);
+    return this.http.delete<any>(`${this.endpoint}/${id}`).pipe(map(res => res.data));
   }
 
 }

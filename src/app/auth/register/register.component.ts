@@ -202,7 +202,10 @@ export class RegisterComponent implements OnInit {
     this.user.modificationtimestamp = new Date();
     this.user.status = true;
     this.user.password = await this.encryptionService.encrypt(this.registerForm.controls['password'].value);
-    this.user.birth_date = this.registerForm.controls['birth_date'].value;
+    const rawDate: Date = this.registerForm.controls['birth_date'].value;
+    const birth_date = rawDate
+      ? `${rawDate.getFullYear()}-${String(rawDate.getMonth() + 1).padStart(2, '0')}-${String(rawDate.getDate()).padStart(2, '0')}`
+      : undefined;
     this.user.email = this.registerForm.controls['email'].value;
     this.user.localidad = this.registerForm.controls['localidad'].value || undefined;
     this.user.lat = this.geocodedLat ?? undefined;
@@ -211,7 +214,7 @@ export class RegisterComponent implements OnInit {
     if (this.accountType === 'tatuador') {
       this.user.estudio = this.registerForm.controls['estudio'].value || undefined;
       this.user.especialidadIds = this.especialidadesSeleccionadas.map(e => e.id);
-      this.registerService.registerTatuador(this.user).subscribe(
+      this.registerService.registerTatuador({ ...this.user, birth_date }).subscribe(
         () => {
           this.showSuccessDialogTatuador();
           setTimeout(() => {
@@ -224,7 +227,7 @@ export class RegisterComponent implements OnInit {
         }
       );
     } else {
-      this.registerService.register(this.user).subscribe(
+      this.registerService.register({ ...this.user, birth_date }).subscribe(
         () => {
           this.showSuccessDialog();
           setTimeout(() => {

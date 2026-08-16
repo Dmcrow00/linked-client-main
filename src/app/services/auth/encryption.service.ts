@@ -7,12 +7,10 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class EncryptionService {
-  private cachedKey: CryptoKey | null = null;
-
   constructor(private http: HttpClient) {}
 
   async encrypt(text: string): Promise<string> {
-    const key = await this.getPublicKey();
+    const key = await this.fetchPublicKey();
     const encrypted = await window.crypto.subtle.encrypt(
       { name: 'RSA-OAEP' },
       key,
@@ -21,9 +19,7 @@ export class EncryptionService {
     return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
   }
 
-  private async getPublicKey(): Promise<CryptoKey> {
-    if (this.cachedKey) return this.cachedKey;
-
+  private async fetchPublicKey(): Promise<CryptoKey> {
     const { publicKey } = await firstValueFrom(
       this.http.get<{ publicKey: string }>(`${environment.urlApi}auth/public-key`)
     );
@@ -34,13 +30,12 @@ export class EncryptionService {
       .replace(/\s/g, '');
     const binaryDer = Uint8Array.from(atob(pem), c => c.charCodeAt(0));
 
-    this.cachedKey = await window.crypto.subtle.importKey(
+    return window.crypto.subtle.importKey(
       'spki',
       binaryDer,
       { name: 'RSA-OAEP', hash: 'SHA-256' },
       false,
       ['encrypt']
     );
-    return this.cachedKey;
   }
 }

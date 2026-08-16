@@ -36,13 +36,14 @@ export class LoginService {
     return this.http
       .post<any>(`${environment.urlHost}auth/login`, credentials)
       .pipe(
-        tap((userData) => {
-          sessionStorage.setItem('accessToken', userData.accessToken);
-          this.currentUserDataSubject.next(userData.accessToken);
+        tap((response) => {
+          const token = response?.data?.token;
+          sessionStorage.setItem('accessToken', token);
+          this.currentUserDataSubject.next(token);
           this.currentUserLoginOnSubject.next(true);
-          this.updateUserId(userData.accessToken);
+          this.updateUserId(token);
         }),
-        map((userData) => userData.accessToken),
+        map((response) => response?.data?.token),
         catchError((error: HttpErrorResponse) =>
           this.errorHandler.handleError(error)
         )

@@ -43,12 +43,12 @@ export class UserService {
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.endpoint}/findall`);
+    return this.http.get<User[]>(`${this.endpoint}`);
   }
 
   updateUser(id: number, userRequest: any): Observable<any> {
     return this.http
-      .put<User>(`${this.endpoint}/updateUser/${id}`, userRequest)
+      .put<User>(`${this.endpoint}/${id}`, userRequest)
       .pipe(catchError(this.handleError));
   }
 
@@ -84,14 +84,18 @@ export class UserService {
 
   getAllUserRoles(idUser: number): Observable<number[]> {
     return this.http
-      .get<number[]>(`${this.endpoint}/getUserRolsByIdUser/${idUser}`);
+      .get<{ data: number[] }>(`${this.endpoint}/getUserRolsByIdUser/${idUser}`)
+      .pipe(map(r => r.data));
   }
 
   getRoles(): Observable<RolApl[] | undefined> {
     return this.http.get<RolApl[]>(`${this.endpoint}/getAllRoles`)
   }
+
   getUserRolByidRole(idRole: string): Observable<RolApl> {
-    return this.http.get<RolApl>(`${this.endpoint}/getUserRolByidRole/${idRole}`);
+    return this.http
+      .get<{ data: RolApl }>(`${this.endpoint}/getUserRolByidRole/${idRole}`)
+      .pipe(map(r => r.data));
   }
 
 }
