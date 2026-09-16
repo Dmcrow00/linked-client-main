@@ -82,8 +82,8 @@ export class MiPortfolioComponent implements OnInit {
     this.instagramLoadingMessage = 'Sincronizando con Instagram...';
     this.syncMessage = '';
     this.instagramService.syncPosts().subscribe({
-      next: (res) => {
-        this.syncMessage = res.message;
+      next: () => {
+        this.syncMessage = 'Publicaciones sincronizadas con Instagram.';
         this.syncMessageIsError = false;
         this.instagramLoading = false;
         this.loadData();

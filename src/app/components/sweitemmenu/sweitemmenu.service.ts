@@ -9,12 +9,12 @@ import { MenuItem } from "./sweitemmenu.models";
     providedIn: 'root',
 })
 export class SweItemMenuService {
-    private endpoint = `${environment.urlApi}sweItemMenu`;
+    private endpoint = `${environment.urlApi}swe/menu`;
 
     constructor(private http: HttpClient) {
     }
 
     getMenuItem(): Observable<MenuItem[]> {
-        return this.http.get<MenuItem[]>(this.endpoint + '/findall');
+        return this.http.get<MenuItem[]>(this.endpoint);
     }
 }

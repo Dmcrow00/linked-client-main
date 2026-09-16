@@ -5,7 +5,7 @@
 
     <!-- Vista Tatuador: muestra info del cliente -->
     <div class="persona-info" *ngIf="esTatuador">
-      <img [src]="data.turno.cliente?.profile_photo | serverUrl" class="avatar-persona" alt="Cliente">
+      <img [src]="data.turno.cliente?.profilePhoto | serverUrl" class="avatar-persona" alt="Cliente">
       <div>
         <h2>{{ data.turno.cliente?.realname }} {{ data.turno.cliente?.surname }}</h2>
         <p class="subtitle">&#64;{{ data.turno.cliente?.username }}</p>
@@ -14,7 +14,7 @@
 
     <!-- Vista Cliente: muestra info del tatuador -->
     <div class="persona-info" *ngIf="!esTatuador">
-      <img [src]="tatuador?.profile_photo | serverUrl" class="avatar-persona" alt="Tatuador">
+      <img [src]="tatuador?.profilePhoto | serverUrl" class="avatar-persona" alt="Tatuador">
       <div>
         <h2>{{ tatuador?.realname }} {{ tatuador?.surname }}</h2>
         <p class="subtitle">{{ tatuador?.estudio || 'Artista tatuador' }}</p>
@@ -52,11 +52,11 @@
 
           <div class="info-item">
             <mat-icon>calendar_today</mat-icon>
-            <span>{{ data.turno.fecha_hora_inicio | date:'EEEE dd MMMM yyyy' }}</span>
+            <span>{{ data.turno.fechaHoraInicio | date:'EEEE dd MMMM yyyy' }}</span>
           </div>
           <div class="info-item">
             <mat-icon>schedule</mat-icon>
-            <span>{{ data.turno.fecha_hora_inicio | date:'HH:mm' }} — {{ data.turno.fecha_hora_fin | date:'HH:mm' }}</span>
+            <span>{{ data.turno.fechaHoraInicio | date:'HH:mm' }} — {{ data.turno.fechaHoraFin | date:'HH:mm' }}</span>
           </div>
           <div class="info-item" *ngIf="esTatuador">
             <mat-icon>email</mat-icon>
@@ -68,16 +68,16 @@
         <div class="section">
           <h3>{{ esTatuador ? 'Idea del cliente' : 'Tu descripción' }}</h3>
           <p class="descripcion-text">
-            {{ data.turno.descripcion_cliente || 'Sin descripción.' }}
+            {{ data.turno.descripcionCliente || 'Sin descripción.' }}
           </p>
         </div>
 
         <!-- Imágenes de referencia -->
-        <div class="section" *ngIf="data.turno.imagenes && data.turno.imagenes.length > 0">
+        <div class="section" *ngIf="data.turno.imagenesRef && data.turno.imagenesRef.length > 0">
           <h3>Referencias visuales</h3>
           <div class="galeria">
-            <div class="img-wrapper" *ngFor="let img of data.turno.imagenes; let i = index">
-              <img [src]="img.image_path | serverUrl" alt="Referencia" (click)="openLightbox(i)">
+            <div class="img-wrapper" *ngFor="let img of data.turno.imagenesRef; let i = index">
+              <img [src]="img | serverUrl" alt="Referencia" (click)="openLightbox(i)">
             </div>
           </div>
         </div>
@@ -92,12 +92,11 @@
         <div class="messages-list" #messagesContainer>
           <div class="message-bubble"
                *ngFor="let msg of mensajes"
-               [class.own-message]="msg.usuarioEnvia?.id === currentUserId">
+               [class.own-message]="msg.usuarioEnviaId === currentUserId">
             <div class="msg-header">
-              <strong>{{ msg.usuarioEnvia?.realname }}</strong>
-              <small>{{ msg.timestamp | date:'dd/MM HH:mm' }}</small>
+              <strong>{{ msg.usuarioEnviaUsername }}</strong>
             </div>
-            <div class="msg-body">{{ msg.mensaje }}</div>
+            <div class="msg-body">{{ msg.texto }}</div>
           </div>
 
           <div *ngIf="mensajes.length === 0" class="no-messages">
@@ -169,15 +168,15 @@
     <button class="lightbox-close" (click)="closeLightbox()">
       <mat-icon>close</mat-icon>
     </button>
-    <button class="lightbox-nav prev" *ngIf="data.turno.imagenes!.length > 1" (click)="$event.stopPropagation(); lightboxPrev()">
+    <button class="lightbox-nav prev" *ngIf="data.turno.imagenesRef!.length > 1" (click)="$event.stopPropagation(); lightboxPrev()">
       <mat-icon>chevron_left</mat-icon>
     </button>
     <img class="lightbox-img" [src]="lightboxUrl" alt="Referencia ampliada" (click)="$event.stopPropagation()">
-    <button class="lightbox-nav next" *ngIf="data.turno.imagenes!.length > 1" (click)="$event.stopPropagation(); lightboxNext()">
+    <button class="lightbox-nav next" *ngIf="data.turno.imagenesRef!.length > 1" (click)="$event.stopPropagation(); lightboxNext()">
       <mat-icon>chevron_right</mat-icon>
     </button>
-    <div class="lightbox-counter" *ngIf="data.turno.imagenes!.length > 1">
-      {{ lightboxIndex! + 1 }} / {{ data.turno.imagenes!.length }}
+    <div class="lightbox-counter" *ngIf="data.turno.imagenesRef!.length > 1">
+      {{ lightboxIndex! + 1 }} / {{ data.turno.imagenesRef!.length }}
     </div>
   </div>
 

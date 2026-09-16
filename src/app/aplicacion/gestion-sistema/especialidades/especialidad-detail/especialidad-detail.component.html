@@ -15,30 +15,8 @@
       </div>
 
       <div class="detail-item">
-        <span class="label">Fecha de carga:</span>
-        <span>{{ data.especialidad.creationtimestamp | date: 'dd/MM/yyyy HH:mm' }}</span>
-      </div>
-
-      <div class="detail-item">
-        <span class="label">Modificación:</span>
-        <span>
-          {{ data.especialidad.modificationtimestamp ? (data.especialidad.modificationtimestamp | date: 'dd/MM/yyyy HH:mm') : '—' }}
-        </span>
-      </div>
-
-      <div class="detail-item">
-        <span class="label">Cargado por:</span>
-        <span>{{ data.especialidad.creationuser }}</span>
-      </div>
-
-      <div class="detail-item">
-        <span class="label">Modificado por:</span>
-        <span>{{ data.especialidad.modificationuser || '—' }}</span>
-      </div>
-
-      <div class="detail-item">
         <span class="label">Estado:</span>
-        <span>{{ data.especialidad.status ? 'Activo' : 'Inactivo' }}</span>
+        <span>{{ data.especialidad.status === 'true' ? 'Activo' : 'Inactivo' }}</span>
       </div>
     </div>
   </mat-card-content>

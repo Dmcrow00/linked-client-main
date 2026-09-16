@@ -7,7 +7,7 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { TurnosService, TurnoTatuadorResponse } from 'src/app/services/turnos/turnos.service';
+import { TurnosService } from 'src/app/services/turnos/turnos.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AgendaDetalleComponent } from './agenda-detalle/agenda-detalle.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -92,7 +92,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
         nombreCliente.includes(searchTerms.username.toLowerCase());
 
       // Filtro por Fecha
-      const fechaTurno = new Date(data.fecha_hora_inicio);
+      const fechaTurno = new Date(data.fechaHoraInicio);
       fechaTurno.setHours(0, 0, 0, 0); // Ignorar hora para comparar días
 
       let coincideFecha = true;
@@ -197,7 +197,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
         case 'fecha':
         case 'hora':
           // Convertir a timestamp para ordenar números correctamente
-          return new Date(item.fecha_hora_inicio).getTime();
+          return new Date(item.fechaHoraInicio).getTime();
         case 'cliente':
           return (item.cliente?.realname || '').toLowerCase();
         case 'estado':
@@ -215,8 +215,8 @@ export class AgendaComponent implements OnInit, OnDestroy {
     this.errorTurnos = null;
 
     this.turnosService.getMisTurnos().subscribe({
-      next: (turnosTatuador: TurnoTatuadorResponse[]) => {
-        this.dataSource.data = turnosTatuador.map(tt => tt.turnoSesion);
+      next: (turnos: TurnoSesion[]) => {
+        this.dataSource.data = turnos;
         this.isLoadingTurnos = false;
       },
       error: (err) => {
@@ -238,7 +238,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
         (data.cliente?.realname || '') +
         (data.cliente?.surname || '') +
         data.estado +
-        new Date(data.fecha_hora_inicio!).toLocaleDateString('es-AR'); // "dd/MM/yyyy"
+        new Date(data.fechaHoraInicio).toLocaleDateString('es-AR'); // "dd/MM/yyyy"
       return dataStr.toLowerCase().includes(filter);
     };
 

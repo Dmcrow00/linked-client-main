@@ -19,9 +19,9 @@ export class RegisterService {
   }
 
   checkAvailability(field: 'username' | 'email', value: string): Observable<{ available: boolean }> {
-    return this.http.get<{ data: { available: boolean } }>(
+    return this.http.get<{ available: boolean }>(
       `${environment.urlHost}auth/check-availability`,
       { params: { field, value } }
-    ).pipe(map(r => r.data));
+    );
   }
 }

@@ -9,7 +9,7 @@
         <mat-nav-list>
             <mat-list-item *ngFor="let item of menuItems" [ngStyle]="{ 'height': getItemHeight(item) }">
                 <div class="menu-item-container">
-                    <button mat-button [disabled]="item.endpoint == null" (click)="navigate(item.endpoint)"
+                    <button mat-button [disabled]="!item.route" (click)="navigate(item.route)"
                         class="menu-button">
                         {{ item.title }}
                     </button>
@@ -22,11 +22,11 @@
 
                 <mat-nav-list *ngIf="item.expanded" class="submenu-list">
                     <mat-list-item *ngFor="let subItem of item.subMenus" class="submenu-item">
-                        <button mat-button (click)="navigate(subItem.endpoint)">
+                        <button mat-button (click)="navigate(subItem.route)">
                             {{ subItem.title }}
                         </button>
                         <mat-list-item *ngFor="let subItemHijo of subItem.subMenus" class="submenu-item">
-                            <button mat-button (click)="navigate(subItemHijo.endpoint)">
+                            <button mat-button (click)="navigate(subItemHijo.route)">
                                 {{ subItemHijo.title }}
                             </button>
                         </mat-list-item>

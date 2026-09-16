@@ -179,24 +179,21 @@
       <div
         *ngFor="let tatuador of tatuadoresResultado"
         class="artist-card"
-        [id]="'artist-card-' + tatuador.idUser"
+        [id]="'artist-card-' + tatuador.id"
       >
         <!-- Avatar -->
         <div class="card-avatar-wrapper">
           <img
-            [src]="tatuador.profile_photo | serverUrl"
+            [src]="tatuador.profilePhoto | serverUrl"
             class="card-avatar"
-            [alt]="tatuador.realname || ''"
+            [alt]="tatuador.username"
             onerror="this.src = 'assets/images/default-avatar.png'"
           />
         </div>
 
         <!-- Info -->
         <div class="card-info">
-          <h3 class="card-name">
-            {{ tatuador.realname }} {{ tatuador.surname }}
-          </h3>
-          <p class="card-username">{{ "@" + tatuador.username }}</p>
+          <h3 class="card-name">{{ "@" + tatuador.username }}</h3>
 
           <div
             class="card-meta"
@@ -214,17 +211,17 @@
             </span>
           </div>
 
-          <div class="card-tags" *ngIf="tatuador.especialidades.length > 0">
+          <div class="card-tags" *ngIf="tatuador.especialidades?.length">
             <span
               class="tag"
-              *ngFor="let e of tatuador.especialidades.slice(0, 3)"
+              *ngFor="let e of (tatuador.especialidades ?? []).slice(0, 3)"
               >{{ e.nombre }}</span
             >
             <span
               class="tag tag-more"
-              *ngIf="tatuador.especialidades.length > 3"
+              *ngIf="(tatuador.especialidades ?? []).length > 3"
             >
-              +{{ tatuador.especialidades.length - 3 }}
+              +{{ (tatuador.especialidades ?? []).length - 3 }}
             </span>
           </div>
         </div>
@@ -232,8 +229,8 @@
         <!-- Acciones -->
         <div class="card-actions">
           <a
-            *ngIf="tatuador.instagram_handle"
-            [href]="getInstagramUrl(tatuador.instagram_handle)"
+            *ngIf="tatuador.instagramHandle"
+            [href]="getInstagramUrl(tatuador.instagramHandle)"
             target="_blank"
             rel="noopener noreferrer"
             mat-icon-button
@@ -249,14 +246,14 @@
           <button
             mat-stroked-button
             class="btn-portfolio"
-            (click)="verPerfil(tatuador.idUser)"
+            (click)="verPerfil(tatuador.id)"
           >
             Portfolio
           </button>
           <button
             mat-raised-button
             class="create-button btn-reservar"
-            (click)="reservar(tatuador.idUser)"
+            (click)="reservar(tatuador.id)"
           >
             Reservar
           </button>

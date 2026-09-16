@@ -6,20 +6,19 @@ import { environment } from 'src/environments/environment';
 
 export interface NewsArticle {
   title: string;
-  description: string | null;
   url: string;
-  urlToImage: string | null;
-  publishedAt: string;
-  source: string;
+  description: string | null;
+  publishedAt: string | null;
+  source: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class NewsService {
   constructor(private http: HttpClient) {}
 
-  getTattooNews(): Observable<{ articles: NewsArticle[] }> {
+  getTattooNews(): Observable<NewsArticle[]> {
     return this.http
-      .get<{ articles: NewsArticle[] }>(`${environment.urlApi}news`)
-      .pipe(catchError(() => of({ articles: [] })));
+      .get<NewsArticle[]>(`${environment.urlApi}news`)
+      .pipe(catchError(() => of([])));
   }
 }

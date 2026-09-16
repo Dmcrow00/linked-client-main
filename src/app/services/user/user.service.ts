@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { User } from '../../models/user.model';
-import { BehaviorSubject, catchError, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, switchMap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { RolApl } from 'src/app/models/rol.models.js';
 
@@ -38,7 +38,7 @@ export class UserService {
 
   getUser(id: number): Observable<User> {
     return this.http
-      .get<User>(environment.urlApi + 'users/' + id)
+      .get<User>(`${this.endpoint}/${id}`)
       .pipe(catchError(this.handleError));
   }
 
@@ -46,24 +46,24 @@ export class UserService {
     return this.http.get<User[]>(`${this.endpoint}`);
   }
 
-  updateUser(id: number, userRequest: any): Observable<any> {
+  updateUser(id: number, userRequest: any): Observable<User> {
     return this.http
       .put<User>(`${this.endpoint}/${id}`, userRequest)
       .pipe(catchError(this.handleError));
   }
 
-  updateUserRoles(userId: number, roleIds: number[]): Observable<string[]> {
+  updateUserRoles(userId: number, roleIds: number[]): Observable<void> {
     return this.http
-      .put<string[]>(`${this.endpoint}/${userId}/roles`, { roleIds })
+      .put<void>(`${this.endpoint}/${userId}/roles`, { roleIds })
       .pipe(catchError(this.handleError));
   }
 
-  updateProfilePhoto(id: number, image: File): Observable<any> {
+  updateProfilePhoto(id: number, image: File): Observable<User> {
     const formData = new FormData();
-    formData.append('image', image);
+    formData.append('file', image);
 
     return this.http
-      .patch(`${this.endpoint}/${id}/profile-photo`, formData)
+      .patch<User>(`${this.endpoint}/${id}/profile-photo`, formData)
       .pipe(catchError(this.handleError));
   }
 
@@ -83,19 +83,15 @@ export class UserService {
   }
 
   getAllUserRoles(idUser: number): Observable<number[]> {
-    return this.http
-      .get<{ data: number[] }>(`${this.endpoint}/getUserRolsByIdUser/${idUser}`)
-      .pipe(map(r => r.data));
+    return this.http.get<number[]>(`${this.endpoint}/getUserRolsByIdUser/${idUser}`);
   }
 
-  getRoles(): Observable<RolApl[] | undefined> {
-    return this.http.get<RolApl[]>(`${this.endpoint}/getAllRoles`)
+  getRoles(): Observable<RolApl[]> {
+    return this.http.get<RolApl[]>(`${this.endpoint}/getAllRoles`);
   }
 
   getUserRolByidRole(idRole: string): Observable<RolApl> {
-    return this.http
-      .get<{ data: RolApl }>(`${this.endpoint}/getUserRolByidRole/${idRole}`)
-      .pipe(map(r => r.data));
+    return this.http.get<RolApl>(`${this.endpoint}/getUserRolByidRole/${idRole}`);
   }
 
 }

@@ -39,7 +39,7 @@ export class SupportTicketDetailComponent implements OnInit {
   ) {
     this.gestionForm = this.fb.group({
       status: [data.supportTicket.status + '' === 'true'],
-      admin_response: ['', [Validators.required, Validators.minLength(10)]],
+      adminResponse: ['', [Validators.required, Validators.minLength(10)]],
     });
   }
 
@@ -49,27 +49,21 @@ export class SupportTicketDetailComponent implements OnInit {
     if (this.gestionForm.invalid) return;
     this.saving = true;
 
-    this.userService.getLoggedInUsername().subscribe((username) => {
-      const payload = {
-        status: this.gestionForm.value.status,
-        admin_response: this.gestionForm.value.admin_response,
-        modificationuser: username ?? '',
-      };
-
-      this.supportTicketService.respondToTicket(this.data.supportTicket.id, payload).subscribe({
+    this.supportTicketService
+      .respondToTicket(this.data.supportTicket.id, this.gestionForm.value.adminResponse)
+      .subscribe({
         next: () => {
           this.saving = false;
           this.dialogRef.close(true);
         },
         error: (err) => {
           this.saving = false;
-          const msg = err?.error?.msg || 'Error al enviar la respuesta';
+          const msg = err?.error?.message || 'Error al enviar la respuesta';
           this.dialog.open(ErrorDialogComponent, {
             data: { type: 'error', message: msg },
           });
         },
       });
-    });
   }
 
   onClose(): void {

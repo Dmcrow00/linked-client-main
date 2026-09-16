@@ -28,10 +28,10 @@
                     {{ h }}
                 </mat-option>
                 
-<mat-option *ngIf="!horariosDisponibles.includes((data.turno.fecha_hora_inicio | date:'HH:mm') || '') && 
-                                   (fecha?.value | date:'dd/MM/yyyy') === (data.turno.fecha_hora_inicio | date:'dd/MM/yyyy')"
-                            [value]="data.turno.fecha_hora_inicio | date:'HH:mm'">
-                    {{ data.turno.fecha_hora_inicio | date:'HH:mm' }} (Actual)
+<mat-option *ngIf="!horariosDisponibles.includes((data.turno.fechaHoraInicio | date:'HH:mm') || '') && 
+                                   (fecha?.value | date:'dd/MM/yyyy') === (data.turno.fechaHoraInicio | date:'dd/MM/yyyy')"
+                            [value]="data.turno.fechaHoraInicio | date:'HH:mm'">
+                    {{ data.turno.fechaHoraInicio | date:'HH:mm' }} (Actual)
                 </mat-option>
 
             </mat-select>

@@ -17,7 +17,7 @@
       <div class="ticket-header">
         <span class="label">TATUADOR</span>
         <div class="artist-info">
-            <img [src]="reserva.tatuador?.profile_photo | serverUrl" 
+            <img [src]="reserva.tatuador?.profilePhoto | serverUrl"
                  class="avatar" 
                  alt="Avatar"
                  onerror="this.src='assets/images/default-profile.jpg'"> 
@@ -37,14 +37,14 @@
                 <mat-icon>calendar_today</mat-icon>
                 <div>
                     <span class="label">FECHA</span>
-                    <span class="value">{{ reserva.fecha_hora_inicio | date: 'dd/MM/yyyy' }}</span>
+                    <span class="value">{{ reserva.fechaHoraInicio | date: 'dd/MM/yyyy' }}</span>
                 </div>
             </div>
             <div class="info-item">
                 <mat-icon>schedule</mat-icon>
                 <div>
                     <span class="label">HORA</span>
-                    <span class="value">{{ reserva.fecha_hora_inicio | date: 'HH:mm' }} hs</span>
+                    <span class="value">{{ reserva.fechaHoraInicio | date: 'HH:mm' }} hs</span>
                 </div>
             </div>
         </div>

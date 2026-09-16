@@ -1,32 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-export interface EstiloDetectado {
-  nombre: string;
-  confianza: number; // 0-100
-}
-
 export interface TatuadorUbicacion {
-  idUser: number;
-  realname?: string;
-  surname?: string;
+  id: number;
   username: string;
-  profile_photo?: string;
+  profilePhoto?: string;
   estudio?: string;
   localidad?: string;
-  antiguedad?: number;
-  especialidades: { id: number; nombre: string }[];
+  especialidades?: { id: number; nombre: string }[];
   lat: number;
   lng: number;
-  instagram_handle?: string;
+  instagramHandle?: string;
   distancia?: number;   // km — calculada en frontend
   matchScore?: number;  // % de coincidencia con estilos detectados
 }
 
 export interface BusquedaEstiloResponse {
-  estilosDetectados: EstiloDetectado[];
+  // Vacío hasta que el backend incorpore el análisis de estilos con IA.
+  estilosDetectados: string[];
   tatuadores: TatuadorUbicacion[];
 }
 

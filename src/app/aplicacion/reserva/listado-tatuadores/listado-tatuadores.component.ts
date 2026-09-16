@@ -33,7 +33,7 @@ export class ListadoTatuadoresComponent {
   // --- Getters ---
     get selectedTatuador(): Tatuador | null {
       if (!this.selectedTatuadorId) return null;
-      return this.tatuadores.find(t => t.idUser === this.selectedTatuadorId) || null;
+      return this.tatuadores.find(t => t.id === this.selectedTatuadorId) || null;
     }
   
     cargarTatuadores(): void {
@@ -82,7 +82,7 @@ export class ListadoTatuadoresComponent {
     
   
     seleccionarTatuador(tatuador: Tatuador): void {
-      this.selectedTatuadorId = tatuador.idUser;
+      this.selectedTatuadorId = tatuador.id;
     }
   
     verTrabajos(idTatuador: number, event: MouseEvent): void {

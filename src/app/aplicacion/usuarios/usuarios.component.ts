@@ -72,6 +72,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     ]);
     this.availableRoles = roles ?? [];
     this.solicitudesPendientes = (sols ?? []).filter(s => s.status === 'pendiente');
+
     this.loadUsuarios();
   }
 
@@ -88,10 +89,10 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   private async loadAllUserRoles(users: User[]): Promise<void> {
     await Promise.all(users.map(async (u) => {
       try {
-        const ids = await this.userService.getAllUserRoles(u.idUser).toPromise();
-        this.userRolesMap.set(u.idUser, (ids ?? []).map(Number));
+        const ids = await this.userService.getAllUserRoles(u.id).toPromise();
+        this.userRolesMap.set(u.id, (ids ?? []).map(Number));
       } catch {
-        this.userRolesMap.set(u.idUser, []);
+        this.userRolesMap.set(u.id, []);
       }
     }));
   }
@@ -105,7 +106,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   isPendienteTatuador(idUser: number): boolean {
-    return this.solicitudesPendientes.some(s => s.idUser === idUser);
+    return this.solicitudesPendientes.some(s => s.user.id === idUser);
   }
 
   isTatuadorActivo(idUser: number): boolean {
@@ -133,13 +134,13 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         u.username?.toLowerCase().includes(this.filterUsername.toLowerCase());
 
       const coincideRol = this.filterRolId === '' ||
-        (this.userRolesMap.get(u.idUser) ?? []).includes(Number(this.filterRolId));
+        (this.userRolesMap.get(u.id) ?? []).includes(Number(this.filterRolId));
 
       let coincideEstado = true;
       if (this.filterEstado === 'pendiente_tatuador') {
-        coincideEstado = this.isPendienteTatuador(u.idUser) && !this.isTatuadorActivo(u.idUser);
+        coincideEstado = this.isPendienteTatuador(u.id) && !this.isTatuadorActivo(u.id);
       } else if (this.filterEstado === 'tatuador_activo') {
-        coincideEstado = this.isTatuadorActivo(u.idUser);
+        coincideEstado = this.isTatuadorActivo(u.id);
       }
 
       return coincideNombre && coincideRol && coincideEstado;

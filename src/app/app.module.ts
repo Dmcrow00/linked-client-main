@@ -40,6 +40,7 @@ import { ErrorDialogComponent } from './components/error-dialog/error-dialog.com
 
 import { JwtInterceptorService } from './services/auth/jwt-interceptor.service';
 import { LoadingInterceptor } from './components/loading.interceptor';
+import { ApiResponseInterceptor } from './core/interceptors/api-response.interceptor';
 
 import { SupportTicketComponent } from './aplicacion/support-ticket/support-ticket.component';
 import { SupportTicketCreateComponent } from './aplicacion/support-ticket/support-ticket-create/support-ticket-create.component';
@@ -200,6 +201,11 @@ registerLocaleData(localeEsAr); // 👈 Esto registra el locale
         { provide: LOCALE_ID, useValue: 'es-AR' },
         { provide: MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS },
         { provide: RECAPTCHA_V3_SITE_KEY, useValue: '6LfpC-ErAAAAAJxd1G8rldVAIzoe7ZdQY3By5j-o' },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: ApiResponseInterceptor,
+            multi: true,
+        },
         {
             provide: HTTP_INTERCEPTORS,
             useClass: JwtInterceptorService,

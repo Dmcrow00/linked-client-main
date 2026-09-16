@@ -152,14 +152,14 @@
               *matCellDef="let turno"
               style="width: 10%; text-align: center"
             >
-              {{ turno.fecha_hora_inicio | date: "dd/MM/yyyy" }}
+              {{ turno.fechaHoraInicio | date: "dd/MM/yyyy" }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="hora">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Hora</th>
             <td mat-cell *matCellDef="let turno">
-              {{ turno.fecha_hora_inicio | date: "HH:mm" }}
+              {{ turno.fechaHoraInicio | date: "HH:mm" }}
             </td>
           </ng-container>
 

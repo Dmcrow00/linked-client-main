@@ -23,12 +23,12 @@
       <div class="detail-row">
         <div class="detail-item">
           <span class="detail-label">Usuario</span>
-          <span class="detail-value">{{ data.supportTicket.creationuser }}</span>
+          <span class="detail-value">{{ data.supportTicket.usuarios?.join(', ') || 'Anónimo' }}</span>
         </div>
         <div class="detail-sep"></div>
         <div class="detail-item">
           <span class="detail-label">Fecha de carga</span>
-          <span class="detail-value">{{ data.supportTicket.creationtimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="detail-value">{{ data.supportTicket.creationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
         <ng-container *ngIf="data.supportTicket.category">
           <div class="detail-sep"></div>
@@ -44,11 +44,11 @@
             <span class="detail-value">{{ data.supportTicket.priority }}</span>
           </div>
         </ng-container>
-        <ng-container *ngIf="data.supportTicket.modificationuser">
+        <ng-container *ngIf="data.supportTicket.modificationTimestamp">
           <div class="detail-sep"></div>
           <div class="detail-item">
             <span class="detail-label">Última gestión</span>
-            <span class="detail-value">{{ data.supportTicket.modificationuser }}</span>
+            <span class="detail-value">{{ data.supportTicket.modificationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
         </ng-container>
       </div>
@@ -81,11 +81,11 @@
           <mat-form-field appearance="outline" class="field-full">
             <textarea
               matInput
-              formControlName="admin_response"
+              formControlName="adminResponse"
               placeholder="Redactá la respuesta que recibirá el usuario por correo..."
               rows="5">
             </textarea>
-            <mat-error *ngIf="gestionForm.get('admin_response')?.hasError('required')">
+            <mat-error *ngIf="gestionForm.get('adminResponse')?.hasError('required')">
               La respuesta es requerida
             </mat-error>
           </mat-form-field>

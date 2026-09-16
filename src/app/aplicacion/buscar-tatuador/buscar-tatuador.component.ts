@@ -144,7 +144,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
     this.artistMarkers = [];
 
     lista.forEach(tatuador => {
-      const photo = tatuador.profile_photo;
+      const photo = tatuador.profilePhoto;
       const photoUrl = photo
         ? (photo.startsWith('http') ? photo : `${environment.urlImg}${photo}`)
         : 'assets/images/default-avatar.png';
@@ -166,7 +166,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
         .bindPopup(this.buildPopupContent(tatuador));
 
       marker.on('click', () => {
-        this.ngZone.run(() => this.scrollToCard(tatuador.idUser));
+        this.ngZone.run(() => this.scrollToCard(tatuador.id));
       });
 
       this.artistMarkers.push(marker);
@@ -174,12 +174,11 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private buildPopupContent(t: TatuadorUbicacion): string {
-    const esps = t.especialidades.slice(0, 3).map(e => e.nombre).join(', ');
+    const esps = (t.especialidades ?? []).slice(0, 3).map(e => e.nombre).join(', ');
     const dist = t.distancia ? `${t.distancia.toFixed(1)} km` : '';
     return `
       <div class="map-popup">
-        <strong>${t.realname ?? ''} ${t.surname ?? ''}</strong>
-        <span class="popup-username">@${t.username}</span>
+        <strong>@${t.username}</strong>
         ${t.estudio ? `<span class="popup-studio">${t.estudio}</span>` : ''}
         ${esps ? `<span class="popup-esps">${esps}</span>` : ''}
         ${dist ? `<span class="popup-dist"><b>${dist}</b> de distancia</span>` : ''}
@@ -338,7 +337,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
 
     if (this.estilosSeleccionados.size > 0) {
       resultado = resultado.filter(t =>
-        t.especialidades.some(e => this.estilosSeleccionados.has(e.nombre))
+        (t.especialidades ?? []).some(e => this.estilosSeleccionados.has(e.nombre))
       );
     }
 
@@ -370,23 +369,20 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
         this.todosLosTatuadores = tatuadores
           .filter(t => t.lat != null && t.lng != null)
           .map(t => ({
-            idUser: t.idUser,
-            realname: t.realname,
-            surname: t.surname,
+            id: t.id,
             username: t.username,
-            profile_photo: t.profile_photo,
+            profilePhoto: t.profilePhoto,
             estudio: t.estudio,
             localidad: t.localidad ?? undefined,
-            antiguedad: t.antiguedad,
             especialidades: t.especialidades ?? [],
             lat: t.lat!,
             lng: t.lng!,
-            instagram_handle: t.instagram_handle ?? undefined,
+            instagramHandle: t.instagramHandle ?? undefined,
           }));
 
         const estilosSet = new Set<string>();
         this.todosLosTatuadores.forEach(t =>
-          t.especialidades.forEach(e => estilosSet.add(e.nombre))
+          (t.especialidades ?? []).forEach(e => estilosSet.add(e.nombre))
         );
         this.estilosDisponibles = Array.from(estilosSet).sort();
 

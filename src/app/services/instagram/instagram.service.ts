@@ -5,15 +5,8 @@ import { environment } from 'src/environments/environment';
 
 export interface InstagramStatus {
   connected: boolean;
-  instagram_user_id?: string;
-  expires_at?: Date;
-}
-
-export interface InstagramSyncResult {
-  message: string;
-  synced: number;
-  skipped: number;
-  deleted: number;
+  instagramUserId?: string;
+  expiresAt?: string;
 }
 
 @Injectable({
@@ -36,8 +29,8 @@ export class InstagramService {
   }
 
   /** Importa los posts de Instagram del tatuador como Trabajos */
-  syncPosts(): Observable<InstagramSyncResult> {
-    return this.http.post<InstagramSyncResult>(`${this.apiUrl}/sync`, {});
+  syncPosts(): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/sync`, {});
   }
 
   /** Desvincula la cuenta de Instagram */

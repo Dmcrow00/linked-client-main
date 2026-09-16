@@ -1,7 +1,7 @@
 <div class="post-tile mat-elevation-z2">
 
   <div class="image-wrapper">
-    <img [src]="trabajo.fotos[currentImageIndex].image_path | serverUrl"
+    <img [src]="trabajo.fotos[currentImageIndex] | serverUrl"
          class="tile-image"
          loading="lazy"
          (error)="hasError = true"
@@ -34,7 +34,7 @@
   <!-- Barra inferior: siempre visible -->
   <div class="bottom-bar">
     <div class="artist-info" *ngIf="showArtistInfo" (click)="irAlPerfil($event)">
-      <img [src]="trabajo.tatuador?.profile_photo | serverUrl" class="mini-avatar">
+      <img [src]="trabajo.tatuador?.profilePhoto | serverUrl" class="mini-avatar">
       <span class="artist-name">{{ trabajo.tatuador?.username }}</span>
     </div>
     <div class="bar-spacer" *ngIf="!showArtistInfo"></div>

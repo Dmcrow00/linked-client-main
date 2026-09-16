@@ -10,7 +10,7 @@
     </button>
 
     <div class="image-wrapper">
-      <img [src]="data.trabajo.fotos[currentImageIndex].image_path | serverUrl"
+      <img [src]="data.trabajo.fotos[currentImageIndex] | serverUrl"
            class="main-image"
            alt="Detalle trabajo">
     </div>
@@ -36,7 +36,7 @@
 
     <div class="modal-header">
       <div class="author-info" (click)="irAlPerfil()">
-        <img [src]="data.trabajo.tatuador?.profile_photo | serverUrl"
+        <img [src]="data.trabajo.tatuador?.profilePhoto | serverUrl"
              class="avatar"
              alt="Avatar">
         <div class="names">
@@ -52,7 +52,7 @@
       <div class="description-card">
         <p class="description">{{ data.trabajo.descripcion || 'Sin descripción.' }}</p>
       </div>
-      <p class="date">Publicado el {{ data.trabajo.creationtimestamp | date:'longDate' }}</p>
+      <p class="date">Publicado el {{ data.trabajo.creationTimestamp | date:'longDate' }}</p>
     </div>
 
     <mat-divider></mat-divider>

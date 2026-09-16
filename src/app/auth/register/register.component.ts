@@ -89,7 +89,7 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.especialidadesService.getAllEspecialidades().subscribe(data => {
-      this.especialidades = data.filter(e => e.status);
+      this.especialidades = data.filter(e => e.status === 'true');
     });
 
     this.registerForm.get('localidad')!.valueChanges.pipe(
@@ -196,12 +196,8 @@ export class RegisterComponent implements OnInit {
     this.user.realname = this.registerForm.controls['realname'].value;
     this.user.username = this.registerForm.controls['username'].value;
     this.user.email = this.registerForm.controls['email'].value;
-    this.user.creationuser = 'admin';
-    this.user.creationtimestamp = new Date();
-    this.user.modificationuser = 'admin';
-    this.user.modificationtimestamp = new Date();
-    this.user.status = true;
     this.user.password = await this.encryptionService.encrypt(this.registerForm.controls['password'].value);
+    this.user.recaptchaToken = this.captchaToken;
     const rawDate: Date = this.registerForm.controls['birth_date'].value;
     const birth_date = rawDate
       ? `${rawDate.getFullYear()}-${String(rawDate.getMonth() + 1).padStart(2, '0')}-${String(rawDate.getDate()).padStart(2, '0')}`
@@ -223,7 +219,7 @@ export class RegisterComponent implements OnInit {
           }, 3000);
         },
         (error) => {
-          this.showErrorDialog(error.error?.error?.message || 'Error desconocido');
+          this.showErrorDialog(error.error?.message || 'Error desconocido');
         }
       );
     } else {
@@ -237,7 +233,7 @@ export class RegisterComponent implements OnInit {
         },
         (error) => {
           console.error('Error al registrar: ', error);
-          this.showErrorDialog(error.error?.error?.message || 'Error desconocido');
+          this.showErrorDialog(error.error?.message || 'Error desconocido');
         }
       );
     }

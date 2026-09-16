@@ -72,10 +72,10 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     realname: this.formBuilder.control<string | null>(null),
     username: this.formBuilder.control<string | null>(null, Validators.required),
     email: this.formBuilder.control<string | null>(null, Validators.required),
-    birth_date: this.formBuilder.control<Date | null>(null, Validators.required),
+    birthDate: this.formBuilder.control<Date | null>(null, Validators.required),
     profileImage: this.formBuilder.control<File | null>(null),
     localidad: this.formBuilder.control<string | null>(null),
-    instagram_handle: this.formBuilder.control<string | null>(null),
+    instagramHandle: this.formBuilder.control<string | null>(null),
   });
 
   // Coordenadas geocodificadas, no en el formulario reactive sino como propiedades
@@ -205,8 +205,8 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     this.instagramLoadingMessage = 'Sincronizando posts...';
     this.instagramMessage = '';
     this.instagramService.syncPosts().subscribe({
-      next: (res) => {
-        this.instagramMessage = res.message;
+      next: () => {
+        this.instagramMessage = 'Publicaciones sincronizadas.';
         this.instagramMessageIsError = false;
         this.instagramLoading = false;
         if (this.userId) this.loadUserData(this.userId);
@@ -269,9 +269,9 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
           realname: data.realname ?? '',
           username: data.username ?? '',
           email: data.email ?? '',
-          birth_date: data.birth_date ? new Date(data.birth_date) : null,
+          birthDate: data.birthDate ? new Date(data.birthDate) : null,
           localidad: data.localidad ?? '',
-          instagram_handle: data.instagram_handle ?? '',
+          instagramHandle: data.instagramHandle ?? '',
         }, { emitEvent: false });
         // Restaurar coordenadas previas si existen
         this.geocodedLat = data.lat ?? null;
@@ -443,30 +443,28 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     // 1. Actualizar datos del usuario
   const formValues = this.registerForm.value;
 
-  let tatuadorData: { estudio?: string | null, fecha_inicio_actividad?: Date | null } = {
+  let tatuadorData: { estudio?: string | null, fechaInicioActividad?: Date | null } = {
     estudio: this.user?.estudio ?? null,
-    fecha_inicio_actividad: this.user?.fecha_inicio_actividad ?? null,
+    fechaInicioActividad: this.user?.fechaInicioActividad ? new Date(this.user.fechaInicioActividad) : null,
     };
 
     if (this.userRol === 'Tatuador' && this.tatuadorComponentRef) {
         tatuadorData = this.tatuadorComponentRef.getTatuadorData();
     }
 
+  // El backend sólo toma los campos editables del perfil: username y email no se actualizan por acá.
   const updatedUser: Partial<User> = {
-    ...this.user,
     realname: formValues.realname ?? undefined,
     surname: formValues.surname ?? undefined,
-    username: formValues.username ?? undefined,
-    email: formValues.email ?? undefined,
-    birth_date: formValues.birth_date
-      ? new Date(formValues.birth_date)
-      : undefined,
+    birthDate: formValues.birthDate ? this.aFechaIso(formValues.birthDate) : undefined,
     estudio: tatuadorData.estudio ?? undefined,
-    fecha_inicio_actividad: tatuadorData.fecha_inicio_actividad ? new Date(tatuadorData.fecha_inicio_actividad) : undefined,
+    fechaInicioActividad: tatuadorData.fechaInicioActividad
+      ? this.aFechaIso(tatuadorData.fechaInicioActividad)
+      : undefined,
     localidad: formValues.localidad ?? undefined,
     lat: this.geocodedLat ?? undefined,
     lng: this.geocodedLng ?? undefined,
-    instagram_handle: formValues.instagram_handle ?? undefined,
+    instagramHandle: formValues.instagramHandle ?? undefined,
   };
 
     requests.push(this.userService.updateUser(this.userId, updatedUser));
@@ -513,6 +511,13 @@ if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0)
     if (this.userId) this.loadUserData(this.userId);
   }
 
+  // El backend espera un LocalDate: se envía la fecha local y no el ISO en UTC, que correría un día.
+  private aFechaIso(fecha: Date): string {
+    const mes = `${fecha.getMonth() + 1}`.padStart(2, '0');
+    const dia = `${fecha.getDate()}`.padStart(2, '0');
+    return `${fecha.getFullYear()}-${mes}-${dia}`;
+  }
+
   /** Formatea la fecha al escribir */
   onDateInput(event: any) {
     let value: string = event.target.value.replace(/\D/g, '');
@@ -525,7 +530,7 @@ if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0)
   get realname() { return this.registerForm.controls.realname; }
   get surname() { return this.registerForm.controls.surname; }
   get email() { return this.registerForm.controls.email; }
-  get birth_date() { return this.registerForm.controls.birth_date; }
+  get birthDate() { return this.registerForm.controls.birthDate; }
   get username() { return this.registerForm.controls.username; }
 
 }

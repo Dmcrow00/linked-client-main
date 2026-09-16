@@ -36,14 +36,14 @@
         <!-- Franja superior con color por estado -->
         <div class="card-header-visual" [ngClass]="'border-' + turno.estado.toLowerCase()">
           <div class="fecha-box">
-            <span class="dia">{{ turno.fecha_hora_inicio | date:'dd' }}</span>
-            <span class="mes">{{ turno.fecha_hora_inicio | date:'MMM' | uppercase }}</span>
-            <span class="anio">{{ turno.fecha_hora_inicio | date:'yyyy' }}</span>
+            <span class="dia">{{ turno.fechaHoraInicio | date:'dd' }}</span>
+            <span class="mes">{{ turno.fechaHoraInicio | date:'MMM' | uppercase }}</span>
+            <span class="anio">{{ turno.fechaHoraInicio | date:'yyyy' }}</span>
           </div>
           <div class="hora-box">
             <mat-icon>schedule</mat-icon>
             <div class="hora-detalle">
-              <span>{{ turno.fecha_hora_inicio | date:'HH:mm' }} — {{ turno.fecha_hora_fin | date:'HH:mm' }}</span>
+              <span>{{ turno.fechaHoraInicio | date:'HH:mm' }} — {{ turno.fechaHoraFin | date:'HH:mm' }}</span>
               <small>{{ duracionMinutos(turno) }} min</small>
             </div>
           </div>
@@ -55,34 +55,34 @@
         <mat-card-content class="card-body">
 
           <!-- Info del tatuador -->
-          <div class="tatuador-info" *ngIf="turno.tatuadoresAsignados && turno.tatuadoresAsignados.length > 0">
-            <img [src]="turno.tatuadoresAsignados[0].tatuador.profile_photo | serverUrl"
+          <div class="tatuador-info" *ngIf="turno.tatuadores && turno.tatuadores.length > 0">
+            <img [src]="turno.tatuadores[0].profilePhoto | serverUrl"
                  class="avatar-small" alt="Tatuador">
             <div>
               <small>Artista</small>
-              <h4>{{ turno.tatuadoresAsignados[0].tatuador.realname }} {{ turno.tatuadoresAsignados[0].tatuador.surname }}</h4>
-              <span class="estudio" *ngIf="turno.tatuadoresAsignados[0].tatuador.estudio">
-                {{ turno.tatuadoresAsignados[0].tatuador.estudio }}
+              <h4>{{ turno.tatuadores[0].realname }} {{ turno.tatuadores[0].surname }}</h4>
+              <span class="estudio" *ngIf="turno.tatuadores[0].estudio">
+                {{ turno.tatuadores[0].estudio }}
               </span>
             </div>
           </div>
 
           <!-- Sin tatuador asignado aún -->
-          <div class="tatuador-info sin-asignar" *ngIf="!turno.tatuadoresAsignados || turno.tatuadoresAsignados.length === 0">
+          <div class="tatuador-info sin-asignar" *ngIf="!turno.tatuadores || turno.tatuadores.length === 0">
             <mat-icon>person_outline</mat-icon>
             <small>Artista por confirmar</small>
           </div>
 
           <!-- Descripción -->
-          <p class="descripcion-corta" *ngIf="turno.descripcion_cliente">
-            {{ turno.descripcion_cliente | slice:0:100 }}{{ turno.descripcion_cliente.length > 100 ? '...' : '' }}
+          <p class="descripcion-corta" *ngIf="turno.descripcionCliente">
+            {{ turno.descripcionCliente | slice:0:100 }}{{ turno.descripcionCliente.length > 100 ? '...' : '' }}
           </p>
 
           <!-- Indicadores adicionales -->
           <div class="indicadores">
-            <span class="indicador" *ngIf="turno.imagenes && turno.imagenes.length > 0">
+            <span class="indicador" *ngIf="turno.imagenesRef && turno.imagenesRef.length > 0">
               <mat-icon>photo_library</mat-icon>
-              {{ turno.imagenes.length }} referencia{{ turno.imagenes.length > 1 ? 's' : '' }}
+              {{ turno.imagenesRef.length }} referencia{{ turno.imagenesRef.length > 1 ? 's' : '' }}
             </span>
           </div>
 

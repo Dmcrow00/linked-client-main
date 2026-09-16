@@ -77,7 +77,7 @@ export class SeleccionarHorarioComponent implements OnInit {
     if (idStr) {
       this.tatuadorId = +idStr;
       this.tatuadorService.getTatuadores().subscribe(tatuadores => {
-        this.selectedTatuador = tatuadores.find(t => t.idUser === this.tatuadorId) || null;
+        this.selectedTatuador = tatuadores.find(t => t.id === this.tatuadorId) || null;
         if (!this.selectedTatuador) {
           this.router.navigate(['/reserva/listado']);
         } else {
@@ -195,24 +195,25 @@ export class SeleccionarHorarioComponent implements OnInit {
     this.isSaving = true;
 
     const [hInicio, mInicio] = this.selectedTime.split(':');
-    const fecha_hora_inicio = new Date(this.selectedDate);
-    fecha_hora_inicio.setHours(parseInt(hInicio), parseInt(mInicio), 0, 0);
+    const fechaHoraInicio = new Date(this.selectedDate);
+    fechaHoraInicio.setHours(parseInt(hInicio), parseInt(mInicio), 0, 0);
 
-    const fecha_hora_fin = new Date(fecha_hora_inicio);
-    fecha_hora_fin.setMinutes(fecha_hora_fin.getMinutes() + 60);
+    const fechaHoraFin = new Date(fechaHoraInicio);
+    fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + 60);
 
+    // El backend parsea ISO local sin zona horaria.
     const solicitudDto: SolicitarTurnoDto = {
       tatuadorId: this.tatuadorId,
-      fecha_hora_inicio: fecha_hora_inicio.toISOString(),
-      fecha_hora_fin: fecha_hora_fin.toISOString(),
-      descripcion_cliente: this.descripcionCliente
+      fechaHoraInicio: this.aIsoLocal(fechaHoraInicio),
+      fechaHoraFin: this.aIsoLocal(fechaHoraFin),
+      descripcionCliente: this.descripcionCliente
     };
 
     this.turnosService.solicitarTurno(solicitudDto, this.selectedFiles).subscribe({
       next: (turnoCreado) => {
         const datosParaConfirmar = {
             tatuador: this.selectedTatuador,
-            fecha_hora_inicio: fecha_hora_inicio.toISOString(),
+            fechaHoraInicio: fechaHoraInicio.toISOString(),
         };
 
         this.reservaStateService.setDatos(datosParaConfirmar);
@@ -226,6 +227,13 @@ export class SeleccionarHorarioComponent implements OnInit {
         this.isSaving = false;
       }
     });
+  }
+
+  // toISOString() convierte a UTC y correría el turno; el backend espera la hora local elegida.
+  private aIsoLocal(fecha: Date): string {
+    const pad = (n: number) => `${n}`.padStart(2, '0');
+    return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())}` +
+           `T${pad(fecha.getHours())}:${pad(fecha.getMinutes())}:00`;
   }
 
   getPhotoUrl(photo?: string): string {

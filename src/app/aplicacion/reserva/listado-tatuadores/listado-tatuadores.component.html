@@ -32,10 +32,10 @@
       <div class="tatuador-card" 
            *ngFor="let tatuador of tatuadores"
            (click)="seleccionarTatuador(tatuador)"
-           [class.selected]="tatuador.idUser === selectedTatuadorId">
+           [class.selected]="tatuador.id === selectedTatuadorId">
         
         <div class="card-top">
-            <img [src]="tatuador?.profile_photo | serverUrl" 
+            <img [src]="tatuador?.profilePhoto | serverUrl"
                  [alt]="tatuador.realname" 
                  class="avatar">
         </div>
@@ -64,11 +64,11 @@
         </div>
 
         <div class="card-actions">
-            <button class="btn-secondary" (click)="verTrabajos(tatuador.idUser, $event)">
+            <button class="btn-secondary" (click)="verTrabajos(tatuador.id, $event)">
                 Ver Portfolio
             </button>
             <button class="btn-primary" 
-                    *ngIf="tatuador.idUser === selectedTatuadorId" 
+                    *ngIf="tatuador.id === selectedTatuadorId"
                     (click)="confirmarSeleccion()">
                 Reservar Aquí
             </button>

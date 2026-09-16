@@ -52,18 +52,10 @@ export class SupportTicketCreateComponent implements OnInit {
   ngOnInit(): void {
     this.loginService.userLoginOn.subscribe(loggedIn => {
       this.isAnonymous = !loggedIn;
-      if (loggedIn) {
-        this.userService.getLoggedInUsername().subscribe({
-          next: (username) => { this.supportTicket.creationuser = username || 'Anónimo'; },
-          error: () => { this.supportTicket.creationuser = 'Anónimo'; },
-        });
-      } else {
-        this.supportTicket.creationuser = 'Anónimo';
-      }
     });
 
-    this.supportTicket.url_pagina = window.location.href;
-    this.supportTicket.user_agent = this.buildDeviceInfo();
+    this.supportTicket.urlPagina = window.location.href;
+    this.supportTicket.userAgent = this.buildDeviceInfo();
   }
 
   private buildDeviceInfo(): string {
@@ -101,7 +93,7 @@ export class SupportTicketCreateComponent implements OnInit {
   isFormValid(): boolean {
     const base = !!this.supportTicket.description?.trim() && !!this.supportTicket.category;
     if (this.isAnonymous) {
-      const email = this.supportTicket.contact_email?.trim() ?? '';
+      const email = this.supportTicket.contactEmail?.trim() ?? '';
       return base && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
     return base;
@@ -110,12 +102,14 @@ export class SupportTicketCreateComponent implements OnInit {
   createSupportTicket(): void {
     if (!this.isFormValid()) return;
 
-    const payload: SupportTicket = {
-      ...this.supportTicket,
-      creationtimestamp: new Date().toISOString(),
-    };
-
-    this.supportTicketService.createSupportTicket(payload).subscribe({
+    this.supportTicketService.createSupportTicket({
+      description: this.supportTicket.description,
+      category: this.supportTicket.category,
+      urlPagina: this.supportTicket.urlPagina,
+      userAgent: this.supportTicket.userAgent,
+      screenshot: this.supportTicket.screenshot,
+      contactEmail: this.isAnonymous ? this.supportTicket.contactEmail : null,
+    }).subscribe({
       next: () => {
         this.dialogRef.close(true);
         this.dialog.open(ErrorDialogComponent, {

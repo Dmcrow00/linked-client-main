@@ -79,8 +79,8 @@ export class MisReservasComponent implements OnInit {
   }
 
   duracionMinutos(turno: TurnoSesion): number {
-    const inicio = new Date(turno.fecha_hora_inicio).getTime();
-    const fin = new Date(turno.fecha_hora_fin).getTime();
+    const inicio = new Date(turno.fechaHoraInicio).getTime();
+    const fin = new Date(turno.fechaHoraFin).getTime();
     return Math.round((fin - inicio) / 60000);
   }
 

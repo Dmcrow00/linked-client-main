@@ -35,7 +35,7 @@
         <div class="ticket-card-header">
           <div class="ticket-meta">
             <span class="ticket-id">#{{ t.id }}</span>
-            <span class="ticket-date">{{ t.creationtimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span class="ticket-date">{{ t.creationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
             <span class="ticket-category" *ngIf="t.category">{{ t.category }}</span>
           </div>
           <span class="ticket-status" [class.resolved]="t.status + '' === 'true'">
@@ -45,12 +45,12 @@
 
         <p class="ticket-description">{{ t.description }}</p>
 
-        <div class="ticket-response" *ngIf="t.admin_response">
+        <div class="ticket-response" *ngIf="t.adminResponse">
           <div class="response-label">
             <mat-icon>chat</mat-icon>
             Respuesta del equipo
           </div>
-          <p class="response-text">{{ t.admin_response }}</p>
+          <p class="response-text">{{ t.adminResponse }}</p>
         </div>
 
       </div>

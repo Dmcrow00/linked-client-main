@@ -57,20 +57,20 @@ horarioForm: FormGroup;
   private buildDiasFormArray(): void {
     for (let i = 0; i < 7; i++) {
       this.diasFormArray.push(this.fb.group({
-        dia_semana: [i], // Guardamos el número del día (0-6)
+        diaSemana: [i], // Guardamos el número del día (0-6)
         enabled: [false], // Checkbox/Toggle para habilitar el día
         // Validadores: requeridos SOLO si 'enabled' es true
-        hora_inicio: ['', Validators.pattern('^([01]?[0-9]|2[0-3]):[0-5][0-9]$')], // Formato HH:MM
-        hora_fin: ['', Validators.pattern('^([01]?[0-9]|2[0-3]):[0-5][0-9]$')],
-        duracion_turno_min: [60, Validators.min(1)] // Default 60 mins, mínimo 1
+        horaInicio: ['', Validators.pattern('^([01]?[0-9]|2[0-3]):[0-5][0-9]$')], // Formato HH:MM
+        horaFin: ['', Validators.pattern('^([01]?[0-9]|2[0-3]):[0-5][0-9]$')],
+        duracionTurnoMin: [60, Validators.min(1)] // Default 60 mins, mínimo 1
       }));
 
       // Suscripción para añadir/quitar validadores dinámicamente
       const dayGroup = this.diasFormArray.at(i);
       dayGroup.get('enabled')?.valueChanges.subscribe(enabled => {
-        const horaInicioCtrl = dayGroup.get('hora_inicio');
-        const horaFinCtrl = dayGroup.get('hora_fin');
-        const duracionCtrl = dayGroup.get('duracion_turno_min');
+        const horaInicioCtrl = dayGroup.get('horaInicio');
+        const horaFinCtrl = dayGroup.get('horaFin');
+        const duracionCtrl = dayGroup.get('duracionTurnoMin');
 
         if (enabled) {
           horaInicioCtrl?.setValidators([Validators.required, Validators.pattern('^([01]?[0-9]|2[0-3]):[0-5][0-9]$')]);
@@ -111,19 +111,19 @@ horarioForm: FormGroup;
 
   private patchForm(horarios: HorarioHabitual[]): void {
     horarios.forEach(h => {
-      const dayGroup = this.diasFormArray.controls.find(control => control.get('dia_semana')?.value === h.dia_semana);
+      const dayGroup = this.diasFormArray.controls.find(control => control.get('diaSemana')?.value === h.diaSemana);
       if (dayGroup) {
         dayGroup.patchValue({
           enabled: true,
-          hora_inicio: h.hora_inicio.substring(0, 5), 
-          hora_fin: h.hora_fin.substring(0, 5),
-          duracion_turno_min: h.duracion_turno_min
+          horaInicio: h.horaInicio.substring(0, 5),
+          horaFin: h.horaFin.substring(0, 5),
+          duracionTurnoMin: h.duracionTurnoMin
         });
       }
     });
     // Asegurarse que los días NO incluidos queden deshabilitados (ya empiezan en false)
     this.diasFormArray.controls.forEach(control => {
-        if (!horarios.some(h => h.dia_semana === control.get('dia_semana')?.value)) {
+        if (!horarios.some(h => h.diaSemana === control.get('diaSemana')?.value)) {
             control.get('enabled')?.setValue(false);
         }
     });
@@ -145,16 +145,15 @@ horarioForm: FormGroup;
     const horarioParaEnviar: HorarioHabitualInput[] = formValue
       .filter(dia => dia.enabled)
       .map(dia => ({
-        dia_semana: dia.dia_semana,
-        hora_inicio: dia.hora_inicio,
-        hora_fin: dia.hora_fin,
-        duracion_turno_min: dia.duracion_turno_min
+        diaSemana: dia.diaSemana,
+        horaInicio: dia.horaInicio,
+        horaFin: dia.horaFin,
+        duracionTurnoMin: dia.duracionTurnoMin
       }));
 
     this.agendaService.updateHorarioHabitual(horarioParaEnviar).subscribe({
-      next: (horarioGuardado) => {
+      next: () => {
         this.snackBar.open('Horario guardado correctamente.', 'OK', { duration: 3000 });
-        this.patchForm(horarioGuardado); // Opcional: repopular con la respuesta por si la BD ajusta algo
         this.isSaving = false;
         this.horarioForm.markAsPristine(); // Marcar como no modificado
       },

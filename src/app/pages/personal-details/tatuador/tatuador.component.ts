@@ -24,7 +24,7 @@ import { MatOption } from '@angular/material/select';
 export class TatuadorComponent implements OnInit {
   @Input() userId!: number|undefined;
   @Input() initialEstudio: string | null | undefined = null;
-  @Input() initialFechaInicio: Date | null | undefined = null;
+  @Input() initialFechaInicio: string | Date | null | undefined = null;
 
   @Output() especialidadesChange = new EventEmitter<Especialidad[]>();
 
@@ -45,7 +45,7 @@ export class TatuadorComponent implements OnInit {
   ) {
     this.tatuadorForm = this.fb.group({
       estudio: [''],
-      fecha_inicio_actividad: [null]
+      fechaInicioActividad: [null]
     });
   }
 
@@ -72,7 +72,7 @@ export class TatuadorComponent implements OnInit {
     if (this.tatuadorForm) { // Asegúrate que el form ya exista
         this.tatuadorForm.patchValue({
             estudio: this.initialEstudio ?? '',
-            fecha_inicio_actividad: this.initialFechaInicio ? new Date(this.initialFechaInicio) : null
+            fechaInicioActividad: this.initialFechaInicio ? new Date(this.initialFechaInicio) : null
         });
     }
   }
@@ -124,7 +124,7 @@ export class TatuadorComponent implements OnInit {
 
   //Metodo para que el componente padre obtenga los datos
   
-  public getTatuadorData(): { estudio?: string | null, fecha_inicio_actividad?: Date | null } {
+  public getTatuadorData(): { estudio?: string | null, fechaInicioActividad?: Date | null } {
     return this.tatuadorForm.value;
   }
 }

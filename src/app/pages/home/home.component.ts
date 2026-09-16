@@ -104,29 +104,27 @@ export class HomeComponent implements OnInit, OnDestroy {
     const trabajo = this.feed.find(t => t.id === trabajoId);
     if (!trabajo) return;
 
-    if (!trabajo.favoritos) trabajo.favoritos = [];
-
     const yaTieneLike = this.misLikes.has(trabajoId);
 
     if (yaTieneLike) {
       this.misLikes.delete(trabajoId);
-      trabajo.favoritos.pop();
+      trabajo.likesCount--;
 
       this.trabajosService.quitarLike(trabajoId).subscribe({
         error: () => {
           this.misLikes.add(trabajoId);
-          trabajo.favoritos?.push({});
+          trabajo.likesCount++;
           console.error("Error al quitar like");
         }
       });
 
     } else {
       this.misLikes.add(trabajoId);
-      trabajo.favoritos.push({});
+      trabajo.likesCount++;
       this.trabajosService.darLike(trabajoId).subscribe({
         error: () => {
           this.misLikes.delete(trabajoId);
-          trabajo.favoritos?.pop();
+          trabajo.likesCount--;
           console.error("Error al dar like");
         }
       });

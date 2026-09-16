@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { SupportTicket } from '../../aplicacion/support-ticket/support-ticket.model';
+import {
+  SupportTicket,
+  SupportTicketCreatePayload,
+  SupportTicketUpdatePayload,
+} from '../../aplicacion/support-ticket/support-ticket.model';
 
 @Injectable({
   providedIn: 'root',
@@ -13,11 +17,11 @@ export class SupportTicketService {
   constructor(private http: HttpClient) {
   }
 
-  createSupportTicket(supportTicket: SupportTicket): Observable<SupportTicket> {
+  createSupportTicket(supportTicket: SupportTicketCreatePayload): Observable<SupportTicket> {
     return this.http.post<SupportTicket>(`${this.endpoint}/create`,supportTicket);
   }
 
-  updateSupportTicket(id: number,supportTicket: SupportTicket): Observable<SupportTicket> {
+  updateSupportTicket(id: number,supportTicket: SupportTicketUpdatePayload): Observable<SupportTicket> {
     return this.http.put<SupportTicket>(`${this.endpoint}/${id}`,supportTicket);
   }
 
@@ -33,12 +37,13 @@ export class SupportTicketService {
     return this.http.get<SupportTicket[]>(`${this.endpoint}/me/tickets`);
   }
 
-  respondToTicket(id: number, data: { status: boolean; admin_response: string; modificationuser: string }): Observable<SupportTicket> {
-    return this.http.post<SupportTicket>(`${this.endpoint}/${id}/respond`, data);
+  // Responder cierra el ticket; el backend solo toma adminResponse.
+  respondToTicket(id: number, adminResponse: string): Observable<void> {
+    return this.http.post<void>(`${this.endpoint}/${id}/respond`, { adminResponse });
   }
 
-  deleteSupportTicket(id: number): Observable<SupportTicket> {
-    return this.http.delete<SupportTicket>(`${this.endpoint}/${id}`);
+  deleteSupportTicket(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.endpoint}/${id}`);
   }
 
 }

@@ -60,22 +60,30 @@ export class SolicitudesTatuadorComponent implements OnInit {
 
     this.tatuadoresIds.clear();
     await Promise.all(pendientes.map(async (sol) => {
-      const roles = await firstValueFrom(this.userService.getAllUserRoles(sol.idUser));
+      const roles = await firstValueFrom(this.userService.getAllUserRoles(sol.user.id));
       if ((roles ?? []).some(r => Number(r) === Number(tatuadorId))) {
-        this.tatuadoresIds.add(sol.idUser);
+        this.tatuadoresIds.add(sol.user.id);
       }
     }));
   }
 
   get pendientes(): SolicitudTatuador[] {
-    return this.solicitudes.filter(s => s.status === 'pendiente' && !this.tatuadoresIds.has(s.idUser));
+    return this.solicitudes.filter(s => s.status === 'pendiente' && !this.tatuadoresIds.has(s.user.id));
   }
 
   get procesadas(): SolicitudTatuador[] {
     return this.solicitudes.filter(s => s.status !== 'pendiente');
   }
 
-  getNombresEspecialidades(ids: number[]): string {
+  // El backend guarda los IDs como arreglo JSON serializado, por ejemplo "[1, 3]".
+  getNombresEspecialidades(idsJson: string | null): string {
+    if (!idsJson) return '—';
+    let ids: number[] = [];
+    try {
+      ids = JSON.parse(idsJson);
+    } catch {
+      return '—';
+    }
     if (!ids?.length) return '—';
     return ids.map(id => this.especialidadesMap.get(id) ?? `#${id}`).join(', ');
   }

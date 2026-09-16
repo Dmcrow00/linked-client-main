@@ -116,13 +116,14 @@ export class SupportTicketComponent implements OnInit, OnDestroy {
       let d1: string | null = null;
       let d2: string | null = null;
 
-      if (ticket.creationtimestamp && this.filterFechaCarga) {
-        d1 = new Date(ticket.creationtimestamp).toISOString().split('T')[0];
+      if (ticket.creationTimestamp && this.filterFechaCarga) {
+        d1 = new Date(ticket.creationTimestamp).toISOString().split('T')[0];
         d2 = this.filterFechaCarga.toISOString().split('T')[0];
       }
 
+      const usuario = this.filterUsuario?.toLowerCase();
       const coincideUsuario =
-        !this.filterUsuario || ticket.creationuser.toLowerCase().includes(this.filterUsuario.toLowerCase());
+        !usuario || (ticket.usuarios ?? []).some(u => u.toLowerCase().includes(usuario));
 
       const coincideFecha = !this.filterFechaCarga || d1 === d2;
 

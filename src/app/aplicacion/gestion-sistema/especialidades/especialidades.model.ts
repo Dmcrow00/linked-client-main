@@ -2,9 +2,12 @@ export class Especialidad {
   id: number = 0;
   nombre: string = '';
   descripcion: string = '';
-  creationuser: string = '';
-  creationtimestamp: string | null = null;
-  modificationuser?: string;
-  modificationtimestamp?: string | null = null;
-  status: boolean = false;
+  // El backend lo expone como "true" / "false".
+  status: string = 'true';
+}
+
+// Alta y edición sólo aceptan estos campos.
+export interface EspecialidadPayload {
+  nombre: string;
+  descripcion: string;
 }

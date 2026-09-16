@@ -1,5 +1,6 @@
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { TurnoMensaje } from 'src/app/models/turno/turno-mensaje.model';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TurnosService } from 'src/app/services/turnos/turnos.service';
@@ -35,7 +36,7 @@ export interface AgendaDetalleData {
 })
 export class AgendaDetalleComponent implements OnInit {
 
-  mensajes: any[] = [];
+  mensajes: TurnoMensaje[] = [];
   nuevoMensajeText = '';
   currentUserId: number | null = null;
   huboCambiosManuales = false;
@@ -61,7 +62,7 @@ export class AgendaDetalleComponent implements OnInit {
   }
 
   get tatuador() {
-    return this.data.turno.tatuadoresAsignados?.[0]?.tatuador;
+    return this.data.turno.tatuadores?.[0];
   }
 
   get statusInfo(): { icon: string; mensaje: string; clase: string } {
@@ -109,7 +110,7 @@ export class AgendaDetalleComponent implements OnInit {
 
   cargarMensajes(): void {
     this.turnosService.getMensajesTurno(this.data.turno.id!).subscribe({
-      next: (msgs: any) => { this.mensajes = msgs; },
+      next: (msgs) => { this.mensajes = msgs; },
       error: () => {}
     });
   }
@@ -117,7 +118,7 @@ export class AgendaDetalleComponent implements OnInit {
   enviarMensaje(): void {
     if (!this.nuevoMensajeText.trim()) return;
     this.turnosService.enviarMensaje(this.data.turno.id!, this.nuevoMensajeText).subscribe({
-      next: (mensajeCreado: any) => {
+      next: (mensajeCreado) => {
         this.mensajes.push(mensajeCreado);
         this.nuevoMensajeText = '';
       },
@@ -137,8 +138,7 @@ export class AgendaDetalleComponent implements OnInit {
 
   get lightboxUrl(): string | null {
     if (this.lightboxIndex === null) return null;
-    const img = this.data.turno.imagenes![this.lightboxIndex];
-    const path = img.image_path;
+    const path = this.data.turno.imagenesRef![this.lightboxIndex];
     return path.startsWith('http') ? path : `${environment.urlImg}${path}`;
   }
 
@@ -152,13 +152,13 @@ export class AgendaDetalleComponent implements OnInit {
 
   lightboxPrev(): void {
     if (this.lightboxIndex === null) return;
-    const total = this.data.turno.imagenes!.length;
+    const total = this.data.turno.imagenesRef!.length;
     this.lightboxIndex = (this.lightboxIndex - 1 + total) % total;
   }
 
   lightboxNext(): void {
     if (this.lightboxIndex === null) return;
-    const total = this.data.turno.imagenes!.length;
+    const total = this.data.turno.imagenesRef!.length;
     this.lightboxIndex = (this.lightboxIndex + 1) % total;
   }
 }

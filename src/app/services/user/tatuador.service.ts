@@ -21,11 +21,11 @@ private apiUrl = `${environment.urlApi}tatuador`;
     return this.http.get<Especialidad[]>(`${this.apiUrl}/${userId}/especialidades`);
   }
 
-  assignEspecialidades(userId: number, especialidadIds: number[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${userId}/asignar-especialidades`, { especialidadIds });
+  assignEspecialidades(userId: number, especialidadIds: number[]): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${userId}/asignar-especialidades`, especialidadIds);
   }
 
-  removeEspecialidad(userId: number, especialidadId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${userId}/quitar-especialidad/${especialidadId}`);
+  removeEspecialidad(userId: number, especialidadId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${userId}/quitar-especialidad/${especialidadId}`);
   }
 }

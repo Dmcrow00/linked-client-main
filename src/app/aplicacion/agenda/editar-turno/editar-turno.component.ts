@@ -35,14 +35,14 @@ minDate: Date = new Date();
     private agendaService: AgendaService,
     @Inject(MAT_DIALOG_DATA) public data: { turno: TurnoSesion }
   ) {
-    const fecha = new Date(data.turno.fecha_hora_inicio);
+    const fecha = new Date(data.turno.fechaHoraInicio);
     const user = this.loginService.currentUserId;
     this.tatuadorId = user;
 
     // Formateamos la hora para el input type="time" (HH:mm)
     const horaStr = fecha.toTimeString().substring(0, 5);
-    if (data.turno.tatuadoresAsignados && data.turno.tatuadoresAsignados.length > 0) {
-        this.tatuadorId = data.turno.tatuadoresAsignados[0].tatuador?.id; 
+    if (data.turno.tatuadores && data.turno.tatuadores.length > 0) {
+        this.tatuadorId = data.turno.tatuadores[0].id;
     }
 
     this.form = this.fb.group({
@@ -96,7 +96,7 @@ minDate: Date = new Date();
       nuevaFechaInicio.setHours(+hours, +minutes, 0, 0);
 
       this.dialogRef.close({
-        fecha_hora_inicio: nuevaFechaInicio.toISOString(),
+        fechaHoraInicio: nuevaFechaInicio.toISOString(),
         estado: this.form.value.estado
       });
     }

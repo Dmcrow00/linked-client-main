@@ -18,8 +18,8 @@
       <mat-form-field *ngIf="isAnonymous" appearance="outline" class="form-field-full">
         <mat-label>Correo de contacto</mat-label>
         <input matInput type="email"
-               [(ngModel)]="supportTicket.contact_email"
-               name="contact_email"
+               [(ngModel)]="supportTicket.contactEmail"
+               name="contactEmail"
                required
                placeholder="ejemplo@correo.com" />
         <mat-hint>Recibirás la respuesta en este correo.</mat-hint>
@@ -81,11 +81,11 @@
         </p>
         <div class="tech-info-row">
           <span class="tech-key">URL</span>
-          <span class="tech-value">{{ supportTicket.url_pagina }}</span>
+          <span class="tech-value">{{ supportTicket.urlPagina }}</span>
         </div>
         <div class="tech-info-row">
           <span class="tech-key">Navegador</span>
-          <span class="tech-value">{{ supportTicket.user_agent }}</span>
+          <span class="tech-value">{{ supportTicket.userAgent }}</span>
         </div>
       </div>
 

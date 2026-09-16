@@ -25,7 +25,7 @@ export class UpdateRolComponent {
     public dialogRef: MatDialogRef<UpdateRolComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { user: User; allRoles: RolApl[]; selectedRoleIds: number[] }
   ) {
-    this.user = { ...data.user, id: data.user.idUser };
+    this.user = { ...data.user };
     this.allRoles = data.allRoles;
     this.selectedRoleIds = [...data.selectedRoleIds];
   }
@@ -47,7 +47,7 @@ export class UpdateRolComponent {
     this.saving = true;
     this.userService.getLoggedInUsername().subscribe((username) => {
       if (username) {
-        this.userService.updateUserRoles(this.user.idUser, this.selectedRoleIds).subscribe({
+        this.userService.updateUserRoles(this.user.id, this.selectedRoleIds).subscribe({
           next: () => this.dialogRef.close(true),
           error: (err) => {
             console.error('Error al actualizar roles:', err);

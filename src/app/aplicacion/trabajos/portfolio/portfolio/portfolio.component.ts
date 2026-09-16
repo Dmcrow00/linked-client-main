@@ -64,7 +64,7 @@ tatuador: Tatuador | null = null;
 
   cargarPerfil(id: number) {
     this.tatuadorService.getTatuadores().subscribe(tatuadores => {
-        this.tatuador = tatuadores.find(t => t.idUser === id) || null;
+        this.tatuador = tatuadores.find(t => t.id === id) || null;
     });
   }
 
@@ -86,7 +86,7 @@ tatuador: Tatuador | null = null;
 
   irAReservar() {
     if (this.tatuador) {
-        this.router.navigate(['/reserva/horarios', this.tatuador.idUser]);
+        this.router.navigate(['/reserva/horarios', this.tatuador.id]);
     }
   }
 
@@ -107,19 +107,18 @@ tatuador: Tatuador | null = null;
     if (!this.userLoginOn || !this.esCliente) return;
     
     const yaTieneLike = this.misLikes.has(trabajo.id);
-    if (!trabajo.favoritos) trabajo.favoritos = [];
 
     if (yaTieneLike) {
         this.misLikes.delete(trabajo.id);
-        trabajo.favoritos.pop();
+        trabajo.likesCount--;
         this.trabajosService.quitarLike(trabajo.id).subscribe({
-            error: () => { this.misLikes.add(trabajo.id); trabajo.favoritos?.push({}); }
+            error: () => { this.misLikes.add(trabajo.id); trabajo.likesCount++; }
         });
     } else {
         this.misLikes.add(trabajo.id);
-        trabajo.favoritos.push({});
+        trabajo.likesCount++;
         this.trabajosService.darLike(trabajo.id).subscribe({
-            error: () => { this.misLikes.delete(trabajo.id); trabajo.favoritos?.pop(); }
+            error: () => { this.misLikes.delete(trabajo.id); trabajo.likesCount--; }
         });
     }
   }

@@ -22,7 +22,7 @@ export class TatuajesFavoritosComponent implements OnInit {
 
   get uniqueArtistsCount(): number {
     const ids = this.trabajosFavoritos
-      .map(t => t.tatuador?.idUser)
+      .map(t => t.tatuador?.id)
       .filter((id): id is number => id !== undefined);
     return new Set(ids).size;
   }
@@ -78,8 +78,6 @@ export class TatuajesFavoritosComponent implements OnInit {
     const trabajo = this.trabajosFavoritos.find(t => t.id === trabajoId);
     if (!trabajo) return;
 
-    if (!trabajo.favoritos) trabajo.favoritos = [];
-
     if (this.favorites.has(trabajoId)) {
       this.favorites.delete(trabajoId);
       this.trabajosFavoritos = this.trabajosFavoritos.filter(t => t.id !== trabajoId);
@@ -92,11 +90,11 @@ export class TatuajesFavoritosComponent implements OnInit {
       });
     } else {
       this.favorites.add(trabajoId);
-      trabajo.favoritos.push({});
+      trabajo.likesCount++;
       this.trabajosService.darLike(trabajoId).subscribe({
         error: () => {
           this.favorites.delete(trabajoId);
-          trabajo.favoritos?.pop();
+          trabajo.likesCount--;
         }
       });
     }

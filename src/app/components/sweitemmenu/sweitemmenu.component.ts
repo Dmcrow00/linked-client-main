@@ -75,26 +75,26 @@ export class SweItemMenuComponent implements OnInit, OnDestroy {
       const menuItems: MenuItem[] = [];
 
       items.forEach(item => {
-        if (!item.idSupItemMenu && this.validaRoles(item)) {
+        if (!item.idSupitemmenu && this.validaRoles(item)) {
           itemMap.set(item.id, { ...item, expanded: false, subMenus: [] });
           menuItems.push(itemMap.get(item.id)!);
         }
       });
 
       items.forEach(itemHijo => {
-        if (itemHijo.idSupItemMenu && this.validaRoles(itemHijo)) {
+        if (itemHijo.idSupitemmenu && this.validaRoles(itemHijo)) {
           menuItems.forEach(itemPadre => {
-            if (Number(itemHijo.idSupItemMenu) == itemPadre.id) {
+            if (Number(itemHijo.idSupitemmenu) == itemPadre.id) {
               let indexItemPadre = menuItems.indexOf(itemPadre);
-              menuItems[indexItemPadre].subMenus.push(itemHijo);
+              menuItems[indexItemPadre].subMenus!.push(itemHijo);
             }
           });
         }
       });
 
-      menuItems.sort((a, b) => a.ordernumber - b.ordernumber);
+      menuItems.sort((a, b) => (a.orderNumber ?? 0) - (b.orderNumber ?? 0));
       menuItems.forEach(item => {
-        item.subMenus.sort((a, b) => a.ordernumber - b.ordernumber);
+        item.subMenus!.sort((a, b) => (a.orderNumber ?? 0) - (b.orderNumber ?? 0));
       });
 
       this.menuItems = menuItems;
@@ -107,7 +107,7 @@ export class SweItemMenuComponent implements OnInit, OnDestroy {
 
     let rolesItem: number[] = [];
 
-    item.roles_permitidos.split(',').forEach(rol => {
+    (item.rolesPermitidos ?? '').split(',').forEach(rol => {
       rolesItem.push(Number(rol));
     });
 
@@ -125,7 +125,9 @@ export class SweItemMenuComponent implements OnInit, OnDestroy {
     item['expanded'] = !item['expanded'];
   }
 
-  navigate(route: string): void {
+  // Los ítems contenedores no tienen ruta propia: sólo despliegan submenús.
+  navigate(route: string | undefined): void {
+    if (!route) return;
     this.router.navigate([route]);
   }
 

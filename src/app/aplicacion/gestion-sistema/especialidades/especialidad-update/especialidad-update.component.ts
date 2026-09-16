@@ -2,7 +2,6 @@ import { Component, Inject } from '@angular/core';
 import { EspecialidadesService } from '../especialidades.service';
 import { Especialidad } from '../especialidades.model';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { UserService } from 'src/app/services/user/user.service';
 import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component.js';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +23,6 @@ especialidad: Especialidad;
 
   constructor(
     private especialidadesService: EspecialidadesService,
-    private userService: UserService,
     private dialog: MatDialog,
     public dialogRef: MatDialogRef<EspecialidadUpdateComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { especialidad: Especialidad
@@ -34,34 +32,18 @@ especialidad: Especialidad;
     this.especialidad = { ...data.especialidad };
   }
 
-  ngOnInit(): void {
-    this.userService.getLoggedInUsername().subscribe((username) => {
-      if (username) {
-        this.especialidad.modificationuser = username;
-        this.especialidad.modificationtimestamp = new Date().toISOString();
-      }
-    });
-  }
-
   onUpdateEspecialidad() {
-    const especialidadToSend = {
-      ...this.especialidad,
-      creationtimestamp: this.especialidad.creationtimestamp
-        ? new Date(this.especialidad.creationtimestamp).toISOString()
-        : null,
-      modificationtimestamp: this.especialidad.modificationtimestamp
-        ? new Date(this.especialidad.modificationtimestamp).toISOString()
-        : null,
-    };
-
     this.especialidadesService
-      .updateEspecialidad(this.especialidad.id, especialidadToSend)
+      .updateEspecialidad(this.especialidad.id, {
+        nombre: this.especialidad.nombre,
+        descripcion: this.especialidad.descripcion,
+      })
       .subscribe({
         next: () => {
           this.dialogRef.close(true);
         },
         error: (error) => {
-          const errorMessage = error?.error?.msg || 'Ocurrió un error';
+          const errorMessage = error?.error?.message || 'Ocurrió un error';
           this.showErrorDialog(errorMessage);
         },
       });

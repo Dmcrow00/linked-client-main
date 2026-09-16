@@ -34,7 +34,7 @@ export class DetalleTrabajoComponent implements OnInit {
   ngOnInit(): void {
 
     this.isLiked = this.data.isLiked;
-    this.likesCount = this.data.trabajo.favoritos?.length || 0;
+    this.likesCount = this.data.trabajo.likesCount ?? 0;
 
     this.loginService.userLoginOn.subscribe(logged => this.userLoginOn = logged);
   }

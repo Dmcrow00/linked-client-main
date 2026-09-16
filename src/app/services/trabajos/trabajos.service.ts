@@ -24,7 +24,7 @@ export class TrabajosService {
 
     if (files && files.length > 0) {
       files.forEach(file => {
-        formData.append('imagen', file, file.name);
+        formData.append('fotos', file, file.name);
       });
     }
 
@@ -37,12 +37,12 @@ export class TrabajosService {
   }
 
   // Favoritos 
-  darLike(trabajoId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${trabajoId}/favorito`, {});
+  darLike(trabajoId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${trabajoId}/favorito`, {});
   }
 
-  quitarLike(trabajoId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${trabajoId}/favorito`);
+  quitarLike(trabajoId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${trabajoId}/favorito`);
   }
 
   getMisLikesIds(): Observable<number[]> {
