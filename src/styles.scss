@@ -707,11 +707,6 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   --mat-datepicker-calendar-date-text-color: var(--text-color);
   --mat-datepicker-calendar-date-disabled-state-text-color: var(--text-secondary-color);
 
-  // Tabs
-  --mat-tab-header-active-label-text-color: var(--title-text-color);
-  --mat-tab-header-inactive-label-text-color: var(--text-secondary-color);
-  --mat-tab-header-active-indicator-color: var(--title-text-color);
-
   // Stroked/outlined buttons
   --mdc-outlined-button-outline-color: var(--line-divider);
   --mdc-outlined-button-label-text-color: var(--text-color);
@@ -781,6 +776,22 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   --mdc-outlined-text-field-focus-outline-color: #6b9a60;
   --mdc-outlined-text-field-error-outline-color: #f44336;
   } // end & {}
+
+  // Tabs: all-component-colors emite sus tokens sobre el propio .mat-mdc-tab-group, así que
+  // definirlos en .dark-theme no alcanza (el valor del elemento le gana al heredado). La pestaña
+  // activa queda con foco al hacer clic y usa los tokens de focus, que traían el verde de la paleta.
+  .mat-mdc-tab-group,
+  .mat-mdc-tab-nav-bar {
+    --mat-tab-header-active-label-text-color: var(--title-text-color);
+    --mat-tab-header-active-focus-label-text-color: var(--title-text-color);
+    --mat-tab-header-active-hover-label-text-color: var(--title-text-color);
+    --mat-tab-header-inactive-label-text-color: var(--text-secondary-color);
+    --mat-tab-header-inactive-focus-label-text-color: var(--text-color);
+    --mat-tab-header-inactive-hover-label-text-color: var(--text-color);
+    --mdc-tab-indicator-active-indicator-color: var(--title-text-color);
+    --mat-tab-header-active-focus-indicator-color: var(--title-text-color);
+    --mat-tab-header-active-hover-indicator-color: var(--title-text-color);
+  }
 
   // --- Overrides globales para colores hardcodeados en clases utilitarias ---
   .confirmation-text,

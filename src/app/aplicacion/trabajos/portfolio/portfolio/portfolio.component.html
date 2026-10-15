@@ -15,8 +15,7 @@
     </div>
 
     <div class="profile-info">
-      <h1 class="artist-name">{{ tatuador.realname }} {{ tatuador.surname }}</h1>
-      <p class="username">{{ tatuador.username }}</p>
+      <h1 class="artist-name">{{ "@" + tatuador.username }}</h1>
       
       <div class="stats-row">
         <span class="stat-item" *ngIf="tatuador.estudio">

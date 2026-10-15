@@ -4,4 +4,5 @@ export interface TurnoMensaje {
   leido: boolean;
   usuarioEnviaId: number | null;
   usuarioEnviaUsername: string | null;
+  creationTimestamp?: string;
 }

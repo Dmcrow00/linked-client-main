@@ -63,8 +63,9 @@ tatuador: Tatuador | null = null;
   }
 
   cargarPerfil(id: number) {
-    this.tatuadorService.getTatuadores().subscribe(tatuadores => {
-        this.tatuador = tatuadores.find(t => t.id === id) || null;
+    this.tatuadorService.getPerfilPublico(id).subscribe({
+      next: (tatuador) => this.tatuador = tatuador,
+      error: () => this.tatuador = null
     });
   }
 

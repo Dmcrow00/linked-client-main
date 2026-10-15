@@ -17,6 +17,11 @@ private apiUrl = `${environment.urlApi}tatuador`;
     return this.http.get<Tatuador[]>(`${environment.urlApi}users/tatuadores`);
   }
 
+  /** Perfil público de un tatuador: no requiere sesión ni trae datos personales. */
+  getPerfilPublico(userId: number): Observable<Tatuador> {
+    return this.http.get<Tatuador>(`${environment.urlApi}users/${userId}/publico`);
+  }
+
   getEspecialidadesTatuador(userId: number): Observable<Especialidad[]>  {
     return this.http.get<Especialidad[]>(`${this.apiUrl}/${userId}/especialidades`);
   }

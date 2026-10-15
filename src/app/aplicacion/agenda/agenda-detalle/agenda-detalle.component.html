@@ -95,6 +95,9 @@
                [class.own-message]="msg.usuarioEnviaId === currentUserId">
             <div class="msg-header">
               <strong>{{ msg.usuarioEnviaUsername }}</strong>
+              <span class="msg-time" *ngIf="msg.creationTimestamp">
+                {{ msg.creationTimestamp | date: 'dd/MM HH:mm' }}
+              </span>
             </div>
             <div class="msg-body">{{ msg.texto }}</div>
           </div>
