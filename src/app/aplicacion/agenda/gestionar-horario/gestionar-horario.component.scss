@@ -175,20 +175,20 @@ mat-form-field {
   min-width: 0;
 
   /* Mobile: reduce texto para caber en columnas estrechas */
-  --mdc-outlined-text-field-label-text-size: 0.68rem;
-  --mdc-outlined-text-field-input-text-size: 0.78rem;
+  --mat-form-field-outlined-label-text-size: 0.68rem;
+  --mat-form-field-outlined-input-text-size: 0.78rem;
 
   @media (min-width: 600px) {
-    --mdc-outlined-text-field-label-text-size: 0.8rem;
-    --mdc-outlined-text-field-input-text-size: 0.88rem;
+    --mat-form-field-outlined-label-text-size: 0.8rem;
+    --mat-form-field-outlined-input-text-size: 0.88rem;
   }
 
   /* Desktop: campos de menor altura */
   @media (min-width: 900px) {
-    --mdc-outlined-text-field-container-height: 44px;
+    --mat-form-field-outlined-container-height: 44px;
     --mat-form-field-container-height: 44px;
-    --mdc-outlined-text-field-label-text-size: 0.72rem;
-    --mdc-outlined-text-field-input-text-size: 0.8rem;
+    --mat-form-field-outlined-label-text-size: 0.72rem;
+    --mat-form-field-outlined-input-text-size: 0.8rem;
   }
 }
 

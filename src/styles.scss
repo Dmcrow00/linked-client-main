@@ -8,7 +8,8 @@
 @use "./app/shared/nav/nav.component" as *;
 
 // 2. Incluimos los estilos base (core)
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Protest+Guerrilla&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
@@ -644,28 +645,28 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   // --- Tokens MDC/Material para la paleta gris-verdácea ---
 
   // Cards
-  --mdc-elevated-card-container-color: var(--card-background-color);
-  --mdc-outlined-card-container-color: var(--card-background-color);
+  --mat-card-elevated-container-color: var(--card-background-color);
+  --mat-card-outlined-container-color: var(--card-background-color);
 
   // Form fields (filled)
-  --mdc-filled-text-field-container-color: var(--light-gray-background-color);
-  --mdc-filled-text-field-input-text-color: var(--text-color);
-  --mdc-filled-text-field-label-text-color: var(--text-secondary-color);
-  --mdc-filled-text-field-hover-label-text-color: var(--text-color);
-  --mdc-filled-text-field-focus-label-text-color: var(--text-color);
+  --mat-form-field-filled-container-color: var(--light-gray-background-color);
+  --mat-form-field-filled-input-text-color: var(--text-color);
+  --mat-form-field-filled-label-text-color: var(--text-secondary-color);
+  --mat-form-field-filled-hover-label-text-color: var(--text-color);
+  --mat-form-field-filled-focus-label-text-color: var(--text-color);
 
   // Form fields (outlined)
-  --mdc-outlined-text-field-input-text-color: var(--text-color);
-  --mdc-outlined-text-field-label-text-color: var(--text-secondary-color);
-  --mdc-outlined-text-field-hover-label-text-color: var(--text-color);
-  --mdc-outlined-text-field-focus-label-text-color: var(--text-color);
-  --mdc-outlined-text-field-outline-color: var(--line-divider);
-  --mdc-outlined-text-field-hover-outline-color: var(--text-secondary-color);
+  --mat-form-field-outlined-input-text-color: var(--text-color);
+  --mat-form-field-outlined-label-text-color: var(--text-secondary-color);
+  --mat-form-field-outlined-hover-label-text-color: var(--text-color);
+  --mat-form-field-outlined-focus-label-text-color: var(--text-color);
+  --mat-form-field-outlined-outline-color: var(--line-divider);
+  --mat-form-field-outlined-hover-outline-color: var(--text-secondary-color);
 
   // Dialog
-  --mdc-dialog-container-color: var(--card-background-color);
-  --mdc-dialog-subhead-color: var(--title-text-color);
-  --mdc-dialog-supporting-text-color: var(--text-color);
+  --mat-dialog-container-color: var(--card-background-color);
+  --mat-dialog-subhead-color: var(--title-text-color);
+  --mat-dialog-supporting-text-color: var(--text-color);
 
   // Table
   --mat-table-background-color: var(--card-background-color);
@@ -696,8 +697,8 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   --mat-autocomplete-background-color: var(--card-background-color);
 
   // Chips
-  --mdc-chip-elevated-container-color: var(--light-gray-background-color);
-  --mdc-chip-label-text-color: var(--text-color);
+  --mat-chip-elevated-container-color: var(--light-gray-background-color);
+  --mat-chip-label-text-color: var(--text-color);
 
   // Datepicker
   --mat-datepicker-calendar-container-background-color: var(--card-background-color);
@@ -708,11 +709,11 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   --mat-datepicker-calendar-date-disabled-state-text-color: var(--text-secondary-color);
 
   // Stroked/outlined buttons
-  --mdc-outlined-button-outline-color: var(--line-divider);
-  --mdc-outlined-button-label-text-color: var(--text-color);
+  --mat-button-outlined-outline-color: var(--line-divider);
+  --mat-button-outlined-label-text-color: var(--text-color);
 
   // Slide toggle / Checkbox / Radio
-  --mdc-checkbox-unselected-icon-color: var(--text-secondary-color);
+  --mat-checkbox-unselected-icon-color: var(--text-secondary-color);
   --mat-slide-toggle-track-color: var(--line-divider);
   --mat-radio-button-label-text-color: var(--text-color);
 
@@ -720,8 +721,8 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   --mat-divider-color: var(--line-divider);
 
   // Tooltips
-  --mdc-plain-tooltip-container-color: var(--light-gray-background-color);
-  --mdc-plain-tooltip-supporting-text-color: var(--text-color);
+  --mat-tooltip-container-color: var(--light-gray-background-color);
+  --mat-tooltip-supporting-text-color: var(--text-color);
 
   // Paginator
   --mat-paginator-container-background-color: var(--card-background-color);
@@ -732,7 +733,7 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   --mat-stepper-line-color: var(--line-divider);
 
   // Icon buttons
-  --mdc-icon-button-icon-color: var(--text-color);
+  --mat-icon-button-icon-color: var(--text-color);
   --mat-icon-button-state-layer-color: var(--text-color);
 
   // Cards — título y subtítulo
@@ -757,24 +758,24 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   --mat-toolbar-container-text-color: var(--menu-text-color);
 
   // Snackbar
-  --mdc-snackbar-container-color: var(--card-background-color);
-  --mdc-snackbar-supporting-text-color: var(--text-color);
+  --mat-snackbar-container-color: var(--card-background-color);
+  --mat-snackbar-supporting-text-color: var(--text-color);
   --mat-snack-bar-button-color: var(--title-text-color);
 
   // Progress spinner
-  --mdc-circular-progress-active-indicator-color: #6b9a60;
+  --mat-progress-spinner-active-indicator-color: #6b9a60;
 
   // Bottom sheet
   --mat-bottom-sheet-container-background-color: var(--card-background-color);
   --mat-bottom-sheet-container-text-color: var(--text-color);
 
   // Input caret
-  --mdc-outlined-text-field-caret-color: var(--text-color);
-  --mdc-filled-text-field-caret-color: var(--text-color);
+  --mat-form-field-outlined-caret-color: var(--text-color);
+  --mat-form-field-filled-caret-color: var(--text-color);
 
   // Form field active/focus outline
-  --mdc-outlined-text-field-focus-outline-color: #6b9a60;
-  --mdc-outlined-text-field-error-outline-color: #f44336;
+  --mat-form-field-outlined-focus-outline-color: #6b9a60;
+  --mat-form-field-outlined-error-outline-color: #f44336;
   } // end & {}
 
   // Tabs: all-component-colors emite sus tokens sobre el propio .mat-mdc-tab-group, así que
@@ -782,15 +783,15 @@ $mi-dark-tema: mat.m2-define-dark-theme((color: (primary: $mi-primary,
   // activa queda con foco al hacer clic y usa los tokens de focus, que traían el verde de la paleta.
   .mat-mdc-tab-group,
   .mat-mdc-tab-nav-bar {
-    --mat-tab-header-active-label-text-color: var(--title-text-color);
-    --mat-tab-header-active-focus-label-text-color: var(--title-text-color);
-    --mat-tab-header-active-hover-label-text-color: var(--title-text-color);
-    --mat-tab-header-inactive-label-text-color: var(--text-secondary-color);
-    --mat-tab-header-inactive-focus-label-text-color: var(--text-color);
-    --mat-tab-header-inactive-hover-label-text-color: var(--text-color);
-    --mdc-tab-indicator-active-indicator-color: var(--title-text-color);
-    --mat-tab-header-active-focus-indicator-color: var(--title-text-color);
-    --mat-tab-header-active-hover-indicator-color: var(--title-text-color);
+    --mat-tab-active-label-text-color: var(--title-text-color);
+    --mat-tab-active-focus-label-text-color: var(--title-text-color);
+    --mat-tab-active-hover-label-text-color: var(--title-text-color);
+    --mat-tab-inactive-label-text-color: var(--text-secondary-color);
+    --mat-tab-inactive-focus-label-text-color: var(--text-color);
+    --mat-tab-inactive-hover-label-text-color: var(--text-color);
+    --mat-tab-active-indicator-color: var(--title-text-color);
+    --mat-tab-active-focus-indicator-color: var(--title-text-color);
+    --mat-tab-active-hover-indicator-color: var(--title-text-color);
   }
 
   // --- Overrides globales para colores hardcodeados en clases utilitarias ---

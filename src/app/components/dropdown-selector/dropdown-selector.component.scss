@@ -3,19 +3,19 @@
 /* Borde del mat-form-field */
 ::ng-deep .mat-mdc-form-field {
   /* color del borde en estados normales */
-  --mdc-outlined-text-field-outline-color: var(--dropdown-label-txt-color);
+  --mat-form-field-outlined-outline-color: var(--dropdown-label-txt-color);
   /* hover: un poco más claro para dar contraste */
-  --mdc-outlined-text-field-hover-outline-color: #5d6a58;
+  --mat-form-field-outlined-hover-outline-color: #5d6a58;
   /* coincide con $section-title-main-color */
   /* focus: usar el color principal */
-  --mdc-outlined-text-field-focused-outline-color: #393e31;
+  --mat-form-field-outlined-focused-outline-color: #393e31;
   /* $main-color */
 
   /* color de label */
-  --mdc-outlined-text-field-label-text-color: var(--dropdown-label-txt-color);
-  --mdc-outlined-text-field-hover-label-text-color: #5d6a58;
+  --mat-form-field-outlined-label-text-color: var(--dropdown-label-txt-color);
+  --mat-form-field-outlined-hover-label-text-color: #5d6a58;
   /* tono intermedio */
-  --mdc-outlined-text-field-focus-label-text-color: #393e31;
+  --mat-form-field-outlined-focus-label-text-color: #393e31;
   /* tono principal */
 }
 
