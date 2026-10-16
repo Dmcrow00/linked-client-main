@@ -3,8 +3,8 @@ import { RolApl } from './rol.models';
 import { Page } from './pagination';
 
 export class User {
-  id: number = 0;
-  username: string = '';
+  id = 0;
+  username = '';
   email?: string;
   realname?: string;
   surname?: string;

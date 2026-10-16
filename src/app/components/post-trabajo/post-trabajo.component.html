@@ -38,8 +38,8 @@
     <!-- Barra inferior: siempre visible -->
     <div class="bottom-bar">
       @if (showArtistInfo) {
-        <div class="artist-info" (click)="irAlPerfil($event)">
-          <img [src]="trabajo.tatuador?.profilePhoto | serverUrl" class="mini-avatar">
+        <div class="artist-info" (click)="irAlPerfil($event)" role="button" tabindex="0" (keydown.enter)="irAlPerfil($event)">
+          <img [src]="trabajo.tatuador?.profilePhoto | serverUrl" class="mini-avatar" alt="">
           <span class="artist-name">{{ trabajo.tatuador?.username }}</span>
         </div>
       }

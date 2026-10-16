@@ -13,6 +13,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCalendar } from '@angular/material/datepicker';
 import { FormsModule } from '@angular/forms';
 import { environment } from 'src/environments/environment';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-seleccionar-horario',
@@ -28,6 +29,7 @@ export class SeleccionarHorarioComponent implements OnInit {
   private agendaService = inject(AgendaService);
   private turnosService = inject(TurnosService);
   private reservaStateService = inject(ReservaStateService);
+  private avisos = inject(AvisosService);
 
 
   minDate: Date;
@@ -47,7 +49,7 @@ export class SeleccionarHorarioComponent implements OnInit {
   selectedTatuador: Tatuador | null = null;
   tatuadorId: number | null = null;
   selectedDate: Date | null = null;
-  selectedTime: string = '';
+  selectedTime = '';
 
   // Horarios
   horarios: string[] = [];
@@ -59,7 +61,7 @@ export class SeleccionarHorarioComponent implements OnInit {
   isLoadingFechas = false;
 
   // Descripción
-  descripcionCliente: string = '';
+  descripcionCliente = '';
 
   // Imágenes
   selectedFiles: File[] = [];
@@ -77,13 +79,16 @@ export class SeleccionarHorarioComponent implements OnInit {
     const idStr = this.route.snapshot.paramMap.get('tatuadorId');
     if (idStr) {
       this.tatuadorId = +idStr;
-      this.tatuadorService.getTatuadores().subscribe(tatuadores => {
-        this.selectedTatuador = tatuadores.find(t => t.id === this.tatuadorId) || null;
-        if (!this.selectedTatuador) {
-          this.router.navigate(['/reserva/listado']);
-        } else {
-          this.cargarFechasBloqueadas();
-        }
+      this.tatuadorService.getTatuadores().subscribe({
+        next: tatuadores => {
+          this.selectedTatuador = tatuadores.find(t => t.id === this.tatuadorId) || null;
+          if (!this.selectedTatuador) {
+            this.router.navigate(['/reserva/listado']);
+          } else {
+            this.cargarFechasBloqueadas();
+          }
+        },
+        error: err => this.avisos.fallo(err, 'No se pudo cargar el tatuador.'),
       });
     } else {
       this.router.navigate(['/reserva/listado']);
@@ -94,9 +99,7 @@ export class SeleccionarHorarioComponent implements OnInit {
       this.selectedFiles = [...imgs];
       imgs.forEach(file => {
         const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previewImages.push(e.target.result);
-        };
+        reader.onload = () => this.previewImages.push(reader.result as string);
         reader.readAsDataURL(file);
       });
     }
@@ -136,8 +139,7 @@ export class SeleccionarHorarioComponent implements OnInit {
           this.errorHorarios = 'No hay horarios disponibles para este día.';
         }
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
         this.isLoadingHorarios = false;
         this.errorHorarios = 'Error al cargar los horarios del tatuador.';
       }
@@ -161,36 +163,29 @@ export class SeleccionarHorarioComponent implements OnInit {
     this.previewImages.splice(index, 1);
   }
 
-  onFileSelected(event: any): void {
-    const files = event.target.files;
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
 
-    if (files) {
-      const totalFiles = this.selectedFiles.length + files.length;
-
-      if (totalFiles > this.maxFiles) {
-        alert(`Solo puedes subir un máximo de ${this.maxFiles} imágenes.`);
-        event.target.value = null;
-        return;
-      }
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        this.selectedFiles.push(file);
-
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previewImages.push(e.target.result);
-        };
-        reader.readAsDataURL(file);
-      }
+    if (this.selectedFiles.length + files.length > this.maxFiles) {
+      this.avisos.error(`Solo puedes subir un máximo de ${this.maxFiles} imágenes.`);
+      input.value = '';
+      return;
     }
 
-    event.target.value = null;
+    for (const file of files) {
+      this.selectedFiles.push(file);
+      const reader = new FileReader();
+      reader.onload = () => this.previewImages.push(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+
+    input.value = '';
   }
 
   confirmarReserva(): void {
     if (!this.canConfirm() || !this.selectedDate || !this.tatuadorId) {
-      alert("Por favor, completa la fecha, hora, descripción y sube al menos una imagen.");
+      this.avisos.error('Por favor, completa la fecha, hora, descripción y sube al menos una imagen.');
       return;
     }
     this.isSaving = true;
@@ -211,7 +206,7 @@ export class SeleccionarHorarioComponent implements OnInit {
     };
 
     this.turnosService.solicitarTurno(solicitudDto, this.selectedFiles).subscribe({
-      next: (turnoCreado) => {
+      next: (_turnoCreado) => {
         const datosParaConfirmar = {
             tatuador: this.selectedTatuador,
             fechaHoraInicio: fechaHoraInicio.toISOString(),
@@ -223,8 +218,7 @@ export class SeleccionarHorarioComponent implements OnInit {
         this.router.navigate(['/reserva/confirmacion']);
       },
       error: (err) => {
-        console.error(err);
-        alert(`Error: ${err.error?.message || 'No se pudo procesar la solicitud.'}`);
+        this.avisos.fallo(err, 'No se pudo procesar la solicitud.');
         this.isSaving = false;
       }
     });

@@ -7,6 +7,7 @@ import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } 
 
 import { MatButton } from '@angular/material/button';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
   selector: 'app-update-rol',
@@ -16,6 +17,7 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
 })
 export class UpdateRolComponent {
   private userService = inject(UserService);
+  private avisos = inject(AvisosService);
   dialogRef = inject<MatDialogRef<UpdateRolComponent>>(MatDialogRef);
   data = inject<{
     user: User;
@@ -51,15 +53,11 @@ export class UpdateRolComponent {
 
   onUpdateUser(): void {
     this.saving = true;
-    this.userService.getLoggedInUsername().subscribe((username) => {
-      if (username) {
-        this.userService.updateUserRoles(this.user.id, this.selectedRoleIds).subscribe({
-          next: () => this.dialogRef.close(true),
-          error: (err) => {
-            console.error('Error al actualizar roles:', err);
-            this.saving = false;
-          }
-        });
+    this.userService.updateUserRoles(this.user.id, this.selectedRoleIds).subscribe({
+      next: () => this.dialogRef.close(true),
+      error: (err) => {
+        this.avisos.fallo(err, 'No se pudieron actualizar los roles.');
+        this.saving = false;
       }
     });
   }

@@ -4,7 +4,7 @@ import { NativeDateAdapter, MatDateFormats } from '@angular/material/core';
 
 @Injectable()
 export class CustomDateAdapter extends NativeDateAdapter {
-    override parse(value: any): Date | null {
+    override parse(value: unknown): Date | null {
         if ((typeof value === 'string') && value.length > 0) {
             const str = value.split('/');
             if (str.length === 3) {
@@ -17,7 +17,7 @@ export class CustomDateAdapter extends NativeDateAdapter {
         return super.parse(value);
     }
 
-    override format(date: Date, displayFormat: Object): string {
+    override format(date: Date, _displayFormat: object): string {
         const day = this._to2digit(date.getDate());
         const month = this._to2digit(date.getMonth() + 1);
         const year = date.getFullYear();

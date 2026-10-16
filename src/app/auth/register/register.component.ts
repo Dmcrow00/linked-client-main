@@ -1,9 +1,8 @@
 import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { RegisterService } from 'src/app/services/auth/register.service';
 import { Validators } from '@angular/forms';
-import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 import { User } from '../auth.models';
 import { EncryptionService } from 'src/app/services/auth/encryption.service';
 import { Router } from '@angular/router';
@@ -34,7 +33,7 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
 export class RegisterComponent implements OnInit {
   private formBuilder = inject(FormBuilder);
   private registerService = inject(RegisterService);
-  private dialog = inject(MatDialog);
+  private avisos = inject(AvisosService);
   private encryptionService = inject(EncryptionService);
   private router = inject(Router);
   private geocodingService = inject(GeocodingService);
@@ -88,8 +87,9 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.especialidadesService.getAllEspecialidades().subscribe(data => {
-      this.especialidades = data.filter(e => e.status === 'true');
+    this.especialidadesService.getAllEspecialidades().subscribe({
+      next: data => (this.especialidades = data.filter(e => e.status === 'true')),
+      error: err => this.avisos.fallo(err, 'No se pudieron cargar las especialidades.'),
     });
 
     this.registerForm.get('localidad')!.valueChanges.pipe(
@@ -210,51 +210,22 @@ export class RegisterComponent implements OnInit {
     if (this.accountType === 'tatuador') {
       this.user.estudio = this.registerForm.controls['estudio'].value || undefined;
       this.user.especialidadIds = this.especialidadesSeleccionadas.map(e => e.id);
-      this.registerService.registerTatuador({ ...this.user, birth_date }).subscribe(
-        () => {
-          this.showSuccessDialogTatuador();
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-            this.dialog.closeAll();
-          }, 3000);
+      this.registerService.registerTatuador({ ...this.user, birth_date }).subscribe({
+        next: () => {
+          this.avisos.success('Solicitud enviada. Tu cuenta está pendiente de aprobación.');
+          void this.router.navigate(['/login']);
         },
-        (error) => {
-          this.showErrorDialog(error.error?.message || 'Error desconocido');
-        }
-      );
+        error: (err) => this.avisos.fallo(err, 'No se pudo enviar la solicitud.'),
+      });
     } else {
-      this.registerService.register({ ...this.user, birth_date }).subscribe(
-        () => {
-          this.showSuccessDialog();
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-            this.dialog.closeAll();
-          }, 2500);
+      this.registerService.register({ ...this.user, birth_date }).subscribe({
+        next: () => {
+          this.avisos.success('Registro exitoso.');
+          void this.router.navigate(['/login']);
         },
-        (error) => {
-          console.error('Error al registrar: ', error);
-          this.showErrorDialog(error.error?.message || 'Error desconocido');
-        }
-      );
+        error: (err) => this.avisos.fallo(err, 'No se pudo completar el registro.'),
+      });
     }
-  }
-
-  private showErrorDialog(errorMessage: string): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message: errorMessage, type: 'error' },
-    });
-  }
-
-  private showSuccessDialog(): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message: 'Registro exitoso', type: 'success' },
-    });
-  }
-
-  private showSuccessDialogTatuador(): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message: 'Solicitud enviada. Tu cuenta está pendiente de aprobación.', type: 'success' },
-    });
   }
 
   passwordMatchValidator(): ValidatorFn {
@@ -365,14 +336,15 @@ export class RegisterComponent implements OnInit {
     };
   }
 
-  onDateInput(event: any) {
-    let value: string = event.target.value.replace(/\D/g, '');
+  onDateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value: string = input.value.replace(/\D/g, '');
     if (value.length >= 2) {
       value = value.slice(0, 2) + '/' + value.slice(2);
     }
     if (value.length >= 5) {
       value = value.slice(0, 5) + '/' + value.slice(5, 9);
     }
-    event.target.value = value;
+    input.value = value;
   }
 }

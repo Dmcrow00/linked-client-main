@@ -5,7 +5,6 @@ import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TurnosService } from 'src/app/services/turnos/turnos.service';
 import { EditarTurnoComponent } from '../editar-turno/editar-turno.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDivider } from '@angular/material/divider';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -19,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 import { environment } from 'src/environments/environment';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 export interface AgendaDetalleData {
   turno: TurnoSesion;
@@ -37,7 +37,7 @@ export class AgendaDetalleComponent implements OnInit {
   private turnosService = inject(TurnosService);
   private loginService = inject(LoginService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private avisos = inject(AvisosService);
 
 
   mensajes: TurnoMensaje[] = [];
@@ -85,28 +85,22 @@ export class AgendaDetalleComponent implements OnInit {
     });
   }
 
-  actualizarTurnoManual(datosNuevos: any): void {
+  actualizarTurnoManual(datosNuevos: Parameters<TurnosService['updateTurno']>[1]): void {
     this.turnosService.updateTurno(this.data.turno.id!, datosNuevos).subscribe({
       next: (turnoActualizado) => {
         this.data.turno = turnoActualizado;
         this.huboCambiosManuales = true;
-        this.snackBar.open('Turno actualizado correctamente.', 'Cerrar', { duration: 3000 });
+        this.avisos.success('Turno actualizado correctamente.');
       },
-      error: (err) => {
-        const msg = err.error?.message || 'Ocurrió un error inesperado.';
-        if (err.status === 409) {
-          this.snackBar.open('El horario elegido se superpone con otro turno.', 'Entendido', { duration: 5000, panelClass: ['error-snackbar'] });
-        } else {
-          this.snackBar.open(`${msg}`, 'Cerrar', { duration: 5000 });
-        }
-      }
+      // Un 409 es un horario que se superpone con otro turno: el servidor manda el motivo.
+      error: (err) => this.avisos.fallo(err, 'No se pudo actualizar el turno.')
     });
   }
 
   cargarMensajes(): void {
     this.turnosService.getMensajesTurno(this.data.turno.id!).subscribe({
       next: (msgs) => { this.mensajes = msgs; },
-      error: () => {}
+      error: (err) => this.avisos.fallo(err, 'No se pudieron cargar los mensajes.')
     });
   }
 
@@ -117,7 +111,7 @@ export class AgendaDetalleComponent implements OnInit {
         this.mensajes.push(mensajeCreado);
         this.nuevoMensajeText = '';
       },
-      error: () => {}
+      error: (err) => this.avisos.fallo(err, 'No se pudo enviar el mensaje.')
     });
   }
 

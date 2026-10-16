@@ -10,6 +10,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { ServerUrlPipe } from '../../../pipes/server-url.pipe';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
+import { AvisosService } from 'src/app/core/avisos.service';
 @Component({
     selector: 'app-detalle-trabajo',
     templateUrl: './detalle-trabajo.component.html',
@@ -25,6 +26,7 @@ export class DetalleTrabajoComponent implements OnInit {
   private router = inject(Router);
   private trabajosService = inject(TrabajosService);
   private loginService = inject(LoginService);
+  private avisos = inject(AvisosService);
 
   currentImageIndex = 0;
 
@@ -61,7 +63,7 @@ export class DetalleTrabajoComponent implements OnInit {
 
   toggleLike() {
     if (!this.userLoginOn) {
-        alert("Inicia sesión para dar Me Gusta");
+        this.avisos.info('Inicia sesión para dar Me Gusta');
         return; 
     }
 
@@ -73,11 +75,11 @@ export class DetalleTrabajoComponent implements OnInit {
 
     if (this.isLiked) {
       this.trabajosService.darLike(trabajoId).subscribe({
-        error: () => { this.isLiked = false; this.likesCount--; } // Revertir
+        error: (err) => { this.isLiked = false; this.likesCount--; this.avisos.fallo(err, 'No se pudo guardar el Me Gusta.'); } // Revertir
       });
     } else {
       this.trabajosService.quitarLike(trabajoId).subscribe({
-        error: () => { this.isLiked = true; this.likesCount++; } // Revertir
+        error: (err) => { this.isLiked = true; this.likesCount++; this.avisos.fallo(err, 'No se pudo quitar el Me Gusta.'); } // Revertir
       });
     }
   }

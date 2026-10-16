@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { ThemeService } from 'src/app/core/services/theme.service';
+import { ThemeService } from '@dmcrow00/ng-core/theme';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
@@ -24,17 +24,9 @@ import { MatIcon } from '@angular/material/icon';
 export class ThemeToggleComponent {
   private themeService = inject(ThemeService);
 
-  isDarkTheme: boolean;
-
-    constructor() {
-    this.isDarkTheme = this.themeService.isDarkTheme();
-  }
+  readonly isDarkTheme = computed(() => this.themeService.theme() === 'dark');
 
   toggleTheme() {
-    this.isDarkTheme = !this.isDarkTheme;
-    this.themeService.setTheme(this.isDarkTheme);
+    this.themeService.toggle();
   }
 }
-
-
-

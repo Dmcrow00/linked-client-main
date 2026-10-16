@@ -8,12 +8,10 @@ import * as L from 'leaflet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { FormsModule } from '@angular/forms';
 
-import { TatuadorService } from 'src/app/services/user/tatuador.service';
 import {
   BusquedaEstiloService,
   TatuadorUbicacion,
@@ -22,8 +20,9 @@ import { ReservaStateService } from 'src/app/services/reserva/reserva-state.serv
 import { GeocodingService, GeoResult } from 'src/app/services/geocoding/geocoding.service';
 import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
 import { environment } from 'src/environments/environment';
+import { AvisosService } from 'src/app/core/avisos.service';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
   iconUrl: 'assets/leaflet/marker-icon.png',
@@ -41,18 +40,16 @@ L.Icon.Default.mergeOptions({
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatSliderModule,
     MatAutocompleteModule,
     ServerUrlPipe,
   ],
 })
 export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy {
-  private tatuadorService = inject(TatuadorService);
   private busquedaService = inject(BusquedaEstiloService);
   private reservaStateService = inject(ReservaStateService);
   private geocodingService = inject(GeocodingService);
-  private snackBar = inject(MatSnackBar);
+  private avisos = inject(AvisosService);
   private router = inject(Router);
   private ngZone = inject(NgZone);
   private location = inject(Location);
@@ -180,7 +177,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
   ────────────────────────────── */
   obtenerUbicacion(): void {
     if (!navigator.geolocation) {
-      this.snackBar.open('Tu navegador no soporta geolocalización.', 'Cerrar', { duration: 3000 });
+      this.avisos.error('Tu navegador no soporta geolocalización.');
       return;
     }
     this.isLocating = true;
@@ -198,7 +195,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
       () => {
         this.ngZone.run(() => {
           this.isLocating = false;
-          this.snackBar.open('No se pudo obtener tu ubicación. Verifica los permisos.', 'Cerrar', { duration: 4000 });
+          this.avisos.error('No se pudo obtener tu ubicación. Verifica los permisos.');
         });
       },
       { enableHighAccuracy: true, timeout: 8000 }
@@ -247,12 +244,12 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
           this.centrarMapaEnUsuario();
           this.aplicarFiltros();
         } else {
-          this.snackBar.open('No se encontró la ubicación. Intentá con otro nombre.', 'Cerrar', { duration: 3500 });
+          this.avisos.info('No se encontró la ubicación. Intentá con otro nombre.');
         }
       },
       error: () => {
         this.isGeocoding = false;
-        this.snackBar.open('Error al buscar la ubicación.', 'Cerrar', { duration: 3000 });
+        this.avisos.error('Error al buscar la ubicación.');
       }
     });
   }
@@ -354,21 +351,10 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
      CARGA INICIAL
   ────────────────────────────── */
   private cargarTatuadoresMapa(): void {
-    this.tatuadorService.getTatuadores().subscribe({
+    // El listado público del backend: no exige sesión (users/tatuadores sí).
+    this.busquedaService.getTatuadoresConUbicacion().subscribe({
       next: (tatuadores) => {
-        this.todosLosTatuadores = tatuadores
-          .filter(t => t.lat != null && t.lng != null)
-          .map(t => ({
-            id: t.id,
-            username: t.username,
-            profilePhoto: t.profilePhoto,
-            estudio: t.estudio,
-            localidad: t.localidad ?? undefined,
-            especialidades: t.especialidades ?? [],
-            lat: t.lat!,
-            lng: t.lng!,
-            instagramHandle: t.instagramHandle ?? undefined,
-          }));
+        this.todosLosTatuadores = tatuadores.map(t => ({ ...t, especialidades: t.especialidades ?? [] }));
 
         const estilosSet = new Set<string>();
         this.todosLosTatuadores.forEach(t =>

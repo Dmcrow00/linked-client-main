@@ -45,8 +45,8 @@
                   <span class="ticket-category">{{ t.category }}</span>
                 }
               </div>
-              <span class="ticket-status" [class.resolved]="t.status + '' === 'true'">
-                {{ t.status + '' === 'true' ? 'RESUELTO' : 'PENDIENTE' }}
+              <span class="ticket-status" [class.resolved]="!t.status">
+                {{ t.status ? 'PENDIENTE' : 'RESUELTO' }}
               </span>
             </div>
             <p class="ticket-description">{{ t.description }}</p>

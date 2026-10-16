@@ -21,7 +21,7 @@ export class TatuajesFavoritosComponent implements OnInit {
 
 
   trabajosFavoritos: Trabajo[] = [];
-  favorites: Set<number> = new Set();
+  favorites = new Set<number>();
   isLoading = true;
 
   get uniqueArtistsCount(): number {

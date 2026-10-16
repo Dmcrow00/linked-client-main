@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
+import { apiErrorMessage } from '@dmcrow00/ng-core/http';
 
 import { User } from 'src/app/models/user.model';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
@@ -14,6 +15,7 @@ import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
 import { PostTileComponent } from 'src/app/components/post-tile/post-tile.component';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 import { DetalleTrabajoComponent } from '../detalle-trabajo/detalle-trabajo.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
   selector: 'app-mi-portfolio',
@@ -22,6 +24,7 @@ import { DetalleTrabajoComponent } from '../detalle-trabajo/detalle-trabajo.comp
   styleUrl: './mi-portfolio.component.scss'
 })
 export class MiPortfolioComponent implements OnInit {
+  private avisos = inject(AvisosService);
   private userService = inject(UserService);
   private trabajosService = inject(TrabajosService);
   private instagramService = inject(InstagramService);
@@ -60,11 +63,14 @@ export class MiPortfolioComponent implements OnInit {
     if (!this.userId) return;
     this.userService.getUser(this.userId).subscribe({
       next: (user) => (this.user = user),
-      error: () => {}
+      error: (err) => this.avisos.fallo(err, 'No se pudo cargar tu perfil.')
     });
     this.trabajosService.getTrabajosPorTatuador(this.userId).subscribe({
       next: (data) => { this.trabajos = data; this.isLoading = false; },
-      error: () => { this.isLoading = false; }
+      error: (err) => {
+        this.isLoading = false;
+        this.avisos.fallo(err, 'No se pudieron cargar tus trabajos.');
+      }
     });
   }
 
@@ -87,7 +93,7 @@ export class MiPortfolioComponent implements OnInit {
         this.loadData();
       },
       error: (err) => {
-        this.syncMessage = err?.error?.message || 'Error al sincronizar con Instagram.';
+        this.syncMessage = apiErrorMessage(err, 'Error al sincronizar con Instagram.');
         this.syncMessageIsError = true;
         this.instagramLoading = false;
         this.loadInstagramStatus();

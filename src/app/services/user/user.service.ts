@@ -1,7 +1,8 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { User } from '../../models/user.model';
-import { BehaviorSubject, catchError, map, Observable, of, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, switchMap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { RolApl } from 'src/app/models/rol.models';
 
@@ -38,24 +39,24 @@ export class UserService {
 
   getUser(id: number): Observable<User> {
     return this.http
-      .get<User>(`${this.endpoint}/${id}`)
-      .pipe(catchError(this.handleError));
+      .get<ApiResponse<User>>(`${this.endpoint}/${id}`)
+      .pipe(map(unwrap));
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.endpoint}`);
+    return this.http.get<ApiResponse<User[]>>(`${this.endpoint}`).pipe(map(unwrap));
   }
 
-  updateUser(id: number, userRequest: any): Observable<User> {
+  updateUser(id: number, userRequest: Partial<User>): Observable<User> {
     return this.http
-      .put<User>(`${this.endpoint}/${id}`, userRequest)
-      .pipe(catchError(this.handleError));
+      .put<ApiResponse<User>>(`${this.endpoint}/${id}`, userRequest)
+      .pipe(map(unwrap));
   }
 
   updateUserRoles(userId: number, roleIds: number[]): Observable<void> {
     return this.http
-      .put<void>(`${this.endpoint}/${userId}/roles`, { roleIds })
-      .pipe(catchError(this.handleError));
+      .put<ApiResponse<void>>(`${this.endpoint}/${userId}/roles`, { roleIds })
+      .pipe(map(unwrap));
   }
 
   updateProfilePhoto(id: number, image: File): Observable<User> {
@@ -63,35 +64,21 @@ export class UserService {
     formData.append('file', image);
 
     return this.http
-      .patch<User>(`${this.endpoint}/${id}/profile-photo`, formData)
-      .pipe(catchError(this.handleError));
+      .patch<ApiResponse<User>>(`${this.endpoint}/${id}/profile-photo`, formData)
+      .pipe(map(unwrap));
   }
 
-  private handleError(error: HttpErrorResponse) {
-    if (error.status === 0) {
-      console.error('Se ha producido un error ', error.error);
-    } else {
-      console.error(
-        'Backend retorno el codigo de estado ',
-        error.status,
-        error.error
-      );
-    }
-    return throwError(
-      () => new Error('Algo fallo. Por favor intente nuevamente.')
-    );
-  }
 
   getAllUserRoles(idUser: number): Observable<number[]> {
-    return this.http.get<number[]>(`${this.endpoint}/getUserRolsByIdUser/${idUser}`);
+    return this.http.get<ApiResponse<number[]>>(`${this.endpoint}/getUserRolsByIdUser/${idUser}`).pipe(map(unwrap));
   }
 
   getRoles(): Observable<RolApl[]> {
-    return this.http.get<RolApl[]>(`${this.endpoint}/getAllRoles`);
+    return this.http.get<ApiResponse<RolApl[]>>(`${this.endpoint}/getAllRoles`).pipe(map(unwrap));
   }
 
   getUserRolByidRole(idRole: string): Observable<RolApl> {
-    return this.http.get<RolApl>(`${this.endpoint}/getUserRolByidRole/${idRole}`);
+    return this.http.get<ApiResponse<RolApl>>(`${this.endpoint}/getUserRolByidRole/${idRole}`).pipe(map(unwrap));
   }
 
 }

@@ -1,6 +1,7 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface SolicitudTatuador {
@@ -30,14 +31,14 @@ export class SolicitudTatuadorService {
   private endpoint = `${environment.urlApi}solicitudes-tatuador`;
 
   getAll(): Observable<SolicitudTatuador[]> {
-    return this.http.get<SolicitudTatuador[]>(this.endpoint);
+    return this.http.get<ApiResponse<SolicitudTatuador[]>>(this.endpoint).pipe(map(unwrap));
   }
 
   aprobar(id: number): Observable<void> {
-    return this.http.put<void>(`${this.endpoint}/${id}/aprobar`, {});
+    return this.http.put<ApiResponse<void>>(`${this.endpoint}/${id}/aprobar`, {}).pipe(map(unwrap));
   }
 
   rechazar(id: number, notas?: string): Observable<void> {
-    return this.http.put<void>(`${this.endpoint}/${id}/rechazar`, { notas });
+    return this.http.put<ApiResponse<void>>(`${this.endpoint}/${id}/rechazar`, { notas }).pipe(map(unwrap));
   }
 }

@@ -1,6 +1,7 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { TurnoMensaje } from 'src/app/models/turno/turno-mensaje.model';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { environment } from 'src/environments/environment';
@@ -32,30 +33,30 @@ export class TurnosService {
       formData.append('imagenes', file, file.name);
     });
 
-    return this.http.post<TurnoSesion>(`${this.apiUrl}/solicitar`, formData);
+    return this.http.post<ApiResponse<TurnoSesion>>(`${this.apiUrl}/solicitar`, formData).pipe(map(unwrap));
   }
 
   getMisTurnos(): Observable<TurnoSesion[]> {
-    return this.http.get<TurnoSesion[]>(`${this.apiUrl}/mis-turnos`);
+    return this.http.get<ApiResponse<TurnoSesion[]>>(`${this.apiUrl}/mis-turnos`).pipe(map(unwrap));
   }
 
   gestionarTurno(idTurno: number, nuevoEstado: string): Observable<TurnoSesion> {
-    return this.http.patch<TurnoSesion>(`${this.apiUrl}/gestionar/${idTurno}`, { estado: nuevoEstado });
+    return this.http.patch<ApiResponse<TurnoSesion>>(`${this.apiUrl}/gestionar/${idTurno}`, { estado: nuevoEstado }).pipe(map(unwrap));
   }
 
   updateTurno(id: number, datos: { fechaHoraInicio?: string; fechaHoraFin?: string; estado?: string }): Observable<TurnoSesion> {
-    return this.http.put<TurnoSesion>(`${this.apiUrl}/${id}`, datos);
+    return this.http.put<ApiResponse<TurnoSesion>>(`${this.apiUrl}/${id}`, datos).pipe(map(unwrap));
   }
 
   getMensajesTurno(turnoId: number): Observable<TurnoMensaje[]> {
-    return this.http.get<TurnoMensaje[]>(`${this.apiUrl}/${turnoId}/mensajes`);
+    return this.http.get<ApiResponse<TurnoMensaje[]>>(`${this.apiUrl}/${turnoId}/mensajes`).pipe(map(unwrap));
   }
 
   enviarMensaje(turnoId: number, texto: string): Observable<TurnoMensaje> {
-    return this.http.post<TurnoMensaje>(`${this.apiUrl}/${turnoId}/mensajes`, { texto });
+    return this.http.post<ApiResponse<TurnoMensaje>>(`${this.apiUrl}/${turnoId}/mensajes`, { texto }).pipe(map(unwrap));
   }
 
   getMisTurnosCliente(): Observable<TurnoSesion[]> {
-    return this.http.get<TurnoSesion[]>(`${this.apiUrl}/mis-reservas-cliente`);
+    return this.http.get<ApiResponse<TurnoSesion[]>>(`${this.apiUrl}/mis-reservas-cliente`).pipe(map(unwrap));
   }
 }

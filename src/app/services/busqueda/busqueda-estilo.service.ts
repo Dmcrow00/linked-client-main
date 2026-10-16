@@ -1,6 +1,7 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface TatuadorUbicacion {
@@ -38,21 +39,21 @@ export class BusquedaEstiloService {
     imagenes: File[],
     lat: number,
     lng: number,
-    radioKm: number = 50
+    radioKm = 50
   ): Observable<BusquedaEstiloResponse> {
     const form = new FormData();
     imagenes.forEach(img => form.append('imagenes', img));
     form.append('lat', lat.toString());
     form.append('lng', lng.toString());
     form.append('radioKm', radioKm.toString());
-    return this.http.post<BusquedaEstiloResponse>(`${this.apiUrl}/por-estilo`, form);
+    return this.http.post<ApiResponse<BusquedaEstiloResponse>>(`${this.apiUrl}/por-estilo`, form).pipe(map(unwrap));
   }
 
   /**
    * Obtiene todos los tatuadores con ubicación (cuando no se usa análisis IA).
    */
   getTatuadoresConUbicacion(): Observable<TatuadorUbicacion[]> {
-    return this.http.get<TatuadorUbicacion[]>(`${this.apiUrl}/tatuadores-ubicacion`);
+    return this.http.get<ApiResponse<TatuadorUbicacion[]>>(`${this.apiUrl}/tatuadores-ubicacion`).pipe(map(unwrap));
   }
 
   /** Calcula distancia en km entre dos coordenadas (Haversine). */

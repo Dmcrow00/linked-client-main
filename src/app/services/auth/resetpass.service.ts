@@ -1,28 +1,17 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { catchError, Observable, tap } from 'rxjs';
-import { User } from 'src/app/auth/auth.models';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { ErrorHandler } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ResetPasswordService {
   private http = inject(HttpClient);
-  private errorHandler = inject(ErrorHandler);
 
-
-
-  resetPassword(token: string, newPassword: string): Observable<any> {
-    return this.http.post(`${environment.urlHost}users/reset-password`, { token, newPassword })
-      .pipe(
-        tap(() => {
-        }),
-        catchError((error: HttpErrorResponse) => {
-          this.errorHandler.handleError(error);
-          throw error;
-        })
-      );
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${environment.urlHost}users/reset-password`, { token, newPassword })
+      .pipe(map(unwrap));
   }
 }

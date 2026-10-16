@@ -4,7 +4,7 @@
     <div class="footer-links">
       <a routerLink="/terminos">Términos y condiciones</a>
       <a routerLink="/privacidad">Política de privacidad</a>
-      <a (click)="handleSoporte()" style="cursor:pointer;">Soporte</a>
+      <a (click)="handleSoporte()" role="button" tabindex="0" (keydown.enter)="handleSoporte()" style="cursor:pointer;">Soporte</a>
       <a routerLink="/contacto">Contacto</a>
     </div>
 

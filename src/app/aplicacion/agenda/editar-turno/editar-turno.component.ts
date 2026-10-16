@@ -1,9 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { LoginService } from 'src/app/services/auth/login.service';
-import { TurnosService } from 'src/app/services/turnos/turnos.service';
 import { AgendaService } from '../agenda.service';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatFormField, MatLabel, MatSuffix, MatError } from '@angular/material/form-field';
@@ -14,6 +13,7 @@ import { DatePipe } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-editar-turno',
@@ -21,7 +21,8 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     styleUrl: './editar-turno.component.scss',
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatSelect, MatOption, MatProgressSpinner, MatError, MatDialogActions, MatButton, MatDialogClose, DatePipe, NoDoubleSubmitDirective]
 })
-export class EditarTurnoComponent {
+export class EditarTurnoComponent implements OnInit {
+  private avisos = inject(AvisosService);
 private fb = inject(FormBuilder);
 dialogRef = inject<MatDialogRef<EditarTurnoComponent>>(MatDialogRef);
 private loginService = inject(LoginService);
@@ -85,7 +86,7 @@ minDate: Date = new Date();
           this.isLoadingHorarios = false;
         },
         error: (err) => {
-          console.error("Error cargando horarios:", err);
+          this.avisos.fallo(err, 'No se pudieron cargar los horarios disponibles.');
           this.isLoadingHorarios = false;
         }
       });

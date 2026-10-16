@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 
 import { DetalleTrabajoComponent } from 'src/app/aplicacion/trabajos/detalle-trabajo/detalle-trabajo.component';
@@ -13,6 +12,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { PostTrabajoComponent } from '../../components/post-trabajo/post-trabajo.component';
 import { SolicitudesTatuadorComponent } from 'src/app/aplicacion/solicitudes-tatuador/solicitudes-tatuador.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
   selector: 'app-home',
@@ -26,13 +26,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   private loginService = inject(LoginService);
   private trabajosService = inject(TrabajosService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private avisos = inject(AvisosService);
 
 
-  userLoginOn: boolean = false;
+  userLoginOn = false;
   userRol: string | null = null;
   feed: Trabajo[] = [];
-  misLikes: Set<number> = new Set();
+  misLikes = new Set<number>();
 
   private destroy$ = new Subject<void>();
 
@@ -81,13 +81,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   cargarFeed() {
     this.trabajosService.getFeed().subscribe({
       next: (data) => this.feed = data,
-      error: (err) => console.error('Error cargando feed', err)
+      error: (err) => this.avisos.fallo(err, 'No se pudo cargar el feed.')
     });
   }
 
   cargarMisLikes() {
     this.trabajosService.getMisLikesIds().subscribe({
-      next: (ids) => this.misLikes = new Set(ids)
+      next: (ids) => this.misLikes = new Set(ids),
+      // Sin los Me Gusta propios el feed se ve igual, sólo sin marcar.
+      error: () => this.misLikes.clear()
     });
   }
 
@@ -95,7 +97,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   onToggleLike(trabajoId: number) {
     if (!this.userLoginOn) {
-      this.snackBar.open("Debes iniciar sesión para dar Me Gusta.", 'Cerrar', { duration: 3000 });
+      this.avisos.info('Debes iniciar sesión para dar Me Gusta.');
       this.router.navigate(['/login']);
       return;
     }
@@ -109,10 +111,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       trabajo.likesCount--;
 
       this.trabajosService.quitarLike(trabajoId).subscribe({
-        error: () => {
+        error: (err) => {
           this.misLikes.add(trabajoId);
           trabajo.likesCount++;
-          console.error("Error al quitar like");
+          this.avisos.fallo(err, 'No se pudo quitar el Me Gusta.');
         }
       });
 
@@ -120,10 +122,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.misLikes.add(trabajoId);
       trabajo.likesCount++;
       this.trabajosService.darLike(trabajoId).subscribe({
-        error: () => {
+        error: (err) => {
           this.misLikes.delete(trabajoId);
           trabajo.likesCount--;
-          console.error("Error al dar like");
+          this.avisos.fallo(err, 'No se pudo guardar el Me Gusta.');
         }
       });
     }

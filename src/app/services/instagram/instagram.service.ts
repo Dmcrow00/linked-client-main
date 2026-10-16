@@ -1,6 +1,7 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface InstagramStatus {
@@ -25,16 +26,16 @@ export class InstagramService {
 
   /** Obtiene el estado de vinculación de Instagram del tatuador autenticado */
   getStatus(): Observable<InstagramStatus> {
-    return this.http.get<InstagramStatus>(`${this.apiUrl}/status`);
+    return this.http.get<ApiResponse<InstagramStatus>>(`${this.apiUrl}/status`).pipe(map(unwrap));
   }
 
   /** Importa los posts de Instagram del tatuador como Trabajos */
   syncPosts(): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/sync`, {});
+    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/sync`, {}).pipe(map(unwrap));
   }
 
   /** Desvincula la cuenta de Instagram */
   disconnect(): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/disconnect`);
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/disconnect`).pipe(map(unwrap));
   }
 }

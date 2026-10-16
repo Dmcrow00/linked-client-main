@@ -1,4 +1,3 @@
-import { SlicePipe } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
@@ -12,8 +11,8 @@ import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
 })
 export class PostTileComponent {
   @Input() trabajo!: Trabajo;
-  @Input() isLiked: boolean = false;
-  @Input() showArtistInfo: boolean = false; 
+  @Input() isLiked = false;
+  @Input() showArtistInfo = false; 
 
   @Output() toggleLike = new EventEmitter<void>();
   @Output() clickCard = new EventEmitter<void>(); // Para abrir detalle

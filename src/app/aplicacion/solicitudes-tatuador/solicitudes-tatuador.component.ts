@@ -3,11 +3,10 @@ import { DatePipe, Location } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
-import { MatDialog } from '@angular/material/dialog';
 import { SolicitudTatuadorService, SolicitudTatuador } from 'src/app/services/solicitud-tatuador/solicitud-tatuador.service';
 import { EspecialidadesService } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.service';
 import { Especialidad } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.model';
-import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -21,21 +20,28 @@ export class SolicitudesTatuadorComponent implements OnInit {
   private service = inject(SolicitudTatuadorService);
   private espService = inject(EspecialidadesService);
   private userService = inject(UserService);
-  private dialog = inject(MatDialog);
+  private avisos = inject(AvisosService);
   private location = inject(Location);
 
   @Input() showHero = true;
   solicitudes: SolicitudTatuador[] = [];
-  especialidadesMap: Map<number, string> = new Map();
+  especialidadesMap = new Map<number, string>();
   loading = true;
-  private tatuadoresIds: Set<number> = new Set();
+  private tatuadoresIds = new Set<number>();
 
   goBack(): void { this.location.back(); }
 
   ngOnInit(): void {
-    this.espService.getAllEspecialidades().subscribe((esps: Especialidad[]) => {
-      esps.forEach(e => this.especialidadesMap.set(e.id, e.nombre));
-      this.loadSolicitudes();
+    this.espService.getAllEspecialidades().subscribe({
+      next: (esps: Especialidad[]) => {
+        esps.forEach(e => this.especialidadesMap.set(e.id, e.nombre));
+        this.loadSolicitudes();
+      },
+      // Sin los nombres, las especialidades se ven por número: las solicitudes se cargan igual.
+      error: (err) => {
+        this.avisos.fallo(err, 'No se pudieron cargar las especialidades.');
+        this.loadSolicitudes();
+      },
     });
   }
 
@@ -47,7 +53,10 @@ export class SolicitudesTatuadorComponent implements OnInit {
         await this.checkRolesTatuador(data.filter(s => s.status === 'pendiente'));
         this.loading = false;
       },
-      error: () => { this.loading = false; }
+      error: (err) => {
+        this.loading = false;
+        this.avisos.fallo(err, 'No se pudieron cargar las solicitudes.');
+      }
     });
   }
 
@@ -89,32 +98,20 @@ export class SolicitudesTatuadorComponent implements OnInit {
   aprobar(sol: SolicitudTatuador): void {
     this.service.aprobar(sol.id).subscribe({
       next: () => {
-        this.dialog.open(ErrorDialogComponent, {
-          data: { message: `Solicitud de ${sol.user.username} aprobada`, type: 'success' }
-        });
+        this.avisos.success(`Solicitud de ${sol.user.username} aprobada`);
         this.loadSolicitudes();
       },
-      error: (err) => {
-        this.dialog.open(ErrorDialogComponent, {
-          data: { message: err.error?.message || 'Error al aprobar', type: 'error' }
-        });
-      }
+      error: (err) => this.avisos.fallo(err, 'Error al aprobar')
     });
   }
 
   rechazar(sol: SolicitudTatuador): void {
     this.service.rechazar(sol.id).subscribe({
       next: () => {
-        this.dialog.open(ErrorDialogComponent, {
-          data: { message: `Solicitud de ${sol.user.username} rechazada`, type: 'error' }
-        });
+        this.avisos.info(`Solicitud de ${sol.user.username} rechazada`);
         this.loadSolicitudes();
       },
-      error: (err) => {
-        this.dialog.open(ErrorDialogComponent, {
-          data: { message: err.error?.message || 'Error al rechazar', type: 'error' }
-        });
-      }
+      error: (err) => this.avisos.fallo(err, 'Error al rechazar')
     });
   }
 }

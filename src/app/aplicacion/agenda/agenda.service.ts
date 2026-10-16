@@ -1,3 +1,4 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
@@ -14,12 +15,12 @@ export class AgendaService {
 
   //Metodos del tatuador
   getHorarioHabitual(): Observable<HorarioHabitual[]> {
-    return this.http.get<HorarioHabitual[]>(`${this.apiUrl}/horario-habitual`);
+    return this.http.get<ApiResponse<HorarioHabitual[]>>(`${this.apiUrl}/horario-habitual`).pipe(map(unwrap));
   }
 
   // Reemplaza el horario completo: los días que no se envían quedan sin atención.
   updateHorarioHabitual(horarios: HorarioHabitualInput[]): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/horario-habitual`, { horarios });
+    return this.http.put<ApiResponse<void>>(`${this.apiUrl}/horario-habitual`, { horarios }).pipe(map(unwrap));
   }
 
   // Metodos del cliente
@@ -28,15 +29,15 @@ export class AgendaService {
     const fechaISO = fecha.toISOString().split('T')[0];
     const params = new HttpParams().set('fecha', fechaISO);
     return this.http
-      .get<{ slots: string[] }>(`${this.apiUrl}/${tatuadorId}/slots-dia`, { params })
-      .pipe(map(res => res.slots));
+      .get<ApiResponse<{ slots: string[] }>>(`${this.apiUrl}/${tatuadorId}/slots-dia`, { params })
+      .pipe(map(unwrap), map(res => res.slots));
   }
 
   getFechasBloqueadas(tatuadorId: number, desde: Date, hasta: Date): Observable<string[]> {
     const params = new HttpParams()
       .set('desde', desde.toISOString().split('T')[0])
       .set('hasta', hasta.toISOString().split('T')[0]);
-    return this.http.get<string[]>(`${this.apiUrl}/${tatuadorId}/fechas-bloqueadas`, { params });
+    return this.http.get<ApiResponse<string[]>>(`${this.apiUrl}/${tatuadorId}/fechas-bloqueadas`, { params }).pipe(map(unwrap));
   }
 
 }

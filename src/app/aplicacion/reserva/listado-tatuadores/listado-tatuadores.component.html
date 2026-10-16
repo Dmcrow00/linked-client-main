@@ -34,7 +34,7 @@
           <div class="tatuadores-grid">
             @for (tatuador of tatuadores; track tatuador) {
               <div class="tatuador-card"
-                (click)="seleccionarTatuador(tatuador)"
+                (click)="seleccionarTatuador(tatuador)" role="button" tabindex="0" (keydown.enter)="seleccionarTatuador(tatuador)"
                 [class.selected]="tatuador.id === selectedTatuadorId">
                 <div class="card-top">
                   <img [src]="tatuador?.profilePhoto | serverUrl"

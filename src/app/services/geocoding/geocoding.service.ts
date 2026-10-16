@@ -28,7 +28,7 @@ interface NominatimReverseResult {
 }
 
 interface PhotonResponse {
-  features: Array<{
+  features: {
     geometry: { coordinates: [number, number] };
     properties: {
       name?: string;
@@ -41,7 +41,7 @@ interface PhotonResponse {
       country?: string;
       countrycode?: string;
     };
-  }>;
+  }[];
 }
 
 @Injectable({ providedIn: 'root' })

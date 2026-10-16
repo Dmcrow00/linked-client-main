@@ -9,8 +9,8 @@
         <p class="gt-subtitle">Soporte técnico</p>
       </div>
     </div>
-    <span class="status-badge" [class.resolved]="data.supportTicket.status + '' === 'true'">
-      {{ data.supportTicket.status + '' === 'true' ? 'RESUELTO' : 'PENDIENTE' }}
+    <span class="status-badge" [class.resolved]="!data.supportTicket.status">
+      {{ data.supportTicket.status ? 'PENDIENTE' : 'RESUELTO' }}
     </span>
   </div>
 
@@ -65,54 +65,29 @@
     <section class="gt-section">
       <h3 class="section-title">Gestión y respuesta</h3>
 
-      <form [formGroup]="gestionForm">
-        <div class="field-group">
-          <label class="field-label">Estado del ticket</label>
-          <mat-form-field appearance="outline" class="field-full">
-            <mat-select formControlName="status">
-              <mat-option [value]="false">Pendiente</mat-option>
-              <mat-option [value]="true">Resuelto</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Respuesta al cliente</label>
-          <mat-form-field appearance="outline" class="field-full">
-            <textarea
-              matInput
-              formControlName="adminResponse"
-              placeholder="Redactá la respuesta que recibirá el usuario por correo..."
-              rows="5">
-            </textarea>
-            @if (gestionForm.get('adminResponse')?.hasError('required')) {
-              <mat-error>
-                La respuesta es requerida
-              </mat-error>
-            }
-          </mat-form-field>
-          <p class="field-hint">
-            <mat-icon class="hint-icon">mail_outline</mat-icon>
-            Se enviará un correo al usuario con el estado actualizado y esta respuesta.
-          </p>
-        </div>
-      </form>
+      <dmc-dynamic-form [fields]="campos" [form]="form" [submitted]="estado.submitted()" idPrefix="ticket"
+                        (send)="onRespond()" />
+      <p class="field-hint">
+        <mat-icon class="hint-icon">mail_outline</mat-icon>
+        Se enviará un correo al usuario con esta respuesta y el ticket quedará resuelto.
+      </p>
+      @if (estado.error(); as error) {
+        <p class="gt-error" role="alert">{{ error }}</p>
+      }
     </section>
 
   </div>
 
   <!-- Acciones -->
   <div class="gt-actions">
-    <button mat-stroked-button type="button" (click)="onClose()">
+    <button mat-stroked-button type="button" [disabled]="estado.saving()" (click)="onClose()">
       Cerrar
     </button>
-    <button mat-raised-button class="btn-save" type="button" appNoDoubleSubmit
-      [disabled]="gestionForm.invalid || saving"
-      (click)="onRespond()">
-      @if (!saving) {
+    <button mat-raised-button class="btn-save" type="button" [disabled]="estado.saving()" (click)="onRespond()">
+      @if (!estado.saving()) {
         <mat-icon>send</mat-icon>
       }
-      <span>{{ saving ? 'Enviando...' : 'Guardar y notificar' }}</span>
+      <span>{{ estado.saving() ? 'Enviando...' : 'Guardar y notificar' }}</span>
     </button>
   </div>
 

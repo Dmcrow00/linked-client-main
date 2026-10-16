@@ -1,8 +1,8 @@
 // Payload de registro. El backend expone la fecha como "birth_date" y las
 // especialidades como "especialidadIds", aunque el resto del contrato sea camelCase.
 export class User {
-  username: string = '';
-  email: string = '';
+  username = '';
+  email = '';
   password?: string;
   realname: undefined | string = '';
   surname: undefined | string = '';

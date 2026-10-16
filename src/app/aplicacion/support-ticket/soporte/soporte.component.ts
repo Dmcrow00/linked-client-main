@@ -5,6 +5,7 @@ import { MatFabButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 
+import { AvisosService } from 'src/app/core/avisos.service';
 import { SupportTicket } from '../support-ticket.model';
 import { SupportTicketService } from '../support-ticket.service';
 import { SupportTicketCreateComponent } from '../support-ticket-create/support-ticket-create.component';
@@ -25,6 +26,7 @@ export class SoporteComponent implements OnInit {
   private supportTicketService = inject(SupportTicketService);
   private dialog = inject(MatDialog);
   private location = inject(Location);
+  private avisos = inject(AvisosService);
 
 
   myTickets: SupportTicket[] = [];
@@ -38,7 +40,10 @@ export class SoporteComponent implements OnInit {
     this.loadingTickets = true;
     this.supportTicketService.getMyTickets().subscribe({
       next: (tickets) => { this.myTickets = tickets; this.loadingTickets = false; },
-      error: () => { this.loadingTickets = false; },
+      error: (err) => {
+        this.loadingTickets = false;
+        this.avisos.fallo(err, 'No se pudieron cargar tus tickets.');
+      },
     });
   }
 

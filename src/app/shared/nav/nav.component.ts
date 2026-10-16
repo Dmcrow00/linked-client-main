@@ -3,7 +3,6 @@ import { LoginService } from '../../services/auth/login.service';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProximamenteService } from 'src/app/services/proximamente.service';
-import { HelpDialogComponent } from 'src/app/components/help-dialog/help-dialog.component';
 import { SupportTicketCreateComponent } from 'src/app/aplicacion/support-ticket/support-ticket-create/support-ticket-create.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from 'src/app/services/user/user.service';
@@ -26,14 +25,14 @@ export class NavComponent implements OnInit, OnDestroy {
   private proximamenteService = inject(ProximamenteService);
   private dialog = inject(MatDialog);
 
-  searchTerm: string = '';
-  userLoginOn: boolean = false;
+  searchTerm = '';
+  userLoginOn = false;
   username: string | null = null;
   userRol: string | null = null;
-  currentUrl: string = '';
+  currentUrl = '';
   private subscriptions: Subscription = new Subscription();
 
-  menuOpen: boolean = false; // Estado inicial cerrado
+  menuOpen = false; // Estado inicial cerrado
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen; // Cambia el estado
@@ -65,9 +64,6 @@ export class NavComponent implements OnInit, OnDestroy {
             this.userRol = null;
           }
         },
-        error: (err) => {
-          console.error('Error al suscribirse al estado de login', err);
-        },
       })
     );
   }
@@ -90,9 +86,8 @@ export class NavComponent implements OnInit, OnDestroy {
             this.username = username
           };
         },
-        error: (err) => {
-          console.error('Error al obtener el nombre de usuario', err);
-        },
+        // Si no llega el nombre, la barra sigue sin él.
+        error: () => (this.username = null),
       })
     );
   }
@@ -103,9 +98,6 @@ export class NavComponent implements OnInit, OnDestroy {
       this.loginService.userRol.subscribe({
         next: (role) => {
           this.userRol = role; // Asigna el rol
-        },
-        error: (err) => {
-          console.error('Error al obtener el rol del usuario', err);
         },
       })
     );

@@ -16,7 +16,7 @@ export interface MenuItem {
 }
 
 export class idRolesPorItemMenu {
-    idItemMenu: number = 0;
+    idItemMenu = 0;
     idRoles: number[] = [];
 }
 

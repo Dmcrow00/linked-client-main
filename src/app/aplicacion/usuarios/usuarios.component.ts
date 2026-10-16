@@ -18,6 +18,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-usuarios',
@@ -55,6 +56,7 @@ import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 ]
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
+  private avisos = inject(AvisosService);
   private userService = inject(UserService);
   private solicitudService = inject(SolicitudTatuadorService);
   private dialog = inject(MatDialog);
@@ -68,11 +70,11 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   // Mapa: idUser → role IDs
-  userRolesMap: Map<number, number[]> = new Map();
+  userRolesMap = new Map<number, number[]>();
 
   // Filtros
   filterRolId: number | '' = '';
-  filterUsername: string = '';
+  filterUsername = '';
   filterEstado: 'todos' | 'pendiente_tatuador' | 'tatuador_activo' = 'todos';
 
   sortDir: 'asc' | 'desc' = 'asc';
@@ -99,10 +101,13 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   loadUsuarios(): void {
     this.userService.getAllUsers()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(async (data) => {
-        this.usuarios = data;
-        await this.loadAllUserRoles(data);
-        this.aplicarFiltro();
+      .subscribe({
+        next: async (data) => {
+          this.usuarios = data;
+          await this.loadAllUserRoles(data);
+          this.aplicarFiltro();
+        },
+        error: (err) => this.avisos.fallo(err, 'No se pudieron cargar los usuarios.'),
       });
   }
 
@@ -181,7 +186,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   openEditDialog(id: number): void {
-    this.userService.getUser(id).subscribe((user) => {
+    this.userService.getUser(id).subscribe({ error: (err) => this.avisos.fallo(err, 'No se pudo cargar el usuario.'), next: (user) => {
       const dialogRef = this.dialog.open(UpdateRolComponent, {
         width: '420px',
         disableClose: true,
@@ -197,7 +202,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
           this.loadUsuarios();
         }
       });
-    });
+    } });
   }
 
   ngOnDestroy(): void {

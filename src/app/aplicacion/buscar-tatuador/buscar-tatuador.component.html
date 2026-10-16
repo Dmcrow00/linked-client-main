@@ -114,10 +114,9 @@
 
           @if (userLat) {
             <div class="radio-control">
-              <label class="radio-label"
-                >Radio de búsqueda: <strong>{{ radioKm }} km</strong></label
+              <label class="radio-label" for="buscar-radio">Radio de búsqueda: <strong>{{ radioKm }} km</strong></label
                 >
-                <input
+                <input id="buscar-radio"
                   type="range"
                   class="radius-slider"
                   min="5"

@@ -12,105 +12,70 @@
   <mat-divider></mat-divider>
 
   <mat-card-content>
-    <form #ticketForm="ngForm">
+    <dmc-dynamic-form [fields]="campos" [form]="form" [submitted]="estado.submitted()" idPrefix="ticket-nuevo"
+                      (send)="createSupportTicket()">
+      <!-- Captura de pantalla -->
+      <div class="screenshot-section col-12">
+        <p class="screenshot-label">
+          <mat-icon>image</mat-icon>
+          Captura de pantalla
+          <span class="optional-tag">Opcional · máx. 1.5 MB</span>
+        </p>
 
-      <!-- Email de contacto (solo usuarios no registrados) -->
-      @if (isAnonymous) {
-        <mat-form-field appearance="outline" class="form-field-full">
-          <mat-label>Correo de contacto</mat-label>
-          <input matInput type="email"
-            [(ngModel)]="supportTicket.contactEmail"
-            name="contactEmail"
-            required
-            placeholder="ejemplo@correo.com" />
-            <mat-hint>Recibirás la respuesta en este correo.</mat-hint>
-          </mat-form-field>
+        @if (screenshot(); as captura) {
+          <div class="screenshot-preview-wrap">
+            <img [src]="captura" class="screenshot-preview" alt="Captura adjunta">
+            <button mat-icon-button class="remove-screenshot" (click)="removeScreenshot()" matTooltip="Eliminar imagen"
+                    aria-label="Eliminar imagen" type="button">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        } @else {
+          <button type="button" class="screenshot-dropzone" (click)="screenshotInput.click()">
+            <mat-icon>add_photo_alternate</mat-icon>
+            <span>Hacé clic para adjuntar una imagen</span>
+          </button>
+          <input #screenshotInput type="file" accept="image/*" hidden (change)="onScreenshotSelected($event)">
         }
 
-        <!-- Categoría -->
-        <mat-form-field appearance="outline" class="form-field-full">
-          <mat-label>Categoría</mat-label>
-          <mat-select [(ngModel)]="supportTicket.category" name="category" required>
-            @for (c of categorias; track c) {
-              <mat-option [value]="c">{{ c }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <!-- Descripción -->
-        <mat-form-field appearance="outline" class="form-field-full">
-          <mat-label>Descripción del problema</mat-label>
-          <textarea
-            matInput
-            [(ngModel)]="supportTicket.description"
-            name="descripcion"
-            required
-            rows="7"
-            placeholder="Describí con detalle qué ocurrió, qué esperabas que pasara y qué pasos seguiste."
-          ></textarea>
-          <mat-hint align="end">{{ supportTicket.description?.length || 0 }} caracteres</mat-hint>
-        </mat-form-field>
-
-        <!-- Captura de pantalla -->
-        <div class="screenshot-section">
-          <p class="screenshot-label">
-            <mat-icon>image</mat-icon>
-            Captura de pantalla
-            <span class="optional-tag">Opcional · máx. 1.5 MB</span>
+        @if (screenshotError(); as error) {
+          <p class="screenshot-error">
+            <mat-icon>error_outline</mat-icon> {{ error }}
           </p>
+        }
+      </div>
 
-          @if (!screenshotPreview) {
-            <div class="screenshot-dropzone" (click)="screenshotInput.click()">
-              <mat-icon>add_photo_alternate</mat-icon>
-              <span>Hacé clic para adjuntar una imagen</span>
-              <input #screenshotInput type="file" accept="image/*" hidden (change)="onScreenshotSelected($event)">
-            </div>
-          }
-
-          @if (screenshotPreview) {
-            <div class="screenshot-preview-wrap">
-              <img [src]="screenshotPreview" class="screenshot-preview" alt="Captura adjunta">
-              <button mat-icon-button class="remove-screenshot" (click)="removeScreenshot()" matTooltip="Eliminar imagen" type="button">
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-          }
-
-          @if (screenshotError) {
-            <p class="screenshot-error">
-              <mat-icon>error_outline</mat-icon> {{ screenshotError }}
-            </p>
-          }
+      <!-- Datos técnicos (enviados automáticamente) -->
+      <div class="tech-info-section col-12">
+        <p class="tech-info-label">
+          <mat-icon>info_outline</mat-icon>
+          Información técnica (enviada automáticamente)
+        </p>
+        <div class="tech-info-row">
+          <span class="tech-key">URL</span>
+          <span class="tech-value">{{ urlPagina }}</span>
         </div>
-
-        <!-- Datos técnicos (colapsados visualmente) -->
-        <div class="tech-info-section">
-          <p class="tech-info-label">
-            <mat-icon>info_outline</mat-icon>
-            Información técnica (enviada automáticamente)
-          </p>
-          <div class="tech-info-row">
-            <span class="tech-key">URL</span>
-            <span class="tech-value">{{ supportTicket.urlPagina }}</span>
-          </div>
-          <div class="tech-info-row">
-            <span class="tech-key">Navegador</span>
-            <span class="tech-value">{{ supportTicket.userAgent }}</span>
-          </div>
+        <div class="tech-info-row">
+          <span class="tech-key">Navegador</span>
+          <span class="tech-value">{{ userAgent }}</span>
         </div>
+      </div>
+    </dmc-dynamic-form>
 
-      </form>
-    </mat-card-content>
+    @if (estado.error(); as error) {
+      <p class="screenshot-error" role="alert">
+        <mat-icon>error_outline</mat-icon> {{ error }}
+      </p>
+    }
+  </mat-card-content>
 
-    <mat-divider></mat-divider>
+  <mat-divider></mat-divider>
 
-    <mat-card-actions class="dialog-actions">
-      <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
-      <button mat-raised-button class="create-button" type="button" appNoDoubleSubmit
-        [disabled]="!isFormValid()"
-        (click)="createSupportTicket()">
-        <mat-icon>send</mat-icon>
-        Enviar ticket
-      </button>
-    </mat-card-actions>
-  </mat-card>
+  <mat-card-actions class="dialog-actions">
+    <button mat-stroked-button type="button" [disabled]="estado.saving()" (click)="cancel()">Cancelar</button>
+    <button mat-raised-button class="create-button" type="button" [disabled]="estado.saving()" (click)="createSupportTicket()">
+      <mat-icon>send</mat-icon>
+      {{ estado.saving() ? 'Enviando…' : 'Enviar ticket' }}
+    </button>
+  </mat-card-actions>
+</mat-card>

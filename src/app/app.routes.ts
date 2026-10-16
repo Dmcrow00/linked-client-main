@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '@dmcrow00/ng-core/auth';
 
 import { adminGuard } from './guards/admin.guard';
 import { NotAuthorizedComponent } from './components/not-authorized/not-authorized.component';
@@ -31,27 +32,29 @@ export const routes: Routes = [
   { path: 'inicio', component: HomeComponent },
   { path: 'not-authorized', component: NotAuthorizedComponent },
   { path: 'usuarios', component: UsuariosComponent, canActivate: [adminGuard] },
-  { path: 'soporte', component: SoporteComponent },
+  { path: 'soporte', component: SoporteComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgotPass', component: ForgotPassComponent },
   { path: 'reset-password', component: ResetPassComponent },
-  { path: 'info', component: PersonalDetailsComponent },
+  { path: 'info', component: PersonalDetailsComponent, canActivate: [authGuard] },
   { path: 'support-ticket', component: SupportTicketComponent, canActivate: [adminModGuard] },
   { path: 'especialidades', component: EspecialidadesComponent, canActivate: [adminModGuard] },
   { path: 'solicitudes-tatuador', component: SolicitudesTatuadorComponent, canActivate: [adminGuard] },
-  { path: 'gestionar-agenda', component: AgendaComponent, canActivate: [ /* AuthGuard de Tatuador */] },
+  { path: 'gestionar-agenda', component: AgendaComponent, canActivate: [authGuard] },
   {
     path: 'reserva',
+    canActivate: [authGuard],
     loadChildren: () => import('./aplicacion/reserva/reserva.routes').then(m => m.RESERVA_ROUTES)
   },
   {
     path: 'mis-reservas',
-    component: MisReservasComponent
+    component: MisReservasComponent,
+    canActivate: [authGuard]
   },
-  { path: 'mis-favoritos', component: TatuajesFavoritosComponent },
+  { path: 'mis-favoritos', component: TatuajesFavoritosComponent, canActivate: [authGuard] },
   { path: 'buscar', component: BuscarTatuadorComponent },
-  { path: 'mi-portfolio', component: MiPortfolioComponent },
+  { path: 'mi-portfolio', component: MiPortfolioComponent, canActivate: [authGuard] },
   { path: 'perfil-publico/:id', component: PortfolioComponent },
   { path: 'terminos', component: TerminosComponent },
   { path: 'privacidad', component: PrivacidadComponent },

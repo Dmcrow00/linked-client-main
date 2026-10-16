@@ -37,7 +37,7 @@
     <div class="info-column">
 
       <div class="modal-header">
-        <div class="author-info" (click)="irAlPerfil()">
+        <div class="author-info" (click)="irAlPerfil()" role="button" tabindex="0" (keydown.enter)="irAlPerfil()">
           <img [src]="data.trabajo.tatuador?.profilePhoto | serverUrl"
             class="avatar"
             alt="Avatar">

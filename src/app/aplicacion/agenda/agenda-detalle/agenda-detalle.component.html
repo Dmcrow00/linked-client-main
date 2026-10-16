@@ -88,7 +88,7 @@
             <div class="galeria">
               @for (img of data.turno.imagenesRef; track img; let i = $index) {
                 <div class="img-wrapper">
-                  <img [src]="img | serverUrl" alt="Referencia" (click)="openLightbox(i)">
+                  <img [src]="img | serverUrl" alt="Referencia" (click)="openLightbox(i)" role="button" tabindex="0" (keydown.enter)="openLightbox(i)">
                 </div>
               }
             </div>
@@ -186,7 +186,7 @@
 
   <!-- LIGHTBOX -->
   @if (lightboxIndex !== null) {
-    <div class="lightbox-overlay" (click)="closeLightbox()">
+    <div class="lightbox-overlay" (click)="closeLightbox()" (keydown.escape)="closeLightbox()" tabindex="-1">
       <button class="lightbox-close" (click)="closeLightbox()">
         <mat-icon>close</mat-icon>
       </button>
@@ -195,6 +195,7 @@
           <mat-icon>chevron_left</mat-icon>
         </button>
       }
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <img class="lightbox-img" [src]="lightboxUrl" alt="Referencia ampliada" (click)="$event.stopPropagation()">
       @if (data.turno.imagenesRef!.length > 1) {
         <button class="lightbox-nav next" (click)="$event.stopPropagation(); lightboxNext()">

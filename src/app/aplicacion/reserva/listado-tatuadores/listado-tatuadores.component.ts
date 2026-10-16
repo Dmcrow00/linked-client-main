@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
@@ -12,7 +12,7 @@ import { ServerUrlPipe } from '../../../pipes/server-url.pipe';
     styleUrl: './listado-tatuadores.component.scss',
     imports: [MatIconButton, MatIcon, MatButton, ServerUrlPipe]
 })
-export class ListadoTatuadoresComponent {
+export class ListadoTatuadoresComponent implements OnInit {
   private tatuadorService = inject(TatuadorService);
   private router = inject(Router);
   private location = inject(Location);
@@ -48,8 +48,7 @@ export class ListadoTatuadoresComponent {
         this.tatuadoresOriginal = tatuadoresLimpios;
         this.tatuadores = tatuadoresLimpios;
         },
-        error: (err) => {
-          console.error('Error al cargar tatuadores:', err);
+        error: () => {
           this.errorCarga = 'No se pudieron cargar los tatuadores. Intenta más tarde.';
         }
       });

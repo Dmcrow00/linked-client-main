@@ -4,7 +4,6 @@ import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { AgendaDetalleComponent } from '../agenda/agenda-detalle/agenda-detalle.component';
 import { TurnosService } from 'src/app/services/turnos/turnos.service';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
@@ -12,6 +11,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCard, MatCardContent, MatCardActions } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
 import { ServerUrlPipe } from '../../pipes/server-url.pipe';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-mis-reservas',
@@ -23,7 +23,7 @@ export class MisReservasComponent implements OnInit {
   private location = inject(Location);
   private turnosService = inject(TurnosService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private avisos = inject(AvisosService);
 
   turnos: TurnoSesion[] = [];
   isLoading = false;
@@ -65,12 +65,9 @@ export class MisReservasComponent implements OnInit {
       next: (turnoActualizado) => {
         const idx = this.turnos.findIndex(t => t.id === turnoId);
         if (idx > -1) this.turnos[idx] = turnoActualizado;
-        this.snackBar.open('Turno cancelado correctamente.', 'OK', { duration: 3000 });
+        this.avisos.success('Turno cancelado correctamente.');
       },
-      error: (err) => {
-        const msg = err.error?.message || 'No se pudo cancelar el turno.';
-        this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
-      }
+      error: (err) => this.avisos.fallo(err, 'No se pudo cancelar el turno.')
     });
   }
 

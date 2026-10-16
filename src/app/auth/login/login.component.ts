@@ -1,9 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LoginService } from '../../services/auth/login.service';
 import { LoginRequest } from '../../models/loginRequest';
-import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 import { SupportTicketCreateComponent } from 'src/app/aplicacion/support-ticket/support-ticket-create/support-ticket-create.component';
 import { MatDialog } from '@angular/material/dialog';
 import { EncryptionService } from 'src/app/services/auth/encryption.service';
@@ -22,16 +22,17 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     styleUrls: ['./login.component.scss'],
     imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatInput, MatError, MatIconButton, MatSuffix, RouterLink, RecaptchaModule, MatButton, NoDoubleSubmitDirective]
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   private formBuilder = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private avisos = inject(AvisosService);
   private dialog = inject(MatDialog);
   private loginService = inject(LoginService);
   private proximamenteService = inject(ProximamenteService);
   private encryptionService = inject(EncryptionService);
 
   loginForm: FormGroup;
-  loginError: string = '';
   hide = true;
   captchaValid = false;
   captchaToken: string | null = null;
@@ -43,7 +44,6 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { }
 
   get username() {
     return this.loginForm.get('username');
@@ -62,21 +62,17 @@ export class LoginComponent implements OnInit {
       };
 
       this.loginService.login(loginRequest).subscribe({
-        next: (userData) => { },
-        error: (errorData) => {
-          this.showErrorDialog(errorData);
-          this.loginError = errorData;
-        },
-        complete: () => {
-          this.router.navigateByUrl('/inicio');
+        next: () => {
           this.loginForm.reset();
-          this.captchaToken = null; 
+          this.captchaToken = null;
           this.captchaValid = false;
+          void this.router.navigateByUrl(this.destino());
         },
+        error: (err) => this.avisos.fallo(err, 'No se pudo iniciar sesión.'),
       });
     } else {
       this.loginForm.markAllAsTouched();
-      this.showErrorDialog('Error al ingresar los datos.');
+      this.avisos.error('Completá el usuario, la contraseña y el captcha.');
     }
   }
 
@@ -92,10 +88,11 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  private showErrorDialog(errorMessage: string): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message: errorMessage, type: 'error' },
-    });
+  /** A dónde volver: la pantalla que pidió el login (sesión vencida o ruta protegida) o el inicio. */
+  private destino(): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    // Sólo rutas internas: un returnUrl de otro sitio no se sigue.
+    return returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/inicio';
   }
 
   onCaptchaResolved(token: string | null) {

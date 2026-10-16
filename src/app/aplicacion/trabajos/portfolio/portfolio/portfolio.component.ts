@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component,  inject, OnInit } from '@angular/core';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TrabajosService } from 'src/app/services/trabajos/trabajos.service';
@@ -12,13 +12,15 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { ServerUrlPipe } from '../../../../pipes/server-url.pipe';
 import { PostTileComponent } from 'src/app/components/post-tile/post-tile.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 @Component({
     selector: 'app-portfolio',
     templateUrl: './portfolio.component.html',
     styleUrl: './portfolio.component.scss',
     imports: [PostTileComponent, MatIcon, MatButton, MatIconButton, ServerUrlPipe]
 })
-export class PortfolioComponent {
+export class PortfolioComponent implements OnInit {
+  private avisos = inject(AvisosService);
 private route = inject(ActivatedRoute);
 private router = inject(Router);
 private tatuadorService = inject(TatuadorService);
@@ -29,7 +31,7 @@ private location = inject(Location);
 
 tatuador: Tatuador | null = null;
   trabajos: Trabajo[] = [];
-  misLikes: Set<number> = new Set();
+  misLikes = new Set<number>();
   
   isLoading = true;
   userLoginOn = false;
@@ -73,12 +75,16 @@ tatuador: Tatuador | null = null;
         this.trabajos = data;
         this.isLoading = false;
       },
-      error: () => this.isLoading = false
+      error: (err) => {
+        this.isLoading = false;
+        this.avisos.fallo(err, 'No se pudieron cargar los trabajos.');
+      }
     });
   }
 
   cargarMisLikes() {
-    this.trabajosService.getMisLikesIds().subscribe(ids => this.misLikes = new Set(ids));
+    // Sin los Me Gusta propios los trabajos se ven igual, sólo sin marcar.
+    this.trabajosService.getMisLikesIds().subscribe({ next: ids => this.misLikes = new Set(ids), error: () => this.misLikes.clear() });
   }
 
   // --- Acciones ---
@@ -90,7 +96,7 @@ tatuador: Tatuador | null = null;
   }
 
   abrirDetalle(trabajo: Trabajo) {
-     const dialogRef = this.dialog.open(DetalleTrabajoComponent, {
+     this.dialog.open(DetalleTrabajoComponent, {
       width: '460px',
       maxWidth: '100vw',
       maxHeight: '90vh',
@@ -111,13 +117,13 @@ tatuador: Tatuador | null = null;
         this.misLikes.delete(trabajo.id);
         trabajo.likesCount--;
         this.trabajosService.quitarLike(trabajo.id).subscribe({
-            error: () => { this.misLikes.add(trabajo.id); trabajo.likesCount++; }
+            error: (err) => { this.misLikes.add(trabajo.id); trabajo.likesCount++; this.avisos.fallo(err, 'No se pudo quitar el Me Gusta.'); }
         });
     } else {
         this.misLikes.add(trabajo.id);
         trabajo.likesCount++;
         this.trabajosService.darLike(trabajo.id).subscribe({
-            error: () => { this.misLikes.delete(trabajo.id); trabajo.likesCount--; }
+            error: (err) => { this.misLikes.delete(trabajo.id); trabajo.likesCount--; this.avisos.fallo(err, 'No se pudo guardar el Me Gusta.'); }
         });
     }
   }

@@ -1,9 +1,9 @@
 export class Especialidad {
-  id: number = 0;
-  nombre: string = '';
-  descripcion: string = '';
+  id = 0;
+  nombre = '';
+  descripcion = '';
   // El backend lo expone como "true" / "false".
-  status: string = 'true';
+  status = 'true';
 }
 
 // Alta y edición sólo aceptan estos campos.

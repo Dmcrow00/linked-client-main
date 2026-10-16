@@ -20,27 +20,11 @@
 </div>
 
 <h3 class="tatuador-section-title">Especialidades</h3>
-<mat-form-field class="col-12 full-width" appearance="outline">
-  <mat-label>Especialidades</mat-label>
-  <mat-chip-grid #chipGrid>
-    @for (especialidad of especialidades; track especialidad) {
-      <mat-chip-row removable="true" (removed)="removeEspecialidad(especialidad)">
-        {{ especialidad.nombre }}
-        <mat-icon matChipRemove>cancel</mat-icon>
-      </mat-chip-row>
-    }
-    <input
-      placeholder="Agregar especialidad..."
-      [formControl]="especialidadCtrl"
-      [matAutocomplete]="auto"
-      [matChipInputFor]="chipGrid"
-      [matChipInputSeparatorKeyCodes]="separatorKeysCodes">
-    </mat-chip-grid>
-    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addEspecialidad($event)">
-      @for (e of filteredEspecialidades | async; track e) {
-        <mat-option [value]="e">
-          {{ e.nombre }}
-        </mat-option>
-      }
-    </mat-autocomplete>
-  </mat-form-field>
+<mat-chip-set aria-label="Especialidades">
+  @for (especialidad of especialidades; track especialidad.id) {
+    <mat-chip>{{ especialidad.nombre }}</mat-chip>
+  } @empty {
+    <p class="sin-especialidades">Todavía no tenés especialidades asignadas.</p>
+  }
+</mat-chip-set>
+<p class="especialidades-ayuda">Las especialidades las asigna un administrador: pedí el cambio desde Soporte.</p>

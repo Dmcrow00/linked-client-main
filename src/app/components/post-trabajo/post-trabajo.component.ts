@@ -15,12 +15,12 @@ export class PostTrabajoComponent {
   private router = inject(Router);
 
   @Input() trabajo!: Trabajo;
-  @Input() isLiked: boolean = false;
-  @Input() showArtistInfo: boolean = true; // True en Home, False en Perfil del Tatuador
+  @Input() isLiked = false;
+  @Input() showArtistInfo = true; // True en Home, False en Perfil del Tatuador
   
   @Output() toggleLike = new EventEmitter<number>(); 
 
-  currentImageIndex: number = 0;
+  currentImageIndex = 0;
   hasError = false;
 
   nextImage(event: MouseEvent) {
@@ -43,7 +43,7 @@ export class PostTrabajoComponent {
   }
 
 
-  irAlPerfil(event?: MouseEvent) {
+  irAlPerfil(event?: Event) {
     if (event) event.stopPropagation();
     if (this.trabajo.tatuador) {
       this.router.navigate(['/perfil-publico', this.trabajo.tatuador.id]);

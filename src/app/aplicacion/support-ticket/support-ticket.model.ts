@@ -1,7 +1,7 @@
 export class SupportTicket {
-  id: number = 0;
+  id = 0;
   // Indica si el ticket sigue abierto.
-  status: boolean = false;
+  status = false;
   description: string | null = null;
   category?: string | null = null;
   priority?: string | null = null;

@@ -1,3 +1,5 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
+import { map } from 'rxjs';
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
@@ -14,6 +16,6 @@ export class SweItemMenuService {
     private endpoint = `${environment.urlApi}swe/menu`;
 
     getMenuItem(): Observable<MenuItem[]> {
-        return this.http.get<MenuItem[]>(this.endpoint);
+        return this.http.get<ApiResponse<MenuItem[]>>(this.endpoint).pipe(map(unwrap));
     }
 }

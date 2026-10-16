@@ -5,7 +5,7 @@ import { LoginService } from 'src/app/services/auth/login.service';
 import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, Subscription, Subject } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { Especialidad } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.model';
 import { TatuadorService } from 'src/app/services/user/tatuador.service';
@@ -24,10 +24,11 @@ import { ServerUrlPipe } from '../../pipes/server-url.pipe';
 import { InstagramService, InstagramStatus } from '../../services/instagram/instagram.service';
 import { GeocodingService, GeoResult } from '../../services/geocoding/geocoding.service';
 import { ForgotPasswordService } from 'src/app/services/auth/forgotpass.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
+import { AvisosService } from 'src/app/core/avisos.service';
+import { apiErrorMessage } from '@dmcrow00/ng-core/http';
 
 
 @Component({
@@ -47,18 +48,18 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
   private instagramService = inject(InstagramService);
   private geocodingService = inject(GeocodingService);
   private forgotPasswordService = inject(ForgotPasswordService);
-  private snackBar = inject(MatSnackBar);
+  private avisos = inject(AvisosService);
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild(TatuadorComponent) tatuadorComponentRef!: TatuadorComponent;
 
   previewImageUrl: string | ArrayBuffer | null = null;
-  environment: string = '';
-  errorMessage: string = '';
+  environment = '';
+  errorMessage = '';
   userId: number | null = null;
   user?: User;
-  userLoginOn: boolean = false;
-  editMode: boolean = false;
+  userLoginOn = false;
+  editMode = false;
   userRol: string | null = null;
   especialidades: Especialidad[] = [];
   today: Date = new Date();
@@ -66,16 +67,16 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
 
   // Cambio de contraseña
-  showPasswordConfirm: boolean = false;
-  passwordResetLoading: boolean = false;
+  showPasswordConfirm = false;
+  passwordResetLoading = false;
 
   // Instagram
   instagramStatus: InstagramStatus = { connected: false };
-  instagramLoading: boolean = false;
-  instagramLoadingMessage: string = '';
-  instagramMessage: string = '';
-  instagramMessageIsError: boolean = false;
-  showInstagramWarning: boolean = false;
+  instagramLoading = false;
+  instagramLoadingMessage = '';
+  instagramMessage = '';
+  instagramMessageIsError = false;
+  showInstagramWarning = false;
 
   registerForm = this.formBuilder.group({
     id: this.formBuilder.control<number | null>(null),
@@ -132,11 +133,11 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
       next: () => {
         this.passwordResetLoading = false;
         this.showPasswordConfirm = false;
-        this.snackBar.open(`Se envió un correo a ${this.user!.email} con el enlace para cambiar la contraseña.`, 'OK', { duration: 6000 });
+        this.avisos.success(`Se envió un correo a ${this.user!.email} con el enlace para cambiar la contraseña.`);
       },
-      error: () => {
+      error: (err) => {
         this.passwordResetLoading = false;
-        this.snackBar.open('Error al enviar el correo. Intentá de nuevo.', 'Cerrar', { duration: 4000 });
+        this.avisos.fallo(err, 'Error al enviar el correo. Intentá de nuevo.');
       }
     });
   }
@@ -210,7 +211,7 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
         if (this.userId) this.loadUserData(this.userId);
       },
       error: (err) => {
-        this.instagramMessage = err?.error?.message || 'Error al sincronizar los posts.';
+        this.instagramMessage = apiErrorMessage(err, 'Error al sincronizar los posts.');
         this.instagramMessageIsError = true;
         this.instagramLoading = false;
         this.loadInstagramStatus();
@@ -228,8 +229,8 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
         this.instagramLoading = false;
         if (this.userId) this.loadUserData(this.userId);
       },
-      error: () => {
-        this.instagramMessage = 'Error al desvincular.';
+      error: (err) => {
+        this.instagramMessage = apiErrorMessage(err, 'Error al desvincular.');
         this.instagramLoading = false;
       }
     });
@@ -278,13 +279,12 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
         this.loadUserRol();
         this.loadEspecialidades();
       },
-      error: (err) => (this.errorMessage = err?.message || 'Error al cargar datos'),
+      error: (err) => (this.errorMessage = apiErrorMessage(err, 'Error al cargar datos')),
     });
   }
 
   private loadEspecialidades(): void {
   if (!this.userId || !this.user) {
-    console.warn("Intentando cargar especialidades sin userId o sin objeto user inicializado.");
     return;
   }
 
@@ -294,8 +294,7 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
             this.user.especialidades = res;
         }
       },
-      error: (err) => {
-          console.error("Error al cargar especialidades del tatuador:", err);
+      error: () => {
           if(this.user) {
               this.user.especialidades = [];
           }
@@ -310,7 +309,6 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
           this.userRol = role;
           if (role === 'Tatuador') this.loadInstagramStatus();
         },
-        error: (err) => console.error('Error al obtener el rol', err),
       })
     );
   }
@@ -337,19 +335,19 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
         this.geocodedLat = result.lat;
         this.geocodedLng = result.lng;
         this.geocodedDisplayName = result.displayName;
-        this.snackBar.open(`Ubicación encontrada: ${result.displayName.split(',').slice(0, 2).join(',')}`, 'OK', { duration: 4000 });
+        this.avisos.success(`Ubicación encontrada: ${result.displayName.split(',').slice(0, 2).join(',')}`);
       } else {
         this.geocodedLat = null;
         this.geocodedLng = null;
         this.geocodedDisplayName = null;
-        this.snackBar.open('No se encontró esa localidad. Intentá con un nombre más específico.', 'Cerrar', { duration: 4000 });
+        this.avisos.error('No se encontró esa localidad. Intentá con un nombre más específico.');
       }
     });
   }
 
   usarGPS(): void {
     if (!navigator.geolocation) {
-      this.snackBar.open('Tu navegador no soporta geolocalización.', 'Cerrar', { duration: 3000 });
+      this.avisos.error('Tu navegador no soporta geolocalización.');
       return;
     }
     this.isGPSLocating = true;
@@ -362,16 +360,16 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
             this.geocodedLng = result.lng;
             this.geocodedDisplayName = result.displayName;
             this.registerForm.patchValue({ localidad: result.displayName }, { emitEvent: false });
-            this.snackBar.open(`Ubicación detectada: ${result.displayName.split(',').slice(0, 2).join(',')}`, 'OK', { duration: 4000 });
+            this.avisos.success(`Ubicación detectada: ${result.displayName.split(',').slice(0, 2).join(',')}`);
           } else {
             this.isGPSLocating = false;
-            this.snackBar.open('No se pudo determinar tu ubicación.', 'Cerrar', { duration: 3000 });
+            this.avisos.error('No se pudo determinar tu ubicación.');
           }
         });
       },
       () => {
         this.isGPSLocating = false;
-        this.snackBar.open('No se pudo obtener el GPS. Verificá los permisos del navegador.', 'Cerrar', { duration: 4000 });
+        this.avisos.error('No se pudo obtener el GPS. Verificá los permisos del navegador.');
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
@@ -388,8 +386,8 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     this.fileInput.nativeElement.click();
   }
 
-  onFileSelected(event: any): void {
-  const file = event.target.files?.[0];
+  onFileSelected(event: Event): void {
+  const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -420,12 +418,6 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
   // ----------------------------------------------------------
   // Guardar cambios (todos los endpoints)
   // ----------------------------------------------------------
-
-  especialidadesSeleccionadas: number[] = [];
-
-  onEspecialidadesChange(especialidades: Especialidad[]): void {
-    this.especialidadesSeleccionadas = especialidades.map(e => e.id);
-  }
 
   onUpdateProfile(): void {
   if (!this.userId || !this.user) {
@@ -472,16 +464,11 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
       requests.push(this.userService.updateProfilePhoto(this.userId, this.selectedFile));
     }
 
-    //  3. Si es tatuador, actualizar especialidades
-if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0) {
-  requests.push(
-      this.tatuadorService.assignEspecialidades(this.userId, this.especialidadesSeleccionadas)
-    );
-  }
+    // Las especialidades no se guardan desde acá: el backend sólo deja asignarlas a un administrador.
 
     //  Ejecutar todas las llamadas juntas
     forkJoin(requests).subscribe({
-      next: (responses) => {
+      next: (_responses) => {
         this.editMode = false;
         this.selectedFile = null;
         this.fileInput.nativeElement.value = '';
@@ -492,8 +479,7 @@ if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0)
       }
       },
       error: (err) => {
-        console.error('Error al guardar perfil', err);
-        this.errorMessage = 'Error al guardar los cambios.';
+        this.errorMessage = apiErrorMessage(err, 'Error al guardar los cambios.');
       },
     });
   }
@@ -517,11 +503,12 @@ if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0)
   }
 
   /** Formatea la fecha al escribir */
-  onDateInput(event: any) {
-    let value: string = event.target.value.replace(/\D/g, '');
+  onDateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value: string = input.value.replace(/\D/g, '');
     if (value.length >= 2) value = value.slice(0, 2) + '/' + value.slice(2);
     if (value.length >= 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-    event.target.value = value;
+    input.value = value;
   }
 
   // Getters de conveniencia

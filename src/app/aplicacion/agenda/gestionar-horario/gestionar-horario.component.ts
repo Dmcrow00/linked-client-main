@@ -1,7 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AgendaService } from '../agenda.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HorarioHabitual, HorarioHabitualInput } from 'src/app/models/horarios-tatuador/horario-habitual';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -13,6 +12,7 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-gestionar-horario',
@@ -20,10 +20,10 @@ import { MatInput } from '@angular/material/input';
     styleUrl: './gestionar-horario.component.scss',
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatProgressSpinner, MatIcon, MatButton, FormsModule, ReactiveFormsModule, MatSlideToggle, MatFormField, MatLabel, MatInput, MatError, MatDialogActions, NoDoubleSubmitDirective]
 })
-export class GestionarHorarioComponent {
+export class GestionarHorarioComponent implements OnInit {
 private fb = inject(FormBuilder);
 private agendaService = inject(AgendaService);
-private snackBar = inject(MatSnackBar);
+private avisos = inject(AvisosService);
 dialogRef = inject<MatDialogRef<GestionarHorarioComponent>>(MatDialogRef);
 
 horarioForm: FormGroup;
@@ -101,8 +101,7 @@ horarioForm: FormGroup;
         this.patchForm(horariosActuales);
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error("Error al cargar horario:", err);
+      error: () => {
         this.errorCarga = "No se pudo cargar el horario actual.";
         this.isLoading = false;
       }
@@ -132,7 +131,7 @@ horarioForm: FormGroup;
 
   onSubmit(): void {
     if (this.horarioForm.invalid) {
-      this.snackBar.open('Por favor, revisa los campos marcados en rojo.', 'Cerrar', { duration: 3000 });
+      this.avisos.error('Por favor, revisa los campos marcados en rojo.');
       // Marcar todos los campos como tocados para mostrar errores
       this.horarioForm.markAllAsTouched();
       return;
@@ -141,7 +140,7 @@ horarioForm: FormGroup;
     this.isSaving = true;
 
     // Filtra solo los días habilitados y mapea al formato Input
-    const formValue = this.horarioForm.value.dias as Array<any>;
+    const formValue = this.horarioForm.value.dias as (HorarioHabitualInput & { enabled: boolean })[];
     const horarioParaEnviar: HorarioHabitualInput[] = formValue
       .filter(dia => dia.enabled)
       .map(dia => ({
@@ -153,14 +152,12 @@ horarioForm: FormGroup;
 
     this.agendaService.updateHorarioHabitual(horarioParaEnviar).subscribe({
       next: () => {
-        this.snackBar.open('Horario guardado correctamente.', 'OK', { duration: 3000 });
+        this.avisos.success('Horario guardado correctamente.');
         this.isSaving = false;
         this.horarioForm.markAsPristine(); // Marcar como no modificado
       },
       error: (err) => {
-        console.error("Error al guardar horario:", err);
-        const errMsg = err.error?.message || 'Error desconocido al guardar.';
-        this.snackBar.open(`Error: ${errMsg}`, 'Cerrar', { duration: 5000 });
+        this.avisos.fallo(err, 'No se pudo guardar el horario.');
         this.isSaving = false;
       }
     });

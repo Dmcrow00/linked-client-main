@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component,     inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
