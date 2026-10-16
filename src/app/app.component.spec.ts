@@ -59,9 +59,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('Debería crear el título dmcoffers-client', () => {
+  it('Debería tener el título linked-client', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('dmcoffers-client');
+    expect(app.title).toEqual('linked-client');
   });
 });
