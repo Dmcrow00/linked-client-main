@@ -36,7 +36,7 @@ export class ResetPassComponent {
   constructor() {
     this.ResetPassForm = this.fb.group({
       token: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
     });
   }
 

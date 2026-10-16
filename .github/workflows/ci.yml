@@ -1,0 +1,74 @@
+# Integración continua del cliente de linked: en cada push y pull request a develop y main compila la librería
+# compartida @dmcrow00/ng-core, instala, corre ESLint, compila para producción y corre los tests unitarios. El runner
+# de GitHub trae Chrome para Karma.
+#
+# Mientras @dmcrow00/ng-core no esté publicada, package.json la toma de file:../dmc00-ng-core/dist/ng-core: el
+# cliente se baja en linked-client-main y la librería en dmc00-ng-core, como en D:\Desarrollo.
+#
+# Secret:
+#   CROSS_REPO_PAT - token con permiso de lectura de contenido sobre Dmcrow00/dmc00-ng-core (repo privado).
+
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Cambiar a un tag (v0.1.0) cuando exista; ver docs/guia-entorno-local-y-despliegue.md.
+  DMC00_NG_CORE_REF: r.ceballos/FEAT_libreriaInicial
+
+jobs:
+  build-y-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: linked-client-main
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: linked-client-main
+
+      - name: dmc00-ng-core (librería compartida)
+        uses: actions/checkout@v7
+        with:
+          repository: Dmcrow00/dmc00-ng-core
+          ref: ${{ env.DMC00_NG_CORE_REF }}
+          token: ${{ secrets.CROSS_REPO_PAT || github.token }}
+          path: dmc00-ng-core
+
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            linked-client-main/package-lock.json
+            dmc00-ng-core/package-lock.json
+
+      - name: Build de @dmcrow00/ng-core
+        working-directory: dmc00-ng-core
+        run: npm ci && npm run build
+
+      - name: Dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Tests unitarios
+        run: npm run test:ci
