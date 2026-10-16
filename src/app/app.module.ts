@@ -72,7 +72,7 @@ import { HttpErrorInterceptor } from './services/auth/http-error.interceptor';
 import { CUSTOM_DATE_FORMATS, CustomDateAdapter } from './components/custom-date-adapter/custom-date-adapter.js';
 import { CalendarioComponent } from "./components/calendario/calendario.component";
 import { ReservaComponent } from './aplicacion/reserva/reserva.component';
-import { RECAPTCHA_V3_SITE_KEY, RecaptchaFormsModule, RecaptchaModule, RecaptchaV3Module } from 'ng-recaptcha-angular19';
+import { RecaptchaFormsModule, RecaptchaModule } from 'ng-recaptcha-2';
 import { EspecialidadesComponent } from './aplicacion/gestion-sistema/especialidades/especialidades.component';
 import { EspecialidadCreateComponent } from './aplicacion/gestion-sistema/especialidades/especialidad-create/especialidad-create.component';
 import { EspecialidadDetailComponent } from './aplicacion/gestion-sistema/especialidades/especialidad-detail/especialidad-detail.component';
@@ -143,7 +143,6 @@ registerLocaleData(localeEsAr); // 👈 Esto registra el locale
         MatAutocompleteModule,
         RecaptchaModule,
         RecaptchaFormsModule,
-        RecaptchaV3Module,
         MatTabsModule, ErrorDialogComponent,
         FooterComponent,
         HeaderComponent,
@@ -196,7 +195,6 @@ registerLocaleData(localeEsAr); // 👈 Esto registra el locale
         { provide: DateAdapter, useClass: CustomDateAdapter },
         { provide: LOCALE_ID, useValue: 'es-AR' },
         { provide: MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS },
-        { provide: RECAPTCHA_V3_SITE_KEY, useValue: '6LfpC-ErAAAAAJxd1G8rldVAIzoe7ZdQY3By5j-o' },
         {
             provide: HTTP_INTERCEPTORS,
             useClass: ApiResponseInterceptor,

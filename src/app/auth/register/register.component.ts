@@ -22,14 +22,14 @@ import { catchError, debounceTime, distinctUntilChanged, filter, map, switchMap 
 import { Observable, of, timer } from 'rxjs';
 import { EspecialidadesService } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.service';
 import { Especialidad } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.model';
-import { RecaptchaComponent } from 'ng-recaptcha-angular19';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 
 @Component({
     selector: 'app-register',
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatPrefix, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, NgIf, NgFor, MatError, MatIconButton, MatButton, MatProgressSpinner, MatTooltip, MatAutocompleteModule, MatChipsModule, RecaptchaComponent, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatPrefix, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, NgIf, NgFor, MatError, MatIconButton, MatButton, MatProgressSpinner, MatTooltip, MatAutocompleteModule, MatChipsModule, RecaptchaModule, NoDoubleSubmitDirective]
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;

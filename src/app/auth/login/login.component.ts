@@ -13,14 +13,14 @@ import { MatFormField, MatError, MatSuffix } from '@angular/material/form-field'
 import { MatInput } from '@angular/material/input';
 import { NgIf } from '@angular/common';
 import { MatIconButton, MatButton } from '@angular/material/button';
-import { RecaptchaComponent } from 'ng-recaptcha-angular19';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatInput, NgIf, MatError, MatIconButton, MatSuffix, RouterLink, RecaptchaComponent, MatButton, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatInput, NgIf, MatError, MatIconButton, MatSuffix, RouterLink, RecaptchaModule, MatButton, NoDoubleSubmitDirective]
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;

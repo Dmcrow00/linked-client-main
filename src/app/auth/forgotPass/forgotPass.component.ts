@@ -7,7 +7,7 @@ import { EncryptionService } from 'src/app/services/auth/encryption.service';
 import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
 import { ForgotPasswordService } from 'src/app/services/auth/forgotpass.service';
 import { MatFormField, MatError } from '@angular/material/form-field';
-import { RecaptchaComponent } from 'ng-recaptcha-angular19';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -19,7 +19,7 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     selector: 'app-forgot-pass',
     templateUrl: './forgotPass.component.html',
     styleUrls: ['./forgotPass.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatInput, NgIf, MatError, MatButton, MatIcon, RouterLink, RecaptchaComponent, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatInput, NgIf, MatError, MatButton, MatIcon, RouterLink, RecaptchaModule, NoDoubleSubmitDirective]
 })
 export class ForgotPassComponent implements OnInit {
   forgotPassForm: FormGroup;

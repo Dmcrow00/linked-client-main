@@ -4,7 +4,7 @@ import {
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
-} from '@angular/common/http/index.js';
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { LoginService } from './login.service';
