@@ -1,18 +1,18 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { User } from '../../models/user.model';
 import { BehaviorSubject, catchError, map, Observable, of, switchMap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { RolApl } from 'src/app/models/rol.models.js';
+import { RolApl } from 'src/app/models/rol.models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
+  private http = inject(HttpClient);
+
   private endpoint = `${environment.urlApi}users`;
   endpointRoles = `${environment.urlApi}`;
-  constructor(private http: HttpClient) {
-  }
 
   private userId: BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
 

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -25,10 +25,10 @@ export interface BusquedaEstiloResponse {
 
 @Injectable({ providedIn: 'root' })
 export class BusquedaEstiloService {
+  private http = inject(HttpClient);
+
 
   private apiUrl = `${environment.urlApi}busqueda`;
-
-  constructor(private http: HttpClient) {}
 
   /**
    * Envía imagen(es) al backend para análisis de estilo y obtiene tatuadores sugeridos.

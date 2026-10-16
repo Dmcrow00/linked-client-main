@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -13,10 +13,10 @@ export interface InstagramStatus {
   providedIn: 'root'
 })
 export class InstagramService {
+  private http = inject(HttpClient);
+
 
   private apiUrl = `${environment.urlApi}instagram`;
-
-  constructor(private http: HttpClient) { }
 
   /** Redirige el navegador al flujo OAuth de Meta (NO es una llamada HTTP interna) */
   connectInstagram(tatuadorId: number, token: string): void {

@@ -30,27 +30,27 @@
           <span class="detail-label">Fecha de carga</span>
           <span class="detail-value">{{ data.supportTicket.creationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
-        <ng-container *ngIf="data.supportTicket.category">
+        @if (data.supportTicket.category) {
           <div class="detail-sep"></div>
           <div class="detail-item">
             <span class="detail-label">Categoría</span>
             <span class="detail-value">{{ data.supportTicket.category }}</span>
           </div>
-        </ng-container>
-        <ng-container *ngIf="data.supportTicket.priority">
+        }
+        @if (data.supportTicket.priority) {
           <div class="detail-sep"></div>
           <div class="detail-item">
             <span class="detail-label">Prioridad</span>
             <span class="detail-value">{{ data.supportTicket.priority }}</span>
           </div>
-        </ng-container>
-        <ng-container *ngIf="data.supportTicket.modificationTimestamp">
+        }
+        @if (data.supportTicket.modificationTimestamp) {
           <div class="detail-sep"></div>
           <div class="detail-item">
             <span class="detail-label">Última gestión</span>
             <span class="detail-value">{{ data.supportTicket.modificationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
-        </ng-container>
+        }
       </div>
 
       <div class="description-block">
@@ -85,9 +85,11 @@
               placeholder="Redactá la respuesta que recibirá el usuario por correo..."
               rows="5">
             </textarea>
-            <mat-error *ngIf="gestionForm.get('adminResponse')?.hasError('required')">
-              La respuesta es requerida
-            </mat-error>
+            @if (gestionForm.get('adminResponse')?.hasError('required')) {
+              <mat-error>
+                La respuesta es requerida
+              </mat-error>
+            }
           </mat-form-field>
           <p class="field-hint">
             <mat-icon class="hint-icon">mail_outline</mat-icon>
@@ -105,9 +107,11 @@
       Cerrar
     </button>
     <button mat-raised-button class="btn-save" type="button" appNoDoubleSubmit
-            [disabled]="gestionForm.invalid || saving"
-            (click)="onRespond()">
-      <mat-icon *ngIf="!saving">send</mat-icon>
+      [disabled]="gestionForm.invalid || saving"
+      (click)="onRespond()">
+      @if (!saving) {
+        <mat-icon>send</mat-icon>
+      }
       <span>{{ saving ? 'Enviando...' : 'Guardar y notificar' }}</span>
     </button>
   </div>

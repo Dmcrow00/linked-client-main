@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginService } from '../../services/auth/login.service';
@@ -11,7 +11,7 @@ import { RecaptchaModule } from 'ng-recaptcha-2';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 
@@ -19,22 +19,22 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     selector: 'app-forgot-pass',
     templateUrl: './forgotPass.component.html',
     styleUrls: ['./forgotPass.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatInput, NgIf, MatError, MatButton, MatIcon, RouterLink, RecaptchaModule, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatError, MatButton, MatIcon, RouterLink, RecaptchaModule, NoDoubleSubmitDirective]
 })
 export class ForgotPassComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private loginService = inject(LoginService);
+  private dialog = inject(MatDialog);
+  private encryptionService = inject(EncryptionService);
+  private ForgotPasswordService = inject(ForgotPasswordService);
+
   forgotPassForm: FormGroup;
   email: string = '';
   captchaValid = false;
   captchaToken: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-    private encryptionService: EncryptionService,
-    private ForgotPasswordService: ForgotPasswordService
-  ) {
+  constructor() {
     this.forgotPassForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });

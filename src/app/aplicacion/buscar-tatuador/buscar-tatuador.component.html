@@ -15,8 +15,8 @@
 
 <div class="buscar-container">
   <!-- ╔══════════════════════════════════════╗
-       ║  CONTENIDO PRINCIPAL                 ║
-       ╚══════════════════════════════════════╝ -->
+  ║  CONTENIDO PRINCIPAL                 ║
+  ╚══════════════════════════════════════╝ -->
   <div class="main-layout">
     <!-- ── Panel izquierdo: controles ── -->
     <aside class="search-panel">
@@ -30,15 +30,16 @@
         <p class="step-hint">Seleccioná uno o más estilos (opcional)</p>
 
         <div class="estilo-chips-grid">
-          <button
-            *ngFor="let e of estilosDisponibles"
-            class="estilo-chip-btn"
-            [class.selected]="isEstiloSeleccionado(e)"
-            (click)="toggleEstilo(e)"
-            type="button"
-          >
-            {{ e }}
-          </button>
+          @for (e of estilosDisponibles; track e) {
+            <button
+              class="estilo-chip-btn"
+              [class.selected]="isEstiloSeleccionado(e)"
+              (click)="toggleEstilo(e)"
+              type="button"
+              >
+              {{ e }}
+            </button>
+          }
         </div>
       </div>
 
@@ -54,17 +55,21 @@
           class="btn-location"
           (click)="obtenerUbicacion()"
           [disabled]="isLocating"
-        >
-          <span *ngIf="isLocating" class="btn-spinner-wrap"
-            ><mat-spinner diameter="18"></mat-spinner
-          ></span>
-          <mat-icon *ngIf="!isLocating">my_location</mat-icon>
+          >
+          @if (isLocating) {
+            <span class="btn-spinner-wrap"
+              ><mat-spinner diameter="18"></mat-spinner
+            ></span>
+          }
+          @if (!isLocating) {
+            <mat-icon>my_location</mat-icon>
+          }
           {{
-            isLocating
-              ? "Obteniendo ubicación..."
-              : userLat
-                ? "Ubicación obtenida ✓"
-                : "Usar mi ubicación"
+          isLocating
+          ? "Obteniendo ubicación..."
+          : userLat
+          ? "Ubicación obtenida ✓"
+          : "Usar mi ubicación"
           }}
         </button>
 
@@ -79,195 +84,221 @@
             (input)="onLocationInput($event)"
             (keyup.enter)="geocodificarUbicacion()"
             [matAutocomplete]="autoLocation"
-          />
-          <mat-autocomplete
-            #autoLocation
-            (optionSelected)="onLocationSelected($event)"
-          >
-            <mat-option
-              *ngFor="let s of locationSuggestions"
-              [value]="s.displayName"
-            >
-              {{ s.displayName }}
-            </mat-option>
-          </mat-autocomplete>
-          <button
-            mat-icon-button
-            class="btn-geocode"
-            (click)="geocodificarUbicacion()"
-            [disabled]="isGeocoding || !locationText.trim()"
-          >
-            <mat-spinner *ngIf="isGeocoding" diameter="18"></mat-spinner>
-            <mat-icon *ngIf="!isGeocoding">search</mat-icon>
-          </button>
-        </div>
-
-        <div *ngIf="userLat" class="radio-control">
-          <label class="radio-label"
-            >Radio de búsqueda: <strong>{{ radioKm }} km</strong></label
-          >
-          <input
-            type="range"
-            class="radius-slider"
-            min="5"
-            max="200"
-            step="5"
-            [(ngModel)]="radioKm"
-            (change)="actualizarDistancias()"
-          />
-          <div class="slider-marks">
-            <span>5 km</span>
-            <span>200 km</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- PASO 3: Buscar -->
-      <div class="panel-section">
-        <div class="section-label">
-          <span class="step-badge">3</span>
-          <span>Buscar artistas</span>
-        </div>
-
-        <button
-          mat-raised-button
-          class="btn-buscar create-button"
-          (click)="aplicarFiltros()"
-        >
-          <mat-icon>search</mat-icon>
-          Buscar artistas
-        </button>
-
-        <div *ngIf="errorMsg" class="info-banner">
-          <mat-icon>info_outline</mat-icon>
-          <span>{{ errorMsg }}</span>
-        </div>
-      </div>
-    </aside>
-
-    <!-- ── Panel derecho: mapa ── -->
-    <div class="map-panel">
-      <div #mapContainer class="leaflet-map"></div>
-      <div class="map-legend">
-        <span class="legend-dot legend-user"></span> Tu ubicación
-        <span class="legend-dot legend-artist"></span> Tatuadores
-      </div>
-    </div>
-  </div>
-
-  <!-- ╔══════════════════════════════════════╗
-       ║  RESULTADOS                          ║
-       ╚══════════════════════════════════════╝ -->
-  <div class="results-section">
-    <div class="results-header">
-      <h2>
-        <mat-icon>group</mat-icon>
-        {{ tatuadoresResultado.length }} artistas encontrados
-      </h2>
-      <p *ngIf="estilosSeleccionados.size > 0 && userLat">
-        Filtrados por estilo y ordenados por distancia
-      </p>
-      <p *ngIf="estilosSeleccionados.size > 0 && !userLat">
-        Filtrados por estilo seleccionado
-      </p>
-      <p *ngIf="estilosSeleccionados.size === 0 && userLat">
-        Ordenados por distancia
-      </p>
-    </div>
-
-    <div class="results-grid">
-      <div
-        *ngFor="let tatuador of tatuadoresResultado"
-        class="artist-card"
-        [id]="'artist-card-' + tatuador.id"
-      >
-        <!-- Avatar -->
-        <div class="card-avatar-wrapper">
-          <img
-            [src]="tatuador.profilePhoto | serverUrl"
-            class="card-avatar"
-            [alt]="tatuador.username"
-            onerror="this.src = 'assets/images/default-avatar.png'"
-          />
-        </div>
-
-        <!-- Info -->
-        <div class="card-info">
-          <h3 class="card-name">{{ "@" + tatuador.username }}</h3>
-
-          <div
-            class="card-meta"
-            *ngIf="tatuador.estudio || tatuador.localidad || tatuador.distancia"
-          >
-            <span *ngIf="tatuador.estudio" class="meta-item">
-              <mat-icon>storefront</mat-icon> {{ tatuador.estudio }}
-            </span>
-            <span *ngIf="tatuador.localidad" class="meta-item">
-              <mat-icon>location_on</mat-icon> {{ tatuador.localidad }}
-            </span>
-            <span *ngIf="tatuador.distancia" class="meta-item meta-distance">
-              <mat-icon>near_me</mat-icon>
-              {{ tatuador.distancia | number: "1.1-1" }} km
-            </span>
+            />
+            <mat-autocomplete
+              #autoLocation
+              (optionSelected)="onLocationSelected($event)"
+              >
+              @for (s of locationSuggestions; track s) {
+                <mat-option
+                  [value]="s.displayName"
+                  >
+                  {{ s.displayName }}
+                </mat-option>
+              }
+            </mat-autocomplete>
+            <button
+              mat-icon-button
+              class="btn-geocode"
+              (click)="geocodificarUbicacion()"
+              [disabled]="isGeocoding || !locationText.trim()"
+              >
+              @if (isGeocoding) {
+                <mat-spinner diameter="18"></mat-spinner>
+              }
+              @if (!isGeocoding) {
+                <mat-icon>search</mat-icon>
+              }
+            </button>
           </div>
 
-          <div class="card-tags" *ngIf="tatuador.especialidades?.length">
-            <span
-              class="tag"
-              *ngFor="let e of (tatuador.especialidades ?? []).slice(0, 3)"
-              >{{ e.nombre }}</span
-            >
-            <span
-              class="tag tag-more"
-              *ngIf="(tatuador.especialidades ?? []).length > 3"
-            >
-              +{{ (tatuador.especialidades ?? []).length - 3 }}
-            </span>
+          @if (userLat) {
+            <div class="radio-control">
+              <label class="radio-label"
+                >Radio de búsqueda: <strong>{{ radioKm }} km</strong></label
+                >
+                <input
+                  type="range"
+                  class="radius-slider"
+                  min="5"
+                  max="200"
+                  step="5"
+                  [(ngModel)]="radioKm"
+                  (change)="actualizarDistancias()"
+                  />
+                  <div class="slider-marks">
+                    <span>5 km</span>
+                    <span>200 km</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- PASO 3: Buscar -->
+            <div class="panel-section">
+              <div class="section-label">
+                <span class="step-badge">3</span>
+                <span>Buscar artistas</span>
+              </div>
+
+              <button
+                mat-raised-button
+                class="btn-buscar create-button"
+                (click)="aplicarFiltros()"
+                >
+                <mat-icon>search</mat-icon>
+                Buscar artistas
+              </button>
+
+              @if (errorMsg) {
+                <div class="info-banner">
+                  <mat-icon>info_outline</mat-icon>
+                  <span>{{ errorMsg }}</span>
+                </div>
+              }
+            </div>
+          </aside>
+
+          <!-- ── Panel derecho: mapa ── -->
+          <div class="map-panel">
+            <div #mapContainer class="leaflet-map"></div>
+            <div class="map-legend">
+              <span class="legend-dot legend-user"></span> Tu ubicación
+              <span class="legend-dot legend-artist"></span> Tatuadores
+            </div>
           </div>
         </div>
 
-        <!-- Acciones -->
-        <div class="card-actions">
-          <a
-            *ngIf="tatuador.instagramHandle"
-            [href]="getInstagramUrl(tatuador.instagramHandle)"
-            target="_blank"
-            rel="noopener noreferrer"
-            mat-icon-button
-            class="btn-instagram"
-            matTooltip="Ver en Instagram"
-          >
-            <svg viewBox="0 0 24 24" class="ig-icon">
-              <path
-                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-              />
-            </svg>
-          </a>
-          <button
-            mat-stroked-button
-            class="btn-portfolio"
-            (click)="verPerfil(tatuador.id)"
-          >
-            Portfolio
-          </button>
-          <button
-            mat-raised-button
-            class="create-button btn-reservar"
-            (click)="reservar(tatuador.id)"
-          >
-            Reservar
-          </button>
-        </div>
-      </div>
-    </div>
+        <!-- ╔══════════════════════════════════════╗
+        ║  RESULTADOS                          ║
+        ╚══════════════════════════════════════╝ -->
+        <div class="results-section">
+          <div class="results-header">
+            <h2>
+              <mat-icon>group</mat-icon>
+              {{ tatuadoresResultado.length }} artistas encontrados
+            </h2>
+            @if (estilosSeleccionados.size > 0 && userLat) {
+              <p>
+                Filtrados por estilo y ordenados por distancia
+              </p>
+            }
+            @if (estilosSeleccionados.size > 0 && !userLat) {
+              <p>
+                Filtrados por estilo seleccionado
+              </p>
+            }
+            @if (estilosSeleccionados.size === 0 && userLat) {
+              <p>
+                Ordenados por distancia
+              </p>
+            }
+          </div>
 
-    <!-- Estado vacío -->
-    <div *ngIf="tatuadoresResultado.length === 0" class="empty-state">
-      <mat-icon>search_off</mat-icon>
-      <p>
-        No se encontraron tatuadores. Intentá ampliar el radio de búsqueda o
-        cambiar los estilos seleccionados.
-      </p>
-    </div>
-  </div>
-</div>
+          <div class="results-grid">
+            @for (tatuador of tatuadoresResultado; track tatuador) {
+              <div
+                class="artist-card"
+                [id]="'artist-card-' + tatuador.id"
+                >
+                <!-- Avatar -->
+                <div class="card-avatar-wrapper">
+                  <img
+                    [src]="tatuador.profilePhoto | serverUrl"
+                    class="card-avatar"
+                    [alt]="tatuador.username"
+                    onerror="this.src = 'assets/images/default-avatar.png'"
+                    />
+                  </div>
+                  <!-- Info -->
+                  <div class="card-info">
+                    <h3 class="card-name">{{ "@" + tatuador.username }}</h3>
+                    @if (tatuador.estudio || tatuador.localidad || tatuador.distancia) {
+                      <div
+                        class="card-meta"
+                        >
+                        @if (tatuador.estudio) {
+                          <span class="meta-item">
+                            <mat-icon>storefront</mat-icon> {{ tatuador.estudio }}
+                          </span>
+                        }
+                        @if (tatuador.localidad) {
+                          <span class="meta-item">
+                            <mat-icon>location_on</mat-icon> {{ tatuador.localidad }}
+                          </span>
+                        }
+                        @if (tatuador.distancia) {
+                          <span class="meta-item meta-distance">
+                            <mat-icon>near_me</mat-icon>
+                            {{ tatuador.distancia | number: "1.1-1" }} km
+                          </span>
+                        }
+                      </div>
+                    }
+                    @if (tatuador.especialidades?.length) {
+                      <div class="card-tags">
+                        @for (e of (tatuador.especialidades ?? []).slice(0, 3); track e) {
+                          <span
+                            class="tag"
+                            >{{ e.nombre }}</span
+                            >
+                        }
+                        @if ((tatuador.especialidades ?? []).length > 3) {
+                          <span
+                            class="tag tag-more"
+                            >
+                            +{{ (tatuador.especialidades ?? []).length - 3 }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <!-- Acciones -->
+                  <div class="card-actions">
+                    @if (tatuador.instagramHandle) {
+                      <a
+                        [href]="getInstagramUrl(tatuador.instagramHandle)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        mat-icon-button
+                        class="btn-instagram"
+                        matTooltip="Ver en Instagram"
+                        >
+                        <svg viewBox="0 0 24 24" class="ig-icon">
+                          <path
+                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                            />
+                          </svg>
+                        </a>
+                      }
+                      <button
+                        mat-stroked-button
+                        class="btn-portfolio"
+                        (click)="verPerfil(tatuador.id)"
+                        >
+                        Portfolio
+                      </button>
+                      <button
+                        mat-raised-button
+                        class="create-button btn-reservar"
+                        (click)="reservar(tatuador.id)"
+                        >
+                        Reservar
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Estado vacío -->
+              @if (tatuadoresResultado.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>search_off</mat-icon>
+                  <p>
+                    No se encontraron tatuadores. Intentá ampliar el radio de búsqueda o
+                    cambiar los estilos seleccionados.
+                  </p>
+                </div>
+              }
+            </div>
+          </div>

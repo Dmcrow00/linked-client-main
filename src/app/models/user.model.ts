@@ -1,5 +1,5 @@
-import { Especialidad } from '../aplicacion/gestion-sistema/especialidades/especialidades.model.js';
-import { RolApl } from './rol.models.js';
+import { Especialidad } from '../aplicacion/gestion-sistema/especialidades/especialidades.model';
+import { RolApl } from './rol.models';
 import { Page } from './pagination';
 
 export class User {

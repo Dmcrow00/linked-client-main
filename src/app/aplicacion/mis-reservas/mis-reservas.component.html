@@ -16,103 +16,108 @@
 <div class="screen-container">
   <div class="reservas-content">
 
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Cargando tus reservas...</p>
-  </div>
-
-  <div *ngIf="errorCarga" class="error-container">
-    <mat-icon>cloud_off</mat-icon>
-    <p>{{ errorCarga }}</p>
-    <button mat-button color="primary" (click)="cargarMisReservas()">Reintentar</button>
-  </div>
-
-  <div *ngIf="!isLoading && !errorCarga">
-
-    <div class="reservas-grid" *ngIf="turnos.length > 0; else emptyState">
-
-      <mat-card class="reserva-card" *ngFor="let turno of turnos">
-
-        <!-- Franja superior con color por estado -->
-        <div class="card-header-visual" [ngClass]="'border-' + turno.estado.toLowerCase()">
-          <div class="fecha-box">
-            <span class="dia">{{ turno.fechaHoraInicio | date:'dd' }}</span>
-            <span class="mes">{{ turno.fechaHoraInicio | date:'MMM' | uppercase }}</span>
-            <span class="anio">{{ turno.fechaHoraInicio | date:'yyyy' }}</span>
-          </div>
-          <div class="hora-box">
-            <mat-icon>schedule</mat-icon>
-            <div class="hora-detalle">
-              <span>{{ turno.fechaHoraInicio | date:'HH:mm' }} — {{ turno.fechaHoraFin | date:'HH:mm' }}</span>
-              <small>{{ duracionMinutos(turno) }} min</small>
-            </div>
-          </div>
-          <span class="estado-chip" [ngClass]="'bg-' + turno.estado.toLowerCase()">
-            {{ turno.estado }}
-          </span>
-        </div>
-
-        <mat-card-content class="card-body">
-
-          <!-- Info del tatuador -->
-          <div class="tatuador-info" *ngIf="turno.tatuadores && turno.tatuadores.length > 0">
-            <img [src]="turno.tatuadores[0].profilePhoto | serverUrl"
-                 class="avatar-small" alt="Tatuador">
-            <div>
-              <small>Artista</small>
-              <h4>{{ turno.tatuadores[0].realname }} {{ turno.tatuadores[0].surname }}</h4>
-              <span class="estudio" *ngIf="turno.tatuadores[0].estudio">
-                {{ turno.tatuadores[0].estudio }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Sin tatuador asignado aún -->
-          <div class="tatuador-info sin-asignar" *ngIf="!turno.tatuadores || turno.tatuadores.length === 0">
-            <mat-icon>person_outline</mat-icon>
-            <small>Artista por confirmar</small>
-          </div>
-
-          <!-- Descripción -->
-          <p class="descripcion-corta" *ngIf="turno.descripcionCliente">
-            {{ turno.descripcionCliente | slice:0:100 }}{{ turno.descripcionCliente.length > 100 ? '...' : '' }}
-          </p>
-
-          <!-- Indicadores adicionales -->
-          <div class="indicadores">
-            <span class="indicador" *ngIf="turno.imagenesRef && turno.imagenesRef.length > 0">
-              <mat-icon>photo_library</mat-icon>
-              {{ turno.imagenesRef.length }} referencia{{ turno.imagenesRef.length > 1 ? 's' : '' }}
-            </span>
-          </div>
-
-        </mat-card-content>
-
-        <mat-divider></mat-divider>
-
-        <mat-card-actions align="end">
-          <button mat-button color="primary" (click)="abrirDetalle(turno)">
-            <mat-icon>open_in_new</mat-icon>
-            Ver detalles
-          </button>
-        </mat-card-actions>
-
-      </mat-card>
-    </div>
-
-    <ng-template #emptyState>
-      <div class="empty-state">
-        <mat-icon class="empty-icon">event_available</mat-icon>
-        <h3>Sin reservas activas</h3>
-        <p>Todavía no solicitaste ningún turno. Buscá un artista y agendá tu próximo tatuaje.</p>
-        <button mat-raised-button color="primary" routerLink="/buscar">
-          <mat-icon>search</mat-icon>
-          Buscar tatuador
-        </button>
+    @if (isLoading) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando tus reservas...</p>
       </div>
-    </ng-template>
+    }
 
+    @if (errorCarga) {
+      <div class="error-container">
+        <mat-icon>cloud_off</mat-icon>
+        <p>{{ errorCarga }}</p>
+        <button mat-button color="primary" (click)="cargarMisReservas()">Reintentar</button>
+      </div>
+    }
+
+    @if (!isLoading && !errorCarga) {
+      <div>
+        @if (turnos.length > 0) {
+          <div class="reservas-grid">
+            @for (turno of turnos; track turno) {
+              <mat-card class="reserva-card">
+                <!-- Franja superior con color por estado -->
+                <div class="card-header-visual" [ngClass]="'border-' + turno.estado.toLowerCase()">
+                  <div class="fecha-box">
+                    <span class="dia">{{ turno.fechaHoraInicio | date:'dd' }}</span>
+                    <span class="mes">{{ turno.fechaHoraInicio | date:'MMM' | uppercase }}</span>
+                    <span class="anio">{{ turno.fechaHoraInicio | date:'yyyy' }}</span>
+                  </div>
+                  <div class="hora-box">
+                    <mat-icon>schedule</mat-icon>
+                    <div class="hora-detalle">
+                      <span>{{ turno.fechaHoraInicio | date:'HH:mm' }} — {{ turno.fechaHoraFin | date:'HH:mm' }}</span>
+                      <small>{{ duracionMinutos(turno) }} min</small>
+                    </div>
+                  </div>
+                  <span class="estado-chip" [ngClass]="'bg-' + turno.estado.toLowerCase()">
+                    {{ turno.estado }}
+                  </span>
+                </div>
+                <mat-card-content class="card-body">
+                  <!-- Info del tatuador -->
+                  @if (turno.tatuadores && turno.tatuadores.length > 0) {
+                    <div class="tatuador-info">
+                      <img [src]="turno.tatuadores[0].profilePhoto | serverUrl"
+                        class="avatar-small" alt="Tatuador">
+                        <div>
+                          <small>Artista</small>
+                          <h4>{{ turno.tatuadores[0].realname }} {{ turno.tatuadores[0].surname }}</h4>
+                          @if (turno.tatuadores[0].estudio) {
+                            <span class="estudio">
+                              {{ turno.tatuadores[0].estudio }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    <!-- Sin tatuador asignado aún -->
+                    @if (!turno.tatuadores || turno.tatuadores.length === 0) {
+                      <div class="tatuador-info sin-asignar">
+                        <mat-icon>person_outline</mat-icon>
+                        <small>Artista por confirmar</small>
+                      </div>
+                    }
+                    <!-- Descripción -->
+                    @if (turno.descripcionCliente) {
+                      <p class="descripcion-corta">
+                        {{ turno.descripcionCliente | slice:0:100 }}{{ turno.descripcionCliente.length > 100 ? '...' : '' }}
+                      </p>
+                    }
+                    <!-- Indicadores adicionales -->
+                    <div class="indicadores">
+                      @if (turno.imagenesRef && turno.imagenesRef.length > 0) {
+                        <span class="indicador">
+                          <mat-icon>photo_library</mat-icon>
+                          {{ turno.imagenesRef.length }} referencia{{ turno.imagenesRef.length > 1 ? 's' : '' }}
+                        </span>
+                      }
+                    </div>
+                  </mat-card-content>
+                  <mat-divider></mat-divider>
+                  <mat-card-actions align="end">
+                    <button mat-button color="primary" (click)="abrirDetalle(turno)">
+                      <mat-icon>open_in_new</mat-icon>
+                      Ver detalles
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">event_available</mat-icon>
+              <h3>Sin reservas activas</h3>
+              <p>Todavía no solicitaste ningún turno. Buscá un artista y agendá tu próximo tatuaje.</p>
+              <button mat-raised-button color="primary" routerLink="/buscar">
+                <mat-icon>search</mat-icon>
+                Buscar tatuador
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+    </div><!-- /reservas-content -->
   </div>
-
-  </div><!-- /reservas-content -->
-</div>

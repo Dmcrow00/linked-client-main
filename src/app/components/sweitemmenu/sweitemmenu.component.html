@@ -1,49 +1,58 @@
 <mat-drawer-container class="sidenav-container" [hasBackdrop]="true">
-    <mat-drawer #drawer class="sidenav" mode="over">
-        <div class="sidenav-header">
-            <button mat-icon-button (click)="drawer.toggle()" class="sidenav-toggle-button">
-                <mat-icon>chevron_left</mat-icon>
+  <mat-drawer #drawer class="sidenav" mode="over">
+    <div class="sidenav-header">
+      <button mat-icon-button (click)="drawer.toggle()" class="sidenav-toggle-button">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+    </div>
+
+    <mat-nav-list>
+      @for (item of menuItems; track item) {
+        <mat-list-item [ngStyle]="{ 'height': getItemHeight(item) }">
+          <div class="menu-item-container">
+            <button mat-button [disabled]="!item.route" (click)="navigate(item.route)"
+              class="menu-button">
+              {{ item.title }}
             </button>
-        </div>
-
-        <mat-nav-list>
-            <mat-list-item *ngFor="let item of menuItems" [ngStyle]="{ 'height': getItemHeight(item) }">
-                <div class="menu-item-container">
-                    <button mat-button [disabled]="!item.route" (click)="navigate(item.route)"
-                        class="menu-button">
-                        {{ item.title }}
-                    </button>
-
-                    <button *ngIf="item.subMenus?.length" mat-icon-button (click)="toggleSubMenu(item)"
-                        class="expand-button">
-                        <mat-icon>{{ item.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-                    </button>
-                </div>
-
-                <mat-nav-list *ngIf="item.expanded" class="submenu-list">
-                    <mat-list-item *ngFor="let subItem of item.subMenus" class="submenu-item">
-                        <button mat-button (click)="navigate(subItem.route)">
-                            {{ subItem.title }}
-                        </button>
-                        <mat-list-item *ngFor="let subItemHijo of subItem.subMenus" class="submenu-item">
-                            <button mat-button (click)="navigate(subItemHijo.route)">
-                                {{ subItemHijo.title }}
-                            </button>
-                        </mat-list-item>
-
+            @if (item.subMenus?.length) {
+              <button mat-icon-button (click)="toggleSubMenu(item)"
+                class="expand-button">
+                <mat-icon>{{ item.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </button>
+            }
+          </div>
+          @if (item.expanded) {
+            <mat-nav-list class="submenu-list">
+              @for (subItem of item.subMenus; track subItem) {
+                <mat-list-item class="submenu-item">
+                  <button mat-button (click)="navigate(subItem.route)">
+                    {{ subItem.title }}
+                  </button>
+                  @for (subItemHijo of subItem.subMenus; track subItemHijo) {
+                    <mat-list-item class="submenu-item">
+                      <button mat-button (click)="navigate(subItemHijo.route)">
+                        {{ subItemHijo.title }}
+                      </button>
                     </mat-list-item>
-                </mat-nav-list>
-            </mat-list-item>
-        </mat-nav-list>
-    </mat-drawer>
+                  }
+                </mat-list-item>
+              }
+            </mat-nav-list>
+          }
+        </mat-list-item>
+      }
+    </mat-nav-list>
+  </mat-drawer>
 
-    <mat-drawer-content>
-        <div class="navbar-container">
-            <button mat-icon-button (click)="drawer.toggle()" *ngIf="!drawer.opened" class="menu-open-button">
-                <mat-icon>menu</mat-icon>
-            </button>
-        </div>
+  <mat-drawer-content>
+    <div class="navbar-container">
+      @if (!drawer.opened) {
+        <button mat-icon-button (click)="drawer.toggle()" class="menu-open-button">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+    </div>
 
-        <router-outlet></router-outlet>
-    </mat-drawer-content>
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
 </mat-drawer-container>

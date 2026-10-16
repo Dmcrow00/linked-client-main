@@ -2,56 +2,58 @@
 
 <mat-dialog-content>
   <div class="upload-container">
-    
+
     <p class="hint-text">Comparte tu arte con la comunidad. (Máx {{maxFiles}} fotos)</p>
 
-    <div class="previews-grid" *ngIf="previewUrls.length > 0">
-      
-      <div class="preview-item" *ngFor="let url of previewUrls; let i = index">
-        <img [src]="url" alt="Preview">
-        
-        <button type="button" class="btn-remove-custom" (click)="removeImage(i)" matTooltip="Quitar">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-      
-      <div class="add-more-box" 
-           *ngIf="previewUrls.length < maxFiles" 
-           (click)="fileInput.click()"
-           matRipple>
-        <mat-icon>add</mat-icon> </div>
+    @if (previewUrls.length > 0) {
+      <div class="previews-grid">
+        @for (url of previewUrls; track url; let i = $index) {
+          <div class="preview-item">
+            <img [src]="url" alt="Preview">
+            <button type="button" class="btn-remove-custom" (click)="removeImage(i)" matTooltip="Quitar">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+        @if (previewUrls.length < maxFiles) {
+          <div class="add-more-box"
+            (click)="fileInput.click()"
+            matRipple>
+            <mat-icon>add</mat-icon> </div>
+          }
+        </div>
+      }
+
+      @if (previewUrls.length === 0) {
+        <div class="placeholder"
+          (click)="fileInput.click()"
+          matRipple>
+          <mat-icon>cloud_upload</mat-icon>
+          <h3>Toca para subir fotos</h3>
+          <p>JPG, PNG, WEBP</p>
+        </div>
+      }
+
+      <input #fileInput type="file" hidden multiple accept="image/*" (change)="onFileSelected($event)">
+
+      <mat-form-field appearance="outline" class="full-width mt-3">
+        <mat-label>Descripción / Pie de foto</mat-label>
+        <textarea matInput
+          [(ngModel)]="descripcion"
+          rows="3"
+          placeholder="Ej: Manga estilo japonés..."
+          [disabled]="isUploading"
+        maxlength="500"></textarea>
+        <mat-hint align="end">{{descripcion.length}} / 500</mat-hint>
+      </mat-form-field>
 
     </div>
+  </mat-dialog-content>
 
-    <div class="placeholder" 
-         *ngIf="previewUrls.length === 0" 
-         (click)="fileInput.click()"
-         matRipple>
-      <mat-icon>cloud_upload</mat-icon>
-      <h3>Toca para subir fotos</h3>
-      <p>JPG, PNG, WEBP</p>
-    </div>
+  <mat-dialog-actions class="action-buttons" align="end">
 
-    <input #fileInput type="file" hidden multiple accept="image/*" (change)="onFileSelected($event)">
-
-    <mat-form-field appearance="outline" class="full-width mt-3">
-      <mat-label>Descripción / Pie de foto</mat-label>
-      <textarea matInput 
-                [(ngModel)]="descripcion" 
-                rows="3" 
-                placeholder="Ej: Manga estilo japonés..."
-                [disabled]="isUploading"
-                maxlength="500"></textarea>
-      <mat-hint align="end">{{descripcion.length}} / 500</mat-hint>
-    </mat-form-field>
-
-  </div>
-</mat-dialog-content>
-
-<mat-dialog-actions class="action-buttons" align="end">
-
-    <button mat-stroked-button color="warn" type="button" 
-    (click)="onCancel()" [disabled]="isUploading">
+    <button mat-stroked-button color="warn" type="button"
+      (click)="onCancel()" [disabled]="isUploading">
       Cancelar
     </button>
 
@@ -62,19 +64,19 @@
       appNoDoubleSubmit
       [disabled]="selectedFiles.length === 0 || isUploading"
       (click)="subir()"
-    >
-      <ng-container *ngIf="!isUploading">
-         <span class="btn-content">
-            <mat-icon>publish</mat-icon>
-            <span>Publicar</span>
-         </span>
-      </ng-container>
-      
-      <ng-container *ngIf="isUploading">
-         <span class="btn-content">
-            <mat-spinner diameter="20"></mat-spinner> 
-            <span>Subiendo...</span>
-         </span>
-      </ng-container>
+      >
+      @if (!isUploading) {
+        <span class="btn-content">
+          <mat-icon>publish</mat-icon>
+          <span>Publicar</span>
+        </span>
+      }
+
+      @if (isUploading) {
+        <span class="btn-content">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Subiendo...</span>
+        </span>
+      }
     </button>
-</mat-dialog-actions>
+  </mat-dialog-actions>

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Location, NgIf, NgFor, NgClass, UpperCasePipe, SlicePipe, DatePipe } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { Location, NgClass, UpperCasePipe, SlicePipe, DatePipe } from '@angular/common';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { AgendaDetalleComponent } from '../agenda/agenda-detalle/agenda-detalle.component';
 import { TurnosService } from 'src/app/services/turnos/turnos.service';
@@ -17,21 +17,17 @@ import { ServerUrlPipe } from '../../pipes/server-url.pipe';
     selector: 'app-mis-reservas',
     templateUrl: './mis-reservas.component.html',
     styleUrl: './mis-reservas.component.scss',
-    imports: [MatIconButton, MatIcon, MatDivider, NgIf, MatProgressSpinner, MatButton,
-              NgFor, MatCard, NgClass, MatCardContent, MatCardActions,
-              RouterLink, UpperCasePipe, SlicePipe, DatePipe, ServerUrlPipe]
+    imports: [MatIconButton, MatIcon, MatDivider, MatProgressSpinner, MatButton, MatCard, NgClass, MatCardContent, MatCardActions, RouterLink, UpperCasePipe, SlicePipe, DatePipe, ServerUrlPipe]
 })
 export class MisReservasComponent implements OnInit {
+  private location = inject(Location);
+  private turnosService = inject(TurnosService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+
   turnos: TurnoSesion[] = [];
   isLoading = false;
   errorCarga: string | null = null;
-
-  constructor(
-    private location: Location,
-    private turnosService: TurnosService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.cargarMisReservas();

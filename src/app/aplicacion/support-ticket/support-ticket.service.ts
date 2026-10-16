@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -12,10 +12,9 @@ import {
   providedIn: 'root',
 })
 export class SupportTicketService {
-  private endpoint = `${environment.urlApi}supportTicket`;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {
-  }
+  private endpoint = `${environment.urlApi}supportTicket`;
 
   createSupportTicket(supportTicket: SupportTicketCreatePayload): Observable<SupportTicket> {
     return this.http.post<SupportTicket>(`${this.endpoint}/create`,supportTicket);

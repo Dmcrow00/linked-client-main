@@ -1,9 +1,9 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { User } from '../../models/user.model';
 import { UserService } from '../../services/user/user.service';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DatePipe, NgIf, NgFor } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, Subscription, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
@@ -35,9 +35,20 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     templateUrl: './personal-details.component.html',
     styleUrls: ['./personal-details.component.scss'],
     providers: [DatePipe],
-    imports: [MatChipsModule, NgIf, NgFor, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatDivider, MatCardContent, MatChip, MatCardActions, MatIcon, MatIconButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, TatuadorComponent, MatButton, DatePipe, ServerUrlPipe, MatSnackBarModule, MatProgressSpinner, MatTooltip, MatAutocompleteModule, NoDoubleSubmitDirective]
+    imports: [MatChipsModule, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatDivider, MatCardContent, MatChip, MatCardActions, MatIcon, MatIconButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, TatuadorComponent, MatButton, DatePipe, ServerUrlPipe, MatSnackBarModule, MatProgressSpinner, MatTooltip, MatAutocompleteModule, NoDoubleSubmitDirective]
 })
 export class PersonalDetailsComponent implements OnInit, OnDestroy {
+  private userService = inject(UserService);
+  private tatuadorService = inject(TatuadorService);
+  private formBuilder = inject(FormBuilder);
+  private loginService = inject(LoginService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private instagramService = inject(InstagramService);
+  private geocodingService = inject(GeocodingService);
+  private forgotPasswordService = inject(ForgotPasswordService);
+  private snackBar = inject(MatSnackBar);
+
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild(TatuadorComponent) tatuadorComponentRef!: TatuadorComponent;
 
@@ -85,19 +96,6 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
   isGeocoding = false;
   isGPSLocating = false;
   locationSuggestions: GeoResult[] = [];
-
-  constructor(
-    private userService: UserService,
-    private tatuadorService: TatuadorService,
-    private formBuilder: FormBuilder,
-    private loginService: LoginService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private instagramService: InstagramService,
-    private geocodingService: GeocodingService,
-    private forgotPasswordService: ForgotPasswordService,
-    private snackBar: MatSnackBar,
-  ) {}
 
   ngOnInit(): void {
     this.loadUserSession();

@@ -5,7 +5,7 @@ import {
   HttpInterceptor,
   HttpRequest,
 } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { LoginService } from './login.service';
 import { Router } from '@angular/router';
@@ -15,11 +15,10 @@ import { MatDialog } from '@angular/material/dialog';
   providedIn: 'root',
 })
 export class JwtInterceptorService implements HttpInterceptor {
-  constructor(
-    private loginService: LoginService,
-    private router: Router,
-    private dialog: MatDialog
-  ) {}
+  private loginService = inject(LoginService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+
 
   intercept(
     req: HttpRequest<any>,

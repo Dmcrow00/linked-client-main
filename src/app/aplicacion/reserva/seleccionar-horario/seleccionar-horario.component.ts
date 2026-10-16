@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Location, NgIf, NgFor } from '@angular/common';
+import { Location } from '@angular/common';
 import { TatuadorService } from 'src/app/services/user/tatuador.service';
 import { AgendaService } from '../../agenda/agenda.service';
 import { SolicitarTurnoDto, TurnosService } from 'src/app/services/turnos/turnos.service';
@@ -18,22 +18,23 @@ import { environment } from 'src/environments/environment';
     selector: 'app-seleccionar-horario',
     templateUrl: './seleccionar-horario.component.html',
     styleUrl: './seleccionar-horario.component.scss',
-    imports: [MatIconButton, MatRipple, MatIcon, NgIf, MatCalendar, NgFor, FormsModule, NoDoubleSubmitDirective]
+    imports: [MatIconButton, MatRipple, MatIcon, MatCalendar, FormsModule, NoDoubleSubmitDirective]
 })
 export class SeleccionarHorarioComponent implements OnInit {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private location = inject(Location);
+  private tatuadorService = inject(TatuadorService);
+  private agendaService = inject(AgendaService);
+  private turnosService = inject(TurnosService);
+  private reservaStateService = inject(ReservaStateService);
+
 
   minDate: Date;
   maxDate: Date;
   isSaving = false;
 
-  constructor(private router: Router,
-              private route: ActivatedRoute,
-              private location: Location,
-              private tatuadorService: TatuadorService,
-              private agendaService: AgendaService,
-              private turnosService: TurnosService,
-              private reservaStateService: ReservaStateService
-  ){
+  constructor(){
     this.minDate = new Date();
     this.minDate.setDate(this.minDate.getDate() + 1);
 

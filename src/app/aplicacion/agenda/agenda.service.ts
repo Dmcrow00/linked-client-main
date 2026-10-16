@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { HorarioHabitual, HorarioHabitualInput } from 'src/app/models/horarios-tatuador/horario-habitual';
 import { environment } from 'src/environments/environment';
@@ -8,9 +8,9 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class AgendaService {
-  private apiUrl = `${environment.urlApi}agenda`;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) { }
+  private apiUrl = `${environment.urlApi}agenda`;
 
   //Metodos del tatuador
   getHorarioHabitual(): Observable<HorarioHabitual[]> {

@@ -1,4 +1,4 @@
-import { Component, Inject} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { EspecialidadesService } from '../especialidades.service';
 import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
@@ -13,15 +13,15 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     imports: [MatCard, MatCardHeader, MatCardTitle, MatIcon, MatCardContent, MatCardActions, MatButton, NoDoubleSubmitDirective]
 })
 export class EspecialidadDeleteComponent {
+  private especialidadService = inject(EspecialidadesService);
+  private dialog = inject(MatDialog);
+  private dialogRef = inject<MatDialogRef<EspecialidadDeleteComponent>>(MatDialogRef);
+  data = inject<{
+    id: number;
+}>(MAT_DIALOG_DATA);
+
   especialidadName: string = '';
   successMessage: string | null = null;
-
-  constructor(
-    private especialidadService: EspecialidadesService,
-    private dialog: MatDialog,
-    private dialogRef: MatDialogRef<EspecialidadDeleteComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { id: number }
-  ) { }
 
   ngOnInit(): void {
     this.especialidadService.getEspecialidad(this.data.id).subscribe({

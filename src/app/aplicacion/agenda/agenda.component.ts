@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { GestionarHorarioComponent } from './gestionar-horario/gestionar-horario.component';
@@ -20,7 +20,7 @@ import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field'
 import { MatSelect, MatOption } from '@angular/material/select';
 import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { NgIf, NgClass, DatePipe, Location } from '@angular/common';
+import { NgClass, DatePipe, Location } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 
@@ -28,9 +28,15 @@ import { MatTooltip } from '@angular/material/tooltip';
   selector: 'app-agenda',
   templateUrl: './agenda.component.html',
   styleUrl: './agenda.component.scss',
-  imports: [MatButton, MatIcon, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, NgIf, MatProgressSpinner, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatPaginator, DatePipe]
+  imports: [MatButton, MatIcon, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatProgressSpinner, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatPaginator, DatePipe]
 })
 export class AgendaComponent implements OnInit, OnDestroy {
+  private dialog = inject(MatDialog);
+  private turnosService = inject(TurnosService);
+  private snackBar = inject(MatSnackBar);
+  private breakpointObserver = inject(BreakpointObserver);
+  private location = inject(Location);
+
 
   displayedColumns: string[] = ['fecha', 'hora', 'cliente', 'estado', 'acciones'];
   dataSource = new MatTableDataSource<TurnoSesion>([]);
@@ -60,14 +66,6 @@ export class AgendaComponent implements OnInit, OnDestroy {
   isLoadingTurnos = false;
   errorTurnos: string | null = null;
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private dialog: MatDialog,
-    private turnosService: TurnosService,
-    private snackBar: MatSnackBar,
-    private breakpointObserver: BreakpointObserver,
-    private location: Location
-  ) { }
 
   goBack(): void { this.location.back(); }
 

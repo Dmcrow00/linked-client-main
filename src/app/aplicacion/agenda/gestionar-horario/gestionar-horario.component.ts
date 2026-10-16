@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AgendaService } from '../agenda.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HorarioHabitual, HorarioHabitualInput } from 'src/app/models/horarios-tatuador/horario-habitual';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -18,21 +18,21 @@ import { MatInput } from '@angular/material/input';
     selector: 'app-gestionar-horario',
     templateUrl: './gestionar-horario.component.html',
     styleUrl: './gestionar-horario.component.scss',
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, NgIf, MatProgressSpinner, MatIcon, MatButton, FormsModule, ReactiveFormsModule, NgFor, MatSlideToggle, MatFormField, MatLabel, MatInput, MatError, MatDialogActions, NoDoubleSubmitDirective]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatProgressSpinner, MatIcon, MatButton, FormsModule, ReactiveFormsModule, MatSlideToggle, MatFormField, MatLabel, MatInput, MatError, MatDialogActions, NoDoubleSubmitDirective]
 })
 export class GestionarHorarioComponent {
+private fb = inject(FormBuilder);
+private agendaService = inject(AgendaService);
+private snackBar = inject(MatSnackBar);
+dialogRef = inject<MatDialogRef<GestionarHorarioComponent>>(MatDialogRef);
+
 horarioForm: FormGroup;
   diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   isLoading = false;
   errorCarga: string | null = null;
   isSaving = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private agendaService: AgendaService,
-    private snackBar: MatSnackBar,
-    public dialogRef: MatDialogRef<GestionarHorarioComponent>,
-  ) {
+  constructor() {
     // Inicializamos el formulario con un FormArray vacío
     this.horarioForm = this.fb.group({
       dias: this.fb.array([])

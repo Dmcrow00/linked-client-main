@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { NgIf, NgFor, Location } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -17,11 +17,18 @@ import { DetalleTrabajoComponent } from '../detalle-trabajo/detalle-trabajo.comp
 
 @Component({
   selector: 'app-mi-portfolio',
-  imports: [NgIf, NgFor, MatIcon, MatIconButton, ServerUrlPipe, PostTileComponent, NoDoubleSubmitDirective],
+  imports: [MatIcon, MatIconButton, ServerUrlPipe, PostTileComponent, NoDoubleSubmitDirective],
   templateUrl: './mi-portfolio.component.html',
   styleUrl: './mi-portfolio.component.scss'
 })
 export class MiPortfolioComponent implements OnInit {
+  private userService = inject(UserService);
+  private trabajosService = inject(TrabajosService);
+  private instagramService = inject(InstagramService);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
+  private location = inject(Location);
+
 
   user: User | null = null;
   trabajos: Trabajo[] = [];
@@ -34,15 +41,6 @@ export class MiPortfolioComponent implements OnInit {
   syncMessageIsError = false;
 
   private userId: number | null = null;
-
-  constructor(
-    private userService: UserService,
-    private trabajosService: TrabajosService,
-    private instagramService: InstagramService,
-    private dialog: MatDialog,
-    private router: Router,
-    private location: Location
-  ) {}
 
   goBack(): void { this.location.back(); }
 

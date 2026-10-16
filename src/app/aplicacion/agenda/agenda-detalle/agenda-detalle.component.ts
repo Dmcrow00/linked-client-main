@@ -1,10 +1,10 @@
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { TurnoMensaje } from 'src/app/models/turno/turno-mensaje.model';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TurnosService } from 'src/app/services/turnos/turnos.service';
-import { EditarTurnoComponent } from '../editar-turno/editar-turno.component.js';
+import { EditarTurnoComponent } from '../editar-turno/editar-turno.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDivider } from '@angular/material/divider';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
@@ -12,7 +12,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -29,12 +29,16 @@ export interface AgendaDetalleData {
     selector: 'app-agenda-detalle',
     templateUrl: './agenda-detalle.component.html',
     styleUrl: './agenda-detalle.component.scss',
-    imports: [MatDivider, MatTabGroup, MatTab, CdkScrollable, MatDialogContent,
-              MatIconButton, MatTooltip, MatIcon, NgIf, NgFor,
-              MatFormField, MatLabel, MatInput, FormsModule, MatSuffix,
-              MatDialogActions, MatButton, DatePipe, ServerUrlPipe, NoDoubleSubmitDirective]
+    imports: [MatDivider, MatTabGroup, MatTab, CdkScrollable, MatDialogContent, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, MatDialogActions, MatButton, DatePipe, ServerUrlPipe, NoDoubleSubmitDirective]
 })
 export class AgendaDetalleComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<AgendaDetalleComponent>>(MatDialogRef);
+  data = inject<AgendaDetalleData>(MAT_DIALOG_DATA);
+  private turnosService = inject(TurnosService);
+  private loginService = inject(LoginService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+
 
   mensajes: TurnoMensaje[] = [];
   nuevoMensajeText = '';
@@ -42,15 +46,6 @@ export class AgendaDetalleComponent implements OnInit {
   huboCambiosManuales = false;
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
-
-  constructor(
-    public dialogRef: MatDialogRef<AgendaDetalleComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AgendaDetalleData,
-    private turnosService: TurnosService,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.currentUserId = this.loginService.currentUserId;

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { SupportTicket } from './support-ticket.model';
 import { SupportTicketService } from './support-ticket.service';
@@ -16,7 +16,7 @@ import { MatSelect, MatOption } from '@angular/material/select';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { DatePipe, Location, NgIf, NgFor } from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
 
 @Component({
   selector: 'app-support-ticket',
@@ -34,6 +34,11 @@ import { DatePipe, Location, NgIf, NgFor } from '@angular/common';
   ],
 })
 export class SupportTicketComponent implements OnInit, OnDestroy {
+  private supportTicketService = inject(SupportTicketService);
+  private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
+  private location = inject(Location);
+
   supportTickets: SupportTicket[] = [];
   filteredTickets: SupportTicket[] = [];
   private destroy$ = new Subject<void>();
@@ -43,13 +48,6 @@ export class SupportTicketComponent implements OnInit, OnDestroy {
   filterEstadoTicket: boolean | null = null;
 
   displayedColumns: string[] = ['id', 'fechaCarga', 'user', 'status', 'actions'];
-
-  constructor(
-    private supportTicketService: SupportTicketService,
-    private dialog: MatDialog,
-    private breakpointObserver: BreakpointObserver,
-    private location: Location
-  ) { }
 
   goBack(): void { this.location.back(); }
 

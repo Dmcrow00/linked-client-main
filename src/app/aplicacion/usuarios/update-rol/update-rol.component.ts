@@ -1,10 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { RolApl } from 'src/app/models/rol.models.js';
+import { RolApl } from 'src/app/models/rol.models';
 import { User } from 'src/app/models/user.model';
 import { UserService } from 'src/app/services/user/user.service';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
-import { NgFor, NgIf } from '@angular/common';
+
 import { MatButton } from '@angular/material/button';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 
@@ -12,19 +12,25 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
   selector: 'app-update-rol',
   templateUrl: './update-rol.component.html',
   styleUrls: ['./update-rol.component.scss'],
-  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, NgFor, MatCardActions, MatButton, NoDoubleSubmitDirective]
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions, MatButton, NoDoubleSubmitDirective]
 })
 export class UpdateRolComponent {
+  private userService = inject(UserService);
+  dialogRef = inject<MatDialogRef<UpdateRolComponent>>(MatDialogRef);
+  data = inject<{
+    user: User;
+    allRoles: RolApl[];
+    selectedRoleIds: number[];
+}>(MAT_DIALOG_DATA);
+
   user: User;
   allRoles: RolApl[] = [];
   selectedRoleIds: number[] = [];
   saving = false;
 
-  constructor(
-    private userService: UserService,
-    public dialogRef: MatDialogRef<UpdateRolComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { user: User; allRoles: RolApl[]; selectedRoleIds: number[] }
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.user = { ...data.user };
     this.allRoles = data.allRoles;
     this.selectedRoleIds = [...data.selectedRoleIds];

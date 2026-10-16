@@ -6,14 +6,15 @@
   <mat-card-content>
     <p class="roles-label">Seleccioná los roles asignados:</p>
     <div class="roles-chips">
-      <button
-        *ngFor="let rol of allRoles"
-        type="button"
-        class="rol-chip"
-        [class.selected]="isRolSelected(rol.id!)"
-        (click)="toggleRol(rol.id!)">
-        {{ rol.description }}
-      </button>
+      @for (rol of allRoles; track rol) {
+        <button
+          type="button"
+          class="rol-chip"
+          [class.selected]="isRolSelected(rol.id!)"
+          (click)="toggleRol(rol.id!)">
+          {{ rol.description }}
+        </button>
+      }
     </div>
   </mat-card-content>
 
@@ -22,8 +23,8 @@
       Cancelar
     </button>
     <button mat-raised-button class="normal-button" type="button" appNoDoubleSubmit
-            (click)="onUpdateUser()"
-            [disabled]="saving || selectedRoleIds.length === 0">
+      (click)="onUpdateUser()"
+      [disabled]="saving || selectedRoleIds.length === 0">
       {{ saving ? 'Guardando…' : 'Guardar' }}
     </button>
   </mat-card-actions>

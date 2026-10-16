@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LoginService } from '../../services/auth/login.service';
@@ -11,7 +11,7 @@ import { ProximamenteService } from 'src/app/services/proximamente.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatError, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { NgIf } from '@angular/common';
+
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
@@ -20,23 +20,23 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatInput, NgIf, MatError, MatIconButton, MatSuffix, RouterLink, RecaptchaModule, MatButton, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatInput, MatError, MatIconButton, MatSuffix, RouterLink, RecaptchaModule, MatButton, NoDoubleSubmitDirective]
 })
 export class LoginComponent implements OnInit {
+  private formBuilder = inject(FormBuilder);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private loginService = inject(LoginService);
+  private proximamenteService = inject(ProximamenteService);
+  private encryptionService = inject(EncryptionService);
+
   loginForm: FormGroup;
   loginError: string = '';
   hide = true;
   captchaValid = false;
   captchaToken: string | null = null;
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private dialog: MatDialog,
-    private loginService: LoginService,
-    private proximamenteService: ProximamenteService,
-    private encryptionService: EncryptionService,
-  ) {
+  constructor() {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required]], //Validadores requeridos
       password: ['', [Validators.required]],

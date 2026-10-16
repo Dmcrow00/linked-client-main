@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, map, of, catchError } from 'rxjs';
 
 export interface GeoResult {
@@ -46,12 +46,12 @@ interface PhotonResponse {
 
 @Injectable({ providedIn: 'root' })
 export class GeocodingService {
+  private http = inject(HttpClient);
+
 
   private readonly NOMINATIM = 'https://nominatim.openstreetmap.org';
   private readonly PHOTON = 'https://photon.komoot.io/api';
   private readonly HEADERS = { 'Accept-Language': 'es', 'User-Agent': 'LinkedTattooApp/1.0' };
-
-  constructor(private http: HttpClient) {}
 
   /** Convierte un texto (ciudad, dirección) a coordenadas. */
   geocode(query: string): Observable<GeoResult | null> {

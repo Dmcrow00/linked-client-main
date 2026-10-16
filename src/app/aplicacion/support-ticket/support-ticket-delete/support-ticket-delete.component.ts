@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   MatDialog,
   MatDialogRef,
@@ -19,15 +19,15 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     imports: [MatCard, MatCardHeader, MatCardTitle, MatIcon, MatCardContent, MatCardActions, MatButton, NoDoubleSubmitDirective]
 })
 export class SupportTicketDeleteComponent implements OnInit {
+  private supportTicketService = inject(SupportTicketService);
+  private dialog = inject(MatDialog);
+  private dialogRef = inject<MatDialogRef<SupportTicketDeleteComponent>>(MatDialogRef);
+  data = inject<{
+    id: number;
+}>(MAT_DIALOG_DATA);
+
   supportTicketName: number = 0;
   successMessage: string | null = null;
-
-  constructor(
-    private supportTicketService: SupportTicketService,
-    private dialog: MatDialog,
-    private dialogRef: MatDialogRef<SupportTicketDeleteComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { id: number }
-  ) { }
 
   ngOnInit(): void {
     this.supportTicketService.getSupportTicket(this.data.id).subscribe({

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { LoginRequest } from '../../models/loginRequest';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { tap, catchError, Observable, BehaviorSubject, map } from 'rxjs';
@@ -11,6 +11,10 @@ import { ErrorHandlerService } from '../error-handler.service';
   providedIn: 'root',
 })
 export class LoginService {
+  private http = inject(HttpClient);
+  private userService = inject(UserService);
+  private errorHandler = inject(ErrorHandlerService);
+
   private currentUserLoginOnSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
   private currentUserDataSubject: BehaviorSubject<string> =
@@ -18,11 +22,7 @@ export class LoginService {
   private currentUserRolSubject: BehaviorSubject<string> =
     new BehaviorSubject<string>('');
 
-  constructor(
-    private http: HttpClient,
-    private userService: UserService,
-    private errorHandler: ErrorHandlerService
-  ) {
+  constructor() {
     const token = sessionStorage.getItem('accessToken');
     this.currentUserLoginOnSubject.next(!!token);
     this.currentUserDataSubject.next(token || '');

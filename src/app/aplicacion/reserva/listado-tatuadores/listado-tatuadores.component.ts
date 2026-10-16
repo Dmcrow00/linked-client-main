@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Location, NgIf, NgFor } from '@angular/common';
+import { Location } from '@angular/common';
 import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
 import { TatuadorService } from 'src/app/services/user/tatuador.service';
 import { MatIconButton, MatButton } from '@angular/material/button';
@@ -10,20 +10,18 @@ import { ServerUrlPipe } from '../../../pipes/server-url.pipe';
     selector: 'app-listado-tatuadores',
     templateUrl: './listado-tatuadores.component.html',
     styleUrl: './listado-tatuadores.component.scss',
-    imports: [MatIconButton, MatIcon, NgIf, MatButton, NgFor, ServerUrlPipe]
+    imports: [MatIconButton, MatIcon, MatButton, ServerUrlPipe]
 })
 export class ListadoTatuadoresComponent {
+  private tatuadorService = inject(TatuadorService);
+  private router = inject(Router);
+  private location = inject(Location);
+
   tatuadoresOriginal: Tatuador[] = [];
   tatuadores: Tatuador[] = [];
 
   selectedTatuadorId: number | null = null;
   errorCarga: string | null = null;
-
-  constructor(
-    private tatuadorService: TatuadorService,
-    private router: Router,
-    private location: Location
-  ) { }
 
   ngOnInit(): void{
     this.cargarTatuadores();

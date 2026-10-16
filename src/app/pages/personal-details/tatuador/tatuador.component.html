@@ -1,42 +1,46 @@
 <mat-divider style="margin: 1.5rem 0;"></mat-divider>
 <div [formGroup]="tatuadorForm"> <h3 class="tatuador-section-title">Información Profesional</h3>
-  <div class="row">
-    <mat-form-field appearance="outline" class="col-12">
-      <mat-label>Nombre del Estudio / Red Social</mat-label>
-      <input matInput formControlName="estudio" placeholder="Ej: Mi Estudio Tattoo" />
-    </mat-form-field>
-  </div>
-  <div class="row">
-    <mat-form-field appearance="outline" class="col-12">
-      <mat-label>Inicio de Actividad</mat-label>
-      <input matInput [matDatepicker]="pickerInicioActividad" formControlName="fechaInicioActividad" [max]="today"
-             placeholder="dd/mm/yyyy" />
+<div class="row">
+  <mat-form-field appearance="outline" class="col-12">
+    <mat-label>Nombre del Estudio / Red Social</mat-label>
+    <input matInput formControlName="estudio" placeholder="Ej: Mi Estudio Tattoo" />
+  </mat-form-field>
+</div>
+<div class="row">
+  <mat-form-field appearance="outline" class="col-12">
+    <mat-label>Inicio de Actividad</mat-label>
+    <input matInput [matDatepicker]="pickerInicioActividad" formControlName="fechaInicioActividad" [max]="today"
+      placeholder="dd/mm/yyyy" />
       <mat-datepicker-toggle matIconSuffix [for]="pickerInicioActividad"></mat-datepicker-toggle>
       <mat-datepicker #pickerInicioActividad></mat-datepicker>
       <mat-hint>¿Cuándo empezaste a tatuar?</mat-hint>
     </mat-form-field>
   </div>
 
-</div> 
+</div>
 
 <h3 class="tatuador-section-title">Especialidades</h3>
 <mat-form-field class="col-12 full-width" appearance="outline">
   <mat-label>Especialidades</mat-label>
   <mat-chip-grid #chipGrid>
-    <mat-chip-row *ngFor="let especialidad of especialidades" removable="true" (removed)="removeEspecialidad(especialidad)">
-      {{ especialidad.nombre }}
-      <mat-icon matChipRemove>cancel</mat-icon>
-    </mat-chip-row>
+    @for (especialidad of especialidades; track especialidad) {
+      <mat-chip-row removable="true" (removed)="removeEspecialidad(especialidad)">
+        {{ especialidad.nombre }}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip-row>
+    }
     <input
       placeholder="Agregar especialidad..."
       [formControl]="especialidadCtrl"
       [matAutocomplete]="auto"
       [matChipInputFor]="chipGrid"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes">
-  </mat-chip-grid>
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addEspecialidad($event)">
-    <mat-option *ngFor="let e of filteredEspecialidades | async" [value]="e">
-      {{ e.nombre }}
-    </mat-option>
-  </mat-autocomplete>
-</mat-form-field>
+    </mat-chip-grid>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addEspecialidad($event)">
+      @for (e of filteredEspecialidades | async; track e) {
+        <mat-option [value]="e">
+          {{ e.nombre }}
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>

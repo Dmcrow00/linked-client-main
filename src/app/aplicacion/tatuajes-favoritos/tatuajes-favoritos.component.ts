@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { NgFor, NgIf, Location } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { Location } from '@angular/common';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
 import { TrabajosService } from 'src/app/services/trabajos/trabajos.service';
 import { PostTrabajoComponent } from 'src/app/components/post-trabajo/post-trabajo.component';
@@ -10,11 +10,15 @@ import { MatIconButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-tatuajes-favoritos',
-  imports: [NgIf, NgFor, PostTrabajoComponent, MatIcon, MatIconButton],
+  imports: [PostTrabajoComponent, MatIcon, MatIconButton],
   templateUrl: './tatuajes-favoritos.component.html',
   styleUrl: './tatuajes-favoritos.component.scss'
 })
 export class TatuajesFavoritosComponent implements OnInit {
+  private trabajosService = inject(TrabajosService);
+  private dialog = inject(MatDialog);
+  private location = inject(Location);
+
 
   trabajosFavoritos: Trabajo[] = [];
   favorites: Set<number> = new Set();
@@ -26,12 +30,6 @@ export class TatuajesFavoritosComponent implements OnInit {
       .filter((id): id is number => id !== undefined);
     return new Set(ids).size;
   }
-
-  constructor(
-    private trabajosService: TrabajosService,
-    private dialog: MatDialog,
-    private location: Location,
-  ) {}
 
   goBack(): void {
     this.location.back();

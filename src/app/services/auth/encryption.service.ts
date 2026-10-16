@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -7,7 +7,8 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class EncryptionService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+
 
   async encrypt(text: string): Promise<string> {
     const key = await this.fetchPublicKey();

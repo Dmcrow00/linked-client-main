@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
-import { NgIf, SlicePipe } from '@angular/common';
+import { SlicePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { ServerUrlPipe } from '../../pipes/server-url.pipe';
@@ -9,9 +9,11 @@ import { ServerUrlPipe } from '../../pipes/server-url.pipe';
     selector: 'app-post-trabajo',
     templateUrl: './post-trabajo.component.html',
     styleUrl: './post-trabajo.component.scss',
-    imports: [NgIf, MatIcon, MatIconButton, SlicePipe, ServerUrlPipe]
+    imports: [MatIcon, MatIconButton, SlicePipe, ServerUrlPipe]
 })
 export class PostTrabajoComponent {
+  private router = inject(Router);
+
   @Input() trabajo!: Trabajo;
   @Input() isLiked: boolean = false;
   @Input() showArtistInfo: boolean = true; // True en Home, False en Perfil del Tatuador
@@ -20,7 +22,6 @@ export class PostTrabajoComponent {
 
   currentImageIndex: number = 0;
   hasError = false;
-  constructor(private router: Router) {}
 
   nextImage(event: MouseEvent) {
     event.stopPropagation(); 

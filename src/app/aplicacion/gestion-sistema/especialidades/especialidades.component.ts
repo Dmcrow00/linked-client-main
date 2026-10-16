@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { Especialidad } from './especialidades.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -19,15 +19,13 @@ import { MatIconButton } from '@angular/material/button';
     imports: [MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class EspecialidadesComponent implements OnInit, OnDestroy {
+  private especialidadesService = inject(EspecialidadesService);
+  private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
+
   especialidades: Especialidad[] = [];
   displayedColumns: string[] = ['id', 'nombre', 'desc', 'actions'];
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private especialidadesService: EspecialidadesService,
-    private dialog: MatDialog,
-    private breakpointObserver: BreakpointObserver
-  ) { }
 
   ngOnInit(): void {
     this.loadEspecialidadess();

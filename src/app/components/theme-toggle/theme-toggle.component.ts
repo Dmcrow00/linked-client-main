@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ThemeService } from 'src/app/core/services/theme.service';
 import { MatIconButton } from '@angular/material/button';
@@ -22,9 +22,11 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatIconButton, MatIcon]
 })
 export class ThemeToggleComponent {
+  private themeService = inject(ThemeService);
+
   isDarkTheme: boolean;
 
-    constructor(private themeService: ThemeService) {
+    constructor() {
     this.isDarkTheme = this.themeService.isDarkTheme();
   }
 

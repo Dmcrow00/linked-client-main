@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TrabajosService } from 'src/app/services/trabajos/trabajos.service';
@@ -7,7 +7,7 @@ import { TatuadorService } from 'src/app/services/user/tatuador.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
-import { NgIf, NgFor, Location } from '@angular/common';
+import { Location } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { ServerUrlPipe } from '../../../../pipes/server-url.pipe';
@@ -16,9 +16,17 @@ import { PostTileComponent } from 'src/app/components/post-tile/post-tile.compon
     selector: 'app-portfolio',
     templateUrl: './portfolio.component.html',
     styleUrl: './portfolio.component.scss',
-    imports: [PostTileComponent, NgIf, MatIcon, NgFor, MatButton, MatIconButton, ServerUrlPipe]
+    imports: [PostTileComponent, MatIcon, MatButton, MatIconButton, ServerUrlPipe]
 })
 export class PortfolioComponent {
+private route = inject(ActivatedRoute);
+private router = inject(Router);
+private tatuadorService = inject(TatuadorService);
+private trabajosService = inject(TrabajosService);
+private loginService = inject(LoginService);
+private dialog = inject(MatDialog);
+private location = inject(Location);
+
 tatuador: Tatuador | null = null;
   trabajos: Trabajo[] = [];
   misLikes: Set<number> = new Set();
@@ -26,16 +34,6 @@ tatuador: Tatuador | null = null;
   isLoading = true;
   userLoginOn = false;
   esCliente = false;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private tatuadorService: TatuadorService,
-    private trabajosService: TrabajosService,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-    private location: Location
-  ) {}
 
   ngOnInit(): void {
     // Obtener ID de la URL

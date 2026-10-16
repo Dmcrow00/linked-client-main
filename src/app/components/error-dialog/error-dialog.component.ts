@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { NgClass } from '@angular/common';
@@ -12,11 +12,13 @@ import { MatButton } from '@angular/material/button';
     imports: [CdkScrollable, MatDialogContent, NgClass, MatIcon, MatDialogActions, MatButton]
 })
 export class ErrorDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ErrorDialogComponent>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: { title: string; message: string; type: 'success' | 'error' }
-  ) {}
+  dialogRef = inject<MatDialogRef<ErrorDialogComponent>>(MatDialogRef);
+  data = inject<{
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+}>(MAT_DIALOG_DATA);
+
 
   onClose(): void {
     this.dialogRef.close();

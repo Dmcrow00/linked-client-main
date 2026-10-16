@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -56,6 +48,15 @@ L.Icon.Default.mergeOptions({
   ],
 })
 export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy {
+  private tatuadorService = inject(TatuadorService);
+  private busquedaService = inject(BusquedaEstiloService);
+  private reservaStateService = inject(ReservaStateService);
+  private geocodingService = inject(GeocodingService);
+  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
+  private ngZone = inject(NgZone);
+  private location = inject(Location);
+
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
 
@@ -84,17 +85,6 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
   private userMarker?: L.Marker;
   private userCircle?: L.Circle;
   private artistMarkers: L.Marker[] = [];
-
-  constructor(
-    private tatuadorService: TatuadorService,
-    private busquedaService: BusquedaEstiloService,
-    private reservaStateService: ReservaStateService,
-    private geocodingService: GeocodingService,
-    private snackBar: MatSnackBar,
-    private router: Router,
-    private ngZone: NgZone,
-    private location: Location,
-  ) {}
 
   goBack(): void {
     this.location.back();

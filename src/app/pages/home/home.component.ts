@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
-import { NgFor, NgIf } from '@angular/common';
+
 import { DetalleTrabajoComponent } from 'src/app/aplicacion/trabajos/detalle-trabajo/detalle-trabajo.component';
 import { SubirTrabajoComponent } from 'src/app/aplicacion/trabajos/subir-trabajo/subir-trabajo/subir-trabajo.component';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
@@ -18,10 +18,16 @@ import { SolicitudesTatuadorComponent } from 'src/app/aplicacion/solicitudes-tat
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [NgIf, NgFor, RouterLink, MatTooltip, MatIcon, PostTrabajoComponent, SolicitudesTatuadorComponent]
+  imports: [RouterLink, MatTooltip, MatIcon, PostTrabajoComponent, SolicitudesTatuadorComponent]
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private loginService = inject(LoginService);
+  private trabajosService = inject(TrabajosService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+
 
   userLoginOn: boolean = false;
   userRol: string | null = null;
@@ -29,14 +35,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   misLikes: Set<number> = new Set();
 
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private router: Router,
-    private loginService: LoginService,
-    private trabajosService: TrabajosService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-  ) { }
 
   ngOnInit(): void {
     this.loginService.userLoginOn

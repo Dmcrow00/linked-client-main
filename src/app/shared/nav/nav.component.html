@@ -10,39 +10,43 @@
       </header>
 
       <!--<div class="center-section">
-        <div class="col-12 col-lg-5 col-md-8 col-sm-8">
-          <div class="search-bar">
-            <button (click)="onSearch()">
-              <mat-icon class="search-icon">search</mat-icon>
-            </button>
+      <div class="col-12 col-lg-5 col-md-8 col-sm-8">
+        <div class="search-bar">
+          <button (click)="onSearch()">
+            <mat-icon class="search-icon">search</mat-icon>
+          </button>
 
-            <input type="text" [(ngModel)]="searchTerm" (keydown.enter)="onSearch()" />
+          <input type="text" [(ngModel)]="searchTerm" (keydown.enter)="onSearch()" />
 
-            <button *ngIf="searchTerm" (click)="clearSearch()">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
+          <button *ngIf="searchTerm" (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
-      </div>-->
+      </div>
+    </div>-->
 
-      <div class="right-section">
-        <div *ngIf="!userLoginOn" class="user-actions">
+    <div class="right-section">
+      @if (!userLoginOn) {
+        <div class="user-actions">
           <button mat-icon-button (click)="openHelp()" aria-label="Ayuda" style="color: white;">
             <mat-icon>help_outline</mat-icon>
           </button>
           <app-theme-toggle-button></app-theme-toggle-button>
         </div>
+      }
 
-        <div *ngIf="userLoginOn" class="user-actions">
-          <button
-            *ngIf="userRol === 'Tatuador' && !isHomePage"
-            mat-icon-button
-            routerLink="/mi-portfolio"
-            style="color: white;"
-            aria-label="Mi Portfolio"
-          >
-            <mat-icon>grid_view</mat-icon>
-          </button>
+      @if (userLoginOn) {
+        <div class="user-actions">
+          @if (userRol === 'Tatuador' && !isHomePage) {
+            <button
+              mat-icon-button
+              routerLink="/mi-portfolio"
+              style="color: white;"
+              aria-label="Mi Portfolio"
+              >
+              <mat-icon>grid_view</mat-icon>
+            </button>
+          }
           <button mat-icon-button [matMenuTriggerFor]="menu" style="color: white;">
             <mat-icon class="header-item-button">person</mat-icon>
           </button>
@@ -54,11 +58,11 @@
               <span>Cerrar Sesión</span>
             </button>
           </mat-menu>
-
           <app-theme-toggle-button></app-theme-toggle-button>
         </div>
-      </div>
-
+      }
     </div>
-  </nav>
+
+  </div>
+</nav>
 </div>

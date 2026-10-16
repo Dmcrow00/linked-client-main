@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { LoginService } from '../../services/auth/login.service';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -7,7 +7,7 @@ import { HelpDialogComponent } from 'src/app/components/help-dialog/help-dialog.
 import { SupportTicketCreateComponent } from 'src/app/aplicacion/support-ticket/support-ticket-create/support-ticket-create.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from 'src/app/services/user/user.service';
-import { NgIf } from '@angular/common';
+
 import { MatIconButton } from '@angular/material/button';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
@@ -17,23 +17,21 @@ import { ThemeToggleComponent } from '../../components/theme-toggle/theme-toggle
     selector: 'app-nav',
     templateUrl: './nav.component.html',
     styleUrls: ['./nav.component.scss'],
-    imports: [RouterLink, NgIf, MatIconButton, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, ThemeToggleComponent]
+    imports: [RouterLink, MatIconButton, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, ThemeToggleComponent]
 })
 export class NavComponent implements OnInit, OnDestroy {
+  private loginService = inject(LoginService);
+  private userService = inject(UserService);
+  private router = inject(Router);
+  private proximamenteService = inject(ProximamenteService);
+  private dialog = inject(MatDialog);
+
   searchTerm: string = '';
   userLoginOn: boolean = false;
   username: string | null = null;
   userRol: string | null = null;
   currentUrl: string = '';
   private subscriptions: Subscription = new Subscription();
-
-  constructor(
-    private loginService: LoginService,
-    private userService: UserService,
-    private router: Router,
-    private proximamenteService: ProximamenteService,
-    private dialog: MatDialog
-  ) { }
 
   menuOpen: boolean = false; // Estado inicial cerrado
 

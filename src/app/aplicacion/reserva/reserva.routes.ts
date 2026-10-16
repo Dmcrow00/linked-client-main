@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { ReservaComponent } from './reserva.component';
 import { ListadoTatuadoresComponent } from './listado-tatuadores/listado-tatuadores.component';
 import { SeleccionarHorarioComponent } from './seleccionar-horario/seleccionar-horario.component';
 import { ConfirmacionReservaComponent } from './confirmacion-reserva/confirmacion-reserva.component';
 
-const routes: Routes = [
+export const RESERVA_ROUTES: Routes = [
   {
     path: '', // La ruta base será /reserva
     component: ReservaComponent,
@@ -19,9 +18,3 @@ const routes: Routes = [
     ]
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class ReservaRoutingModule { }

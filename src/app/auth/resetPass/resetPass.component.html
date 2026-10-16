@@ -9,10 +9,14 @@
         <mat-form-field appearance="outline" class="col-12">
           <mat-label>Token de Recuperación</mat-label>
           <input matInput formControlName="token" placeholder="Ingrese su token de recuperación" required />
-          <mat-error
-            *ngIf="ResetPassForm.get('token')?.invalid && (ResetPassForm.get('token')?.dirty || ResetPassForm.get('token')?.touched)">
-            <div *ngIf="ResetPassForm.get('token')?.hasError('required')">El token es requerido.</div>
-          </mat-error>
+          @if (ResetPassForm.get('token')?.invalid && (ResetPassForm.get('token')?.dirty || ResetPassForm.get('token')?.touched)) {
+            <mat-error
+              >
+              @if (ResetPassForm.get('token')?.hasError('required')) {
+                <div>El token es requerido.</div>
+              }
+            </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -21,29 +25,35 @@
           <mat-label>Nueva Contraseña</mat-label>
           <input matInput formControlName="newPassword" [type]="hide ? 'password' : 'text'"
             placeholder="Ingrese su nueva contraseña" required />
-          <button mat-icon-button matSuffix type="button" (click)="hide = !hide"
-            [attr.aria-label]="'Mostrar/ocultar contraseña'" [attr.aria-pressed]="!hide">
+            <button mat-icon-button matSuffix type="button" (click)="hide = !hide"
+              [attr.aria-label]="'Mostrar/ocultar contraseña'" [attr.aria-pressed]="!hide">
 
-            <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          <mat-error
-            *ngIf="ResetPassForm.get('newPassword')?.invalid && (ResetPassForm.get('newPassword')?.dirty || ResetPassForm.get('newPassword')?.touched)">
-            <div *ngIf="ResetPassForm.get('newPassword')?.hasError('required')">La nueva contraseña es requerida.</div>
-            <div *ngIf="ResetPassForm.get('newPassword')?.hasError('minlength')">La contraseña debe tener al menos 6
-              caracteres.
-            </div>
-          </mat-error>
-        </mat-form-field>
-      </div>
+              <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (ResetPassForm.get('newPassword')?.invalid && (ResetPassForm.get('newPassword')?.dirty || ResetPassForm.get('newPassword')?.touched)) {
+              <mat-error
+                >
+                @if (ResetPassForm.get('newPassword')?.hasError('required')) {
+                  <div>La nueva contraseña es requerida.</div>
+                }
+                @if (ResetPassForm.get('newPassword')?.hasError('minlength')) {
+                  <div>La contraseña debe tener al menos 6
+                    caracteres.
+                  </div>
+                }
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
 
 
 
-    </mat-card-content>
+      </mat-card-content>
 
-    <mat-card-actions>
-      <button mat-raised-button color="primary" type="submit" class="reset-password-button" appNoDoubleSubmit>
-        Restaurar Contraseña
-      </button>
-    </mat-card-actions>
-  </mat-card>
-</form>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" type="submit" class="reset-password-button" appNoDoubleSubmit>
+          Restaurar Contraseña
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </form>

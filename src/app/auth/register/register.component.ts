@@ -1,4 +1,4 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { RegisterService } from 'src/app/services/auth/register.service';
@@ -11,7 +11,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatPrefix, MatSuffix, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -29,9 +29,18 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     selector: 'app-register',
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatPrefix, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, NgIf, NgFor, MatError, MatIconButton, MatButton, MatProgressSpinner, MatTooltip, MatAutocompleteModule, MatChipsModule, RecaptchaModule, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatPrefix, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatError, MatIconButton, MatButton, MatProgressSpinner, MatTooltip, MatAutocompleteModule, MatChipsModule, RecaptchaModule, NoDoubleSubmitDirective]
 })
 export class RegisterComponent implements OnInit {
+  private formBuilder = inject(FormBuilder);
+  private registerService = inject(RegisterService);
+  private dialog = inject(MatDialog);
+  private encryptionService = inject(EncryptionService);
+  private router = inject(Router);
+  private geocodingService = inject(GeocodingService);
+  private ngZone = inject(NgZone);
+  private especialidadesService = inject(EspecialidadesService);
+
   registerForm: FormGroup;
   user: User = new User();
   today: Date = new Date();
@@ -51,16 +60,7 @@ export class RegisterComponent implements OnInit {
   especialidades: Especialidad[] = [];
   especialidadesSeleccionadas: Especialidad[] = [];
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private registerService: RegisterService,
-    private dialog: MatDialog,
-    private encryptionService: EncryptionService,
-    private router: Router,
-    private geocodingService: GeocodingService,
-    private ngZone: NgZone,
-    private especialidadesService: EspecialidadesService,
-  ) {
+  constructor() {
     this.registerForm = this.formBuilder.group(
       {
         username: ['', [Validators.required], [this.usernameAvailabilityValidator()]],

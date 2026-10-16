@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Especialidad } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.model';
 import { EspecialidadesService } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.service';
@@ -11,7 +11,7 @@ import { MatFormField, MatLabel, MatSuffix, MatHint } from '@angular/material/fo
 import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 import { MatChipGrid, MatChipRow, MatChipRemove, MatChipInput } from '@angular/material/chips';
-import { NgFor, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatOption } from '@angular/material/select';
 
@@ -19,9 +19,13 @@ import { MatOption } from '@angular/material/select';
     selector: 'app-tatuador',
     templateUrl: './tatuador.component.html',
     styleUrls: ['./tatuador.component.scss'],
-    imports: [MatDivider, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatHint, MatChipGrid, NgFor, MatChipRow, MatIcon, MatChipRemove, MatAutocompleteTrigger, MatChipInput, MatAutocomplete, MatOption, AsyncPipe]
+    imports: [MatDivider, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatHint, MatChipGrid, MatChipRow, MatIcon, MatChipRemove, MatAutocompleteTrigger, MatChipInput, MatAutocomplete, MatOption, AsyncPipe]
 })
 export class TatuadorComponent implements OnInit {
+  private tatuadorService = inject(TatuadorService);
+  private especialidadesService = inject(EspecialidadesService);
+  private fb = inject(FormBuilder);
+
   @Input() userId!: number|undefined;
   @Input() initialEstudio: string | null | undefined = null;
   @Input() initialFechaInicio: string | Date | null | undefined = null;
@@ -38,11 +42,7 @@ export class TatuadorComponent implements OnInit {
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
-  constructor(
-    private tatuadorService: TatuadorService,
-    private especialidadesService: EspecialidadesService,
-    private fb: FormBuilder
-  ) {
+  constructor() {
     this.tatuadorForm = this.fb.group({
       estudio: [''],
       fechaInicioActividad: [null]

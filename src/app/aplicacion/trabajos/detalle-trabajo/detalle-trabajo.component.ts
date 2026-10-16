@@ -1,10 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogClose } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TrabajosService } from 'src/app/services/trabajos/trabajos.service';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
@@ -14,22 +14,23 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     selector: 'app-detalle-trabajo',
     templateUrl: './detalle-trabajo.component.html',
     styleUrl: './detalle-trabajo.component.scss',
-    imports: [NgIf, MatIcon, NgFor, MatIconButton, MatDialogClose, MatDivider, DatePipe, ServerUrlPipe, NoDoubleSubmitDirective]
+    imports: [MatIcon, MatIconButton, MatDialogClose, MatDivider, DatePipe, ServerUrlPipe, NoDoubleSubmitDirective]
 })
 export class DetalleTrabajoComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<DetalleTrabajoComponent>>(MatDialogRef);
+  data = inject<{
+    trabajo: Trabajo;
+    isLiked: boolean;
+}>(MAT_DIALOG_DATA);
+  private router = inject(Router);
+  private trabajosService = inject(TrabajosService);
+  private loginService = inject(LoginService);
+
   currentImageIndex = 0;
 
   isLiked = false;
   likesCount = 0;
   userLoginOn = false;
-
-  constructor(
-    public dialogRef: MatDialogRef<DetalleTrabajoComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { trabajo: Trabajo, isLiked: boolean },
-    private router: Router,
-    private trabajosService: TrabajosService,
-    private loginService: LoginService
-  ) {}
 
   ngOnInit(): void {
 

@@ -10,44 +10,52 @@
           <input matInput type="text" [(ngModel)]="especialidad.nombre" name="nombre" #name="ngModel"
             minlength="1" required />
 
-          <button *ngIf="especialidad.nombre" matSuffix mat-icon-button aria-label="Clear"
-            (click)="especialidad.nombre = ''">
-            <mat-icon>close</mat-icon>
-          </button>
+            @if (especialidad.nombre) {
+              <button matSuffix mat-icon-button aria-label="Clear"
+                (click)="especialidad.nombre = ''">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
 
-          <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">
-            El nombre no puede estar vacio.
-          </mat-error>
-        </mat-form-field>
-      </div>
+            @if (name.invalid && (name.dirty || name.touched)) {
+              <mat-error>
+                El nombre no puede estar vacio.
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
 
-      <div class="row">
-        <mat-form-field class="col-12" appearance="outline">
-          <mat-label>Descripción</mat-label>
-          <textarea matInput rows="4" [(ngModel)]="especialidad.descripcion" name="descripcion" #descripcion="ngModel"
+        <div class="row">
+          <mat-form-field class="col-12" appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <textarea matInput rows="4" [(ngModel)]="especialidad.descripcion" name="descripcion" #descripcion="ngModel"
             minlength="1" required ></textarea>
 
-          <button *ngIf="especialidad.descripcion" matSuffix mat-icon-button aria-label="Clear"
-            (click)="especialidad.descripcion = ''">
-            <mat-icon>close</mat-icon>
-          </button>
+            @if (especialidad.descripcion) {
+              <button matSuffix mat-icon-button aria-label="Clear"
+                (click)="especialidad.descripcion = ''">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
 
-          <mat-error *ngIf="descripcion.invalid && (descripcion.dirty || descripcion.touched)">
-            La descripcion no puede estar vacia.
-          </mat-error>
-        </mat-form-field>
-      </div>
+            @if (descripcion.invalid && (descripcion.dirty || descripcion.touched)) {
+              <mat-error>
+                La descripcion no puede estar vacia.
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
 
-    </form>
-  </mat-card-content>
+      </form>
+    </mat-card-content>
 
-  <mat-card-actions class="action-buttons">
-    <button mat-stroked-button type="button" color="secondary" (click)="cancel()">
-      Cancelar
-    </button>
-    <button mat-flat-button type="submit" class="create-button" appNoDoubleSubmit [disabled]="especialidadesForm.invalid"
-      (click)="createEspecialidad()">
-      Crear
-    </button>
-  </mat-card-actions>
-</mat-card>
+    <mat-card-actions class="action-buttons">
+      <button mat-stroked-button type="button" color="secondary" (click)="cancel()">
+        Cancelar
+      </button>
+      <button mat-flat-button type="submit" class="create-button" appNoDoubleSubmit [disabled]="especialidadesForm.invalid"
+        (click)="createEspecialidad()">
+        Crear
+      </button>
+    </mat-card-actions>
+  </mat-card>

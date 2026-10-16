@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -25,9 +25,9 @@ export interface SolicitudTatuador {
 
 @Injectable({ providedIn: 'root' })
 export class SolicitudTatuadorService {
-  private endpoint = `${environment.urlApi}solicitudes-tatuador`;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private endpoint = `${environment.urlApi}solicitudes-tatuador`;
 
   getAll(): Observable<SolicitudTatuador[]> {
     return this.http.get<SolicitudTatuador[]>(this.endpoint);

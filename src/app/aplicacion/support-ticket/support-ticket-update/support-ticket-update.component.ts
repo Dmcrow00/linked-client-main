@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   MatDialog,
   MatDialogRef,
@@ -23,14 +23,18 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     imports: [MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatCardActions, MatButton, NoDoubleSubmitDirective]
 })
 export class SupportTicketUpdateComponent {
+  private supportTicketService = inject(SupportTicketService);
+  private dialog = inject(MatDialog);
+  dialogRef = inject<MatDialogRef<SupportTicketUpdateComponent>>(MatDialogRef);
+  data = inject<{
+    supportTicket: SupportTicket;
+}>(MAT_DIALOG_DATA);
+
   supportTicket: SupportTicket;
 
-  constructor(
-    private supportTicketService: SupportTicketService,
-    private dialog: MatDialog,
-    public dialogRef: MatDialogRef<SupportTicketUpdateComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { supportTicket: SupportTicket }
-  ) {
+  constructor() {
+    const data = this.data;
+
     // Inicializo el supportTicket con data del dialog
     this.supportTicket = { ...data.supportTicket };
   }

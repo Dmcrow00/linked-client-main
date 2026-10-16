@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Especialidad } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.model';
 import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
@@ -9,9 +9,9 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class TatuadorService {
-private apiUrl = `${environment.urlApi}tatuador`;
+private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+private apiUrl = `${environment.urlApi}tatuador`;
 
   getTatuadores(): Observable<Tatuador[]> {
     return this.http.get<Tatuador[]>(`${environment.urlApi}users/tatuadores`);

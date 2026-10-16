@@ -1,64 +1,68 @@
-<div class="portfolio-container" *ngIf="tatuador">
-  
-  <div class="page-header">
-    <button mat-icon-button (click)="goBack()" class="btn-back">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-  </div>
-  <div class="profile-header mat-elevation-z1">
-
-
-    <div class="avatar-container">
-      <img [src]="tatuador.profilePhoto | serverUrl"
-           class="profile-avatar" 
-           alt="Foto de perfil">
+@if (tatuador) {
+  <div class="portfolio-container">
+    <div class="page-header">
+      <button mat-icon-button (click)="goBack()" class="btn-back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
     </div>
-
-    <div class="profile-info">
-      <h1 class="artist-name">{{ "@" + tatuador.username }}</h1>
-      
-      <div class="stats-row">
-        <span class="stat-item" *ngIf="tatuador.estudio">
-            <mat-icon>storefront</mat-icon> {{ tatuador.estudio }}
-        </span>
-        <span class="stat-item" *ngIf="tatuador.antiguedad">
-            <mat-icon>history_edu</mat-icon> {{ tatuador.antiguedad }} años exp.
-        </span>
+    <div class="profile-header mat-elevation-z1">
+      <div class="avatar-container">
+        <img [src]="tatuador.profilePhoto | serverUrl"
+          class="profile-avatar"
+          alt="Foto de perfil">
+        </div>
+        <div class="profile-info">
+          <h1 class="artist-name">{{ "@" + tatuador.username }}</h1>
+          <div class="stats-row">
+            @if (tatuador.estudio) {
+              <span class="stat-item">
+                <mat-icon>storefront</mat-icon> {{ tatuador.estudio }}
+              </span>
+            }
+            @if (tatuador.antiguedad) {
+              <span class="stat-item">
+                <mat-icon>history_edu</mat-icon> {{ tatuador.antiguedad }} años exp.
+              </span>
+            }
+          </div>
+          @if (tatuador.especialidades && tatuador.especialidades.length > 0) {
+            <div class="tags-row">
+              @for (esp of tatuador.especialidades; track esp) {
+                <span class="tag">{{ esp.nombre }}</span>
+              }
+            </div>
+          }
+          @if (userLoginOn && esCliente) {
+            <div class="actions-row">
+              <button mat-flat-button class="btn-reservar normal-button" (click)="irAReservar()">
+                Reservar Turno
+              </button>
+            </div>
+          }
+        </div>
       </div>
-
-      <div class="tags-row" *ngIf="tatuador.especialidades && tatuador.especialidades.length > 0">
-         <span class="tag" *ngFor="let esp of tatuador.especialidades">{{ esp.nombre }}</span>
+      <div class="gallery-title">
+        <h3>Portfolio</h3>
+        <span class="count">{{ trabajos.length }} publicaciones</span>
       </div>
-
-      <div class="actions-row" *ngIf="userLoginOn && esCliente">
-         <button mat-flat-button class="btn-reservar normal-button" (click)="irAReservar()">
-            Reservar Turno
-         </button>
-      </div>
+      @if (!isLoading && trabajos.length > 0) {
+        <div class="galeria-grid">
+          @for (trabajo of trabajos; track trabajo) {
+            <app-post-tile
+              [trabajo]="trabajo"
+              [isLiked]="misLikes.has(trabajo.id)"
+              [showArtistInfo]="false"
+              (click)="abrirDetalle(trabajo)"
+              (toggleLike)="toggleLike(trabajo)">
+            </app-post-tile>
+          }
+        </div>
+      }
+      @if (!isLoading && trabajos.length === 0) {
+        <div class="empty-state">
+          <mat-icon>image_not_supported</mat-icon>
+          <p>Este artista aún no ha subido trabajos.</p>
+        </div>
+      }
     </div>
-  </div>
-
-  <div class="gallery-title">
-      <h3>Portfolio</h3>
-      <span class="count">{{ trabajos.length }} publicaciones</span>
-  </div>
-
-  <div class="galeria-grid" *ngIf="!isLoading && trabajos.length > 0">
-    <app-post-tile 
-      *ngFor="let trabajo of trabajos"
-      [trabajo]="trabajo"
-      [isLiked]="misLikes.has(trabajo.id)"
-      [showArtistInfo]="false" 
-      (click)="abrirDetalle(trabajo)"
-      (toggleLike)="toggleLike(trabajo)">
-      </app-post-tile>
-  </div>
-
-  
-
-  <div *ngIf="!isLoading && trabajos.length === 0" class="empty-state">
-      <mat-icon>image_not_supported</mat-icon>
-      <p>Este artista aún no ha subido trabajos.</p>
-  </div>
-
-</div>
+  }

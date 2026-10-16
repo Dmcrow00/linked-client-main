@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Especialidad, EspecialidadPayload } from './especialidades.model';
@@ -8,10 +8,9 @@ import { Especialidad, EspecialidadPayload } from './especialidades.model';
   providedIn: 'root'
 })
 export class EspecialidadesService {
-private endpoint = `${environment.urlApi}especialidades`;
+private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {
-  }
+private endpoint = `${environment.urlApi}especialidades`;
 
   createEspecialidad(especialidad: EspecialidadPayload): Observable<Especialidad> {
     return this.http.post<Especialidad>(`${this.endpoint}`, especialidad);

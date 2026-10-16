@@ -1,14 +1,14 @@
-import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
 
 @Directive({
   selector: 'button[appNoDoubleSubmit]',
   standalone: true
 })
 export class NoDoubleSubmitDirective {
+  private el = inject<ElementRef<HTMLButtonElement>>(ElementRef);
+
   @Input() submitDelay = 1500;
   private pending = false;
-
-  constructor(private el: ElementRef<HTMLButtonElement>) {}
 
   @HostListener('click', ['$event'])
   onClick(event: Event): void {

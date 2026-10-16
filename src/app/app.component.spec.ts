@@ -39,9 +39,9 @@ describe('AppComponent', () => {
         MatToolbarModule,
         MatMenuModule,
         MatSnackBarModule,
-        HeaderComponent, NavComponent, FooterComponent
+        HeaderComponent, NavComponent, FooterComponent,
+        AppComponent
     ],
-    declarations: [AppComponent],
     providers: [
         LoginService,
         provideHttpClient(withInterceptorsFromDi()),

@@ -17,60 +17,65 @@
             #nombre="ngModel"
             required
             minlength="1"
-          />
+            />
 
-          <button
-            *ngIf="especialidad.nombre"
-            matSuffix
-            mat-icon-button
-            aria-label="Clear"
-            (click)="especialidad.nombre = ''"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
+            @if (especialidad.nombre) {
+              <button
+                matSuffix
+                mat-icon-button
+                aria-label="Clear"
+                (click)="especialidad.nombre = ''"
+                >
+                <mat-icon>close</mat-icon>
+              </button>
+            }
 
-          <mat-error *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
-            El nombre no puede estar vacío.
-          </mat-error>
-        </mat-form-field>
-      </div>
+            @if (nombre.invalid && (nombre.dirty || nombre.touched)) {
+              <mat-error>
+                El nombre no puede estar vacío.
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
 
-      <!-- Descripción -->
-      <div class="row">
-        <mat-form-field class="col-12" appearance="outline">
-          <mat-label>Descripción</mat-label>
-          <textarea
-            matInput
-            rows="4"
-            [(ngModel)]="especialidad.descripcion"
-            name="descripcion"
-            #descripcion="ngModel"
-            required
-            minlength="1"
-          ></textarea>
+        <!-- Descripción -->
+        <div class="row">
+          <mat-form-field class="col-12" appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <textarea
+              matInput
+              rows="4"
+              [(ngModel)]="especialidad.descripcion"
+              name="descripcion"
+              #descripcion="ngModel"
+              required
+              minlength="1"
+            ></textarea>
 
-          <mat-error *ngIf="descripcion.invalid && (descripcion.dirty || descripcion.touched)">
-            La descripción no puede estar vacía.
-          </mat-error>
-        </mat-form-field>
-      </div>
-    </form>
-  </mat-card-content>
+            @if (descripcion.invalid && (descripcion.dirty || descripcion.touched)) {
+              <mat-error>
+                La descripción no puede estar vacía.
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-card-content>
 
-  <mat-card-actions class="action-buttons">
-    <button mat-stroked-button color="warn" type="button" (click)="cancel()">
-      Cancelar
-    </button>
+    <mat-card-actions class="action-buttons">
+      <button mat-stroked-button color="warn" type="button" (click)="cancel()">
+        Cancelar
+      </button>
 
-    <button
-      mat-raised-button
-      class="create-button"
-      type="submit"
-      appNoDoubleSubmit
-      (click)="onUpdateEspecialidad()"
-      [disabled]="especialidadForm.invalid"
-    >
-      Actualizar
-    </button>
-  </mat-card-actions>
-</mat-card>
+      <button
+        mat-raised-button
+        class="create-button"
+        type="submit"
+        appNoDoubleSubmit
+        (click)="onUpdateEspecialidad()"
+        [disabled]="especialidadForm.invalid"
+        >
+        Actualizar
+      </button>
+    </mat-card-actions>
+  </mat-card>

@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { NgFor, NgIf, DatePipe, Location } from '@angular/common';
+import { Component, Input, OnInit, inject } from '@angular/core';
+import { DatePipe, Location } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
@@ -15,22 +15,20 @@ import { firstValueFrom } from 'rxjs';
   selector: 'app-solicitudes-tatuador',
   templateUrl: './solicitudes-tatuador.component.html',
   styleUrls: ['./solicitudes-tatuador.component.scss'],
-  imports: [NgFor, NgIf, DatePipe, MatIcon, MatButton, MatIconButton, NoDoubleSubmitDirective],
+  imports: [DatePipe, MatIcon, MatButton, MatIconButton, NoDoubleSubmitDirective],
 })
 export class SolicitudesTatuadorComponent implements OnInit {
+  private service = inject(SolicitudTatuadorService);
+  private espService = inject(EspecialidadesService);
+  private userService = inject(UserService);
+  private dialog = inject(MatDialog);
+  private location = inject(Location);
+
   @Input() showHero = true;
   solicitudes: SolicitudTatuador[] = [];
   especialidadesMap: Map<number, string> = new Map();
   loading = true;
   private tatuadoresIds: Set<number> = new Set();
-
-  constructor(
-    private service: SolicitudTatuadorService,
-    private espService: EspecialidadesService,
-    private userService: UserService,
-    private dialog: MatDialog,
-    private location: Location
-  ) { }
 
   goBack(): void { this.location.back(); }
 

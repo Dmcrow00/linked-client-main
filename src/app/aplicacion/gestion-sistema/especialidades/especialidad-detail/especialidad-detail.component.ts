@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Especialidad } from '../especialidades.model';
 import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions } from '@angular/material/card';
@@ -12,10 +12,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatCard, MatCardHeader, MatCardAvatar, MatIcon, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions, MatButton]
 })
 export class EspecialidadDetailComponent {
-  constructor(
-    public dialogRef: MatDialogRef<EspecialidadDetailComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { especialidad: Especialidad }
-  ) {}
+  dialogRef = inject<MatDialogRef<EspecialidadDetailComponent>>(MatDialogRef);
+  data = inject<{
+    especialidad: Especialidad;
+}>(MAT_DIALOG_DATA);
+
 
   onClose(): void {
     this.dialogRef.close();

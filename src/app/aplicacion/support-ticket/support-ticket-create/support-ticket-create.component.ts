@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { NgIf, NgFor } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { LoginService } from 'src/app/services/auth/login.service';
 
@@ -25,14 +25,33 @@ import { UserService } from 'src/app/services/user/user.service';
   templateUrl: './support-ticket-create.component.html',
   styleUrls: ['./support-ticket-create.component.scss'],
   imports: [
-    NgIf, NgFor, FormsModule,
-    MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions,
-    MatFormField, MatLabel, MatHint,
-    MatInput, MatSelect, MatOption,
-    MatButton, MatIconButton, MatIcon, MatDivider, MatTooltip, NoDoubleSubmitDirective,
-  ]
+    FormsModule,
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    MatCardActions,
+    MatFormField,
+    MatLabel,
+    MatHint,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatDivider,
+    MatTooltip,
+    NoDoubleSubmitDirective
+]
 })
 export class SupportTicketCreateComponent implements OnInit {
+  private supportTicketService = inject(SupportTicketService);
+  private dialogRef = inject<MatDialogRef<SupportTicketCreateComponent>>(MatDialogRef);
+  private userService = inject(UserService);
+  private loginService = inject(LoginService);
+  private dialog = inject(MatDialog);
+
 
   categorias = ['Bug / Error', 'Consulta general', 'Sugerencia de mejora', 'Reclamo', 'Otro'];
 
@@ -40,14 +59,6 @@ export class SupportTicketCreateComponent implements OnInit {
   screenshotPreview: string | null = null;
   screenshotError = '';
   isAnonymous = false;
-
-  constructor(
-    private supportTicketService: SupportTicketService,
-    private dialogRef: MatDialogRef<SupportTicketCreateComponent>,
-    private userService: UserService,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-  ) {}
 
   ngOnInit(): void {
     this.loginService.userLoginOn.subscribe(loggedIn => {

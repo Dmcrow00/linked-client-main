@@ -1,17 +1,27 @@
-<app-header *ngIf="showShell"></app-header>
+@if (showShell) {
+  <app-header></app-header>
+}
 
-<div *ngIf="!showShell" class="floating-auth-actions">
-  <button mat-icon-button routerLink="/inicio" aria-label="Ir al inicio">
-    <mat-icon>home</mat-icon>
-  </button>
-  <app-theme-toggle-button></app-theme-toggle-button>
-</div>
+@if (!showShell) {
+  <div class="floating-auth-actions">
+    <button mat-icon-button routerLink="/inicio" aria-label="Ir al inicio">
+      <mat-icon>home</mat-icon>
+    </button>
+    <app-theme-toggle-button></app-theme-toggle-button>
+  </div>
+}
 
 <div class="main-container">
-  <app-sweitemmenu *ngIf="userLoginOn && userIsAdmin"></app-sweitemmenu>
+  @if (userLoginOn && userIsAdmin) {
+    <app-sweitemmenu></app-sweitemmenu>
+  }
   <div class="content-container">
-    <app-loading-overlay *ngIf="isLoading$ | async"></app-loading-overlay>
+    @if (isLoading$ | async) {
+      <app-loading-overlay></app-loading-overlay>
+    }
     <router-outlet></router-outlet>
   </div>
 </div>
-<app-footer *ngIf="showShell"></app-footer>
+@if (showShell) {
+  <app-footer></app-footer>
+}

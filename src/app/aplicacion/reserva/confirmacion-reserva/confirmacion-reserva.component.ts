@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReservaStateService } from 'src/app/services/reserva/reserva-state.service';
@@ -18,12 +18,10 @@ import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
     ]
 })
 export class ConfirmacionReservaComponent implements OnInit {
-  reserva: any;
+  private router = inject(Router);
+  private reservaStateService = inject(ReservaStateService);
 
-  constructor(
-    private router: Router,
-    private reservaStateService: ReservaStateService
-  ) {}
+  reserva: any;
 
   ngOnInit(): void {  
     this.reserva = this.reservaStateService.getDatos();

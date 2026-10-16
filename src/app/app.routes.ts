@@ -1,12 +1,9 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { adminGuard } from './guards/admin.guard';
 import { NotAuthorizedComponent } from './components/not-authorized/not-authorized.component';
 
 import { LoginComponent } from './auth/login/login.component';
-
-import { AppComponent } from './app.component';
 
 import { RegisterComponent } from './auth/register/register.component';
 import { HomeComponent } from './pages/home/home.component';
@@ -29,7 +26,7 @@ import { PrivacidadComponent } from './pages/privacidad/privacidad.component';
 import { ContactoComponent } from './pages/contacto/contacto.component';
 import { SolicitudesTatuadorComponent } from './aplicacion/solicitudes-tatuador/solicitudes-tatuador.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: '/inicio', pathMatch: 'full' },
   { path: 'inicio', component: HomeComponent },
   { path: 'not-authorized', component: NotAuthorizedComponent },
@@ -46,7 +43,7 @@ const routes: Routes = [
   { path: 'gestionar-agenda', component: AgendaComponent, canActivate: [ /* AuthGuard de Tatuador */] },
   {
     path: 'reserva',
-    loadChildren: () => import('./aplicacion/reserva/reserva-routing.module.js').then(m => m.ReservaRoutingModule)
+    loadChildren: () => import('./aplicacion/reserva/reserva.routes').then(m => m.RESERVA_ROUTES)
   },
   {
     path: 'mis-reservas',
@@ -60,12 +57,5 @@ const routes: Routes = [
   { path: 'privacidad', component: PrivacidadComponent },
   { path: 'contacto', component: ContactoComponent },
   { path: '**', redirectTo: '/inicio', pathMatch: 'full' }, //redireccionar a inicio si no hay match
-  // Carga diferida (lazy loading) para el flujo de prereserva
-
 ];
 
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule { }

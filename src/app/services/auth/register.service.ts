@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { User } from 'src/app/auth/auth.models';
 import { environment } from 'src/environments/environment';
@@ -8,7 +8,8 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class RegisterService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+
 
   register(user: Omit<User, 'birth_date'> & { birth_date?: string }): Observable<any> {
     return this.http.post<any>(`${environment.urlHost}users/register`, user);

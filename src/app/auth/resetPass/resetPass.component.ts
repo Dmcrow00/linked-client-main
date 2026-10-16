@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginService } from '../../services/auth/login.service';
@@ -10,7 +10,7 @@ import { ResetPasswordService } from 'src/app/services/auth/resetpass.service';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
 import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { NgIf } from '@angular/common';
+
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
@@ -20,22 +20,22 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     selector: 'app-reset-pass',
     templateUrl: './resetPass.component.html',
     styleUrls: ['./resetPass.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatLabel, MatInput, NgIf, MatError, MatIconButton, MatSuffix, MatIcon, MatCardActions, MatButton, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatLabel, MatInput, MatError, MatIconButton, MatSuffix, MatIcon, MatCardActions, MatButton, NoDoubleSubmitDirective]
 })
 export class ResetPassComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private loginService = inject(LoginService);
+  private dialog = inject(MatDialog);
+  private encryptionService = inject(EncryptionService);
+  private resetPasswordService = inject(ResetPasswordService);
+
   ResetPassForm: FormGroup;
   password: string = '';
   token: string = '';
   hide = true; 
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-    private encryptionService: EncryptionService,
-    private resetPasswordService: ResetPasswordService
-  ) {
+  constructor() {
     this.ResetPassForm = this.fb.group({
       token: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.minLength(6)]],

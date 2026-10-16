@@ -8,152 +8,164 @@
     </div>
   </div>
 
-  <div *ngIf="selectedTatuador" class="booking-grid">
-    <!-- ── Columna izquierda: Calendario + datos del tatuador ── -->
-    <div class="booking-col booking-col-calendar">
-      <div class="section-title">
-        <mat-icon>calendar_today</mat-icon> Elige una fecha
-      </div>
-      <mat-calendar
-        [minDate]="minDate"
-        [maxDate]="maxDate"
-        [dateFilter]="dateFilter"
-        (selectedChange)="onDateSelected($event)"
-        [selected]="selectedDate"
-      >
-      </mat-calendar>
-
-      <!-- Tarjeta del tatuador — solo visible en desktop -->
-      <div class="tatuador-sidebar-card">
-        <div class="tatuador-sidebar-avatar">
-          <img
-            [src]="getPhotoUrl(selectedTatuador.profilePhoto)"
-            [alt]="selectedTatuador.realname || ''"
-          />
+  @if (selectedTatuador) {
+    <div class="booking-grid">
+      <!-- ── Columna izquierda: Calendario + datos del tatuador ── -->
+      <div class="booking-col booking-col-calendar">
+        <div class="section-title">
+          <mat-icon>calendar_today</mat-icon> Elige una fecha
         </div>
-        <p class="tatuador-sidebar-name">
-          {{ selectedTatuador.realname }} {{ selectedTatuador.surname }}
-        </p>
-        <p class="tatuador-sidebar-handle">{{ '@' + selectedTatuador.username }}</p>
-        <p class="tatuador-sidebar-meta" *ngIf="selectedTatuador.estudio">
-          <mat-icon>store</mat-icon>{{ selectedTatuador.estudio }}
-        </p>
-        <p class="tatuador-sidebar-meta" *ngIf="selectedTatuador.localidad">
-          <mat-icon>location_on</mat-icon>{{ selectedTatuador.localidad }}
-        </p>
-        <div
-          class="tatuador-sidebar-chips"
-          *ngIf="selectedTatuador.especialidades?.length"
-        >
-          <span
-            class="esp-chip"
-            *ngFor="let esp of selectedTatuador.especialidades"
-            >{{ esp.nombre }}</span
+        <mat-calendar
+          [minDate]="minDate"
+          [maxDate]="maxDate"
+          [dateFilter]="dateFilter"
+          (selectedChange)="onDateSelected($event)"
+          [selected]="selectedDate"
           >
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Columna derecha: Horarios, descripción, imágenes ── -->
-    <div class="booking-col booking-col-details">
-      <div class="section-title">
-        <mat-icon>schedule</mat-icon> Horarios Disponibles
-      </div>
-
-      <div *ngIf="!selectedDate" class="horarios-feedback">
-        Seleccioná una fecha para ver los horarios disponibles.
-      </div>
-
-      <div *ngIf="isLoadingHorarios" class="horarios-feedback">
-        Buscando horarios...
-      </div>
-
-      <div *ngIf="errorHorarios" class="horarios-feedback error">
-        {{ errorHorarios }}
-      </div>
-
-      <div
-        class="horarios-section"
-        *ngIf="!isLoadingHorarios && !errorHorarios && horarios.length > 0"
-      >
-        <button
-          *ngFor="let horario of horarios"
-          class="horario-btn"
-          [class.selected]="isTimeSelected(horario)"
-          [disabled]="!selectedDate"
-          (click)="selectTime(horario)"
-        >
-          {{ horario }}
-        </button>
-      </div>
-
-      <div
-        *ngIf="
-          !isLoadingHorarios &&
-          !errorHorarios &&
-          horarios.length === 0 &&
-          selectedDate
-        "
-        class="horarios-feedback"
-      >
-        No hay horarios disponibles para esta fecha.
-      </div>
-
-      <div class="section-title section-title--spaced">
-        <mat-icon>edit</mat-icon> Describe tu idea
-      </div>
-
-      <div class="descripcion-section">
-        <textarea
-          class="descripcion-textarea"
-          rows="4"
-          placeholder="Describe tu idea, tamaño (ej: 10x5 cm), zona del cuerpo..."
-          [(ngModel)]="descripcionCliente"
-        >
-        </textarea>
-      </div>
-
-      <div class="section-title section-title--spaced">
-        <mat-icon>photo_camera</mat-icon> Referencias (Máx {{ maxFiles }})
-      </div>
-
-      <div class="upload-section">
-        <div class="preview-container" *ngIf="previewImages.length > 0">
-          <div
-            class="preview-item"
-            *ngFor="let img of previewImages; let i = index"
-          >
-            <img [src]="img" alt="Vista previa" />
-            <button class="remove-img-btn" (click)="removeImage(i)">✕</button>
+        </mat-calendar>
+        <!-- Tarjeta del tatuador — solo visible en desktop -->
+        <div class="tatuador-sidebar-card">
+          <div class="tatuador-sidebar-avatar">
+            <img
+              [src]="getPhotoUrl(selectedTatuador.profilePhoto)"
+              [alt]="selectedTatuador.realname || ''"
+              />
+            </div>
+            <p class="tatuador-sidebar-name">
+              {{ selectedTatuador.realname }} {{ selectedTatuador.surname }}
+            </p>
+            <p class="tatuador-sidebar-handle">{{ '@' + selectedTatuador.username }}</p>
+            @if (selectedTatuador.estudio) {
+              <p class="tatuador-sidebar-meta">
+                <mat-icon>store</mat-icon>{{ selectedTatuador.estudio }}
+              </p>
+            }
+            @if (selectedTatuador.localidad) {
+              <p class="tatuador-sidebar-meta">
+                <mat-icon>location_on</mat-icon>{{ selectedTatuador.localidad }}
+              </p>
+            }
+            @if (selectedTatuador.especialidades?.length) {
+              <div
+                class="tatuador-sidebar-chips"
+                >
+                @for (esp of selectedTatuador.especialidades; track esp) {
+                  <span
+                    class="esp-chip"
+                    >{{ esp.nombre }}</span
+                    >
+                }
+              </div>
+            }
           </div>
         </div>
-
-        <label
-          class="upload-btn"
-          *ngIf="selectedFiles.length < maxFiles"
-          matRipple
-        >
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            multiple
-            (change)="onFileSelected($event)"
-          />
-          <mat-icon>add_photo_alternate</mat-icon>
-          <span>Añadir imágenes</span>
-        </label>
-      </div>
-
-      <button
-        class="btn-confirm"
-        appNoDoubleSubmit
-        [disabled]="!canConfirm() || isSaving"
-        (click)="confirmarReserva()"
-      >
-        <span *ngIf="!isSaving">Confirmar Reserva</span>
-        <span *ngIf="isSaving">Procesando...</span>
-      </button>
+        <!-- ── Columna derecha: Horarios, descripción, imágenes ── -->
+        <div class="booking-col booking-col-details">
+          <div class="section-title">
+            <mat-icon>schedule</mat-icon> Horarios Disponibles
+          </div>
+          @if (!selectedDate) {
+            <div class="horarios-feedback">
+              Seleccioná una fecha para ver los horarios disponibles.
+            </div>
+          }
+          @if (isLoadingHorarios) {
+            <div class="horarios-feedback">
+              Buscando horarios...
+            </div>
+          }
+          @if (errorHorarios) {
+            <div class="horarios-feedback error">
+              {{ errorHorarios }}
+            </div>
+          }
+          @if (!isLoadingHorarios && !errorHorarios && horarios.length > 0) {
+            <div
+              class="horarios-section"
+              >
+              @for (horario of horarios; track horario) {
+                <button
+                  class="horario-btn"
+                  [class.selected]="isTimeSelected(horario)"
+                  [disabled]="!selectedDate"
+                  (click)="selectTime(horario)"
+                  >
+                  {{ horario }}
+                </button>
+              }
+            </div>
+          }
+          @if (
+            !isLoadingHorarios &&
+            !errorHorarios &&
+            horarios.length === 0 &&
+            selectedDate
+            ) {
+            <div
+              class="horarios-feedback"
+              >
+              No hay horarios disponibles para esta fecha.
+            </div>
+          }
+          <div class="section-title section-title--spaced">
+            <mat-icon>edit</mat-icon> Describe tu idea
+          </div>
+          <div class="descripcion-section">
+            <textarea
+              class="descripcion-textarea"
+              rows="4"
+              placeholder="Describe tu idea, tamaño (ej: 10x5 cm), zona del cuerpo..."
+              [(ngModel)]="descripcionCliente"
+              >
+            </textarea>
+          </div>
+          <div class="section-title section-title--spaced">
+            <mat-icon>photo_camera</mat-icon> Referencias (Máx {{ maxFiles }})
+          </div>
+          <div class="upload-section">
+            @if (previewImages.length > 0) {
+              <div class="preview-container">
+                @for (img of previewImages; track img; let i = $index) {
+                  <div
+                    class="preview-item"
+                    >
+                    <img [src]="img" alt="Vista previa" />
+                    <button class="remove-img-btn" (click)="removeImage(i)">✕</button>
+                  </div>
+                }
+              </div>
+            }
+            @if (selectedFiles.length < maxFiles) {
+              <label
+                class="upload-btn"
+                matRipple
+                >
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  multiple
+                  (change)="onFileSelected($event)"
+                  />
+                  <mat-icon>add_photo_alternate</mat-icon>
+                  <span>Añadir imágenes</span>
+                </label>
+              }
+            </div>
+            <button
+              class="btn-confirm"
+              appNoDoubleSubmit
+              [disabled]="!canConfirm() || isSaving"
+              (click)="confirmarReserva()"
+              >
+              @if (!isSaving) {
+                <span>Confirmar Reserva</span>
+              }
+              @if (isSaving) {
+                <span>Procesando...</span>
+              }
+            </button>
+          </div>
+        </div>
+      }
     </div>
-  </div>
-</div>

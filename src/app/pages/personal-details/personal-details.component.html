@@ -1,499 +1,512 @@
-<p *ngIf="errorMessage.length !== 0" class="text-danger">{{ errorMessage }}</p>
+@if (errorMessage.length !== 0) {
+  <p class="text-danger">{{ errorMessage }}</p>
+}
 
 <!-- Datos Personales -->
 
 <div class="card-container" [class.is-loading]="instagramLoading">
   <!-- Overlay de carga Instagram -->
-  <div *ngIf="instagramLoading" class="instagram-loading-overlay">
-    <div class="instagram-spinner"></div>
-    <p class="instagram-loading-text">{{ instagramLoadingMessage }}</p>
-  </div>
+  @if (instagramLoading) {
+    <div class="instagram-loading-overlay">
+      <div class="instagram-spinner"></div>
+      <p class="instagram-loading-text">{{ instagramLoadingMessage }}</p>
+    </div>
+  }
 
   <!-- ===================== MODO VISTA ===================== -->
-  <mat-card
-    *ngIf="(userLoginOn && !editMode) || !userLoginOn"
-    class="personal-details-card"
-  >
-    <mat-card-header>
-      <div mat-card-avatar class="profile-picture-container">
-        <img
-          [src]="previewImageUrl || (user?.profilePhoto | serverUrl)"
-          alt="Foto de perfil"
-          class="profile-picture"
-        />
-      </div>
-      <div mat-card-header-text>
-        <mat-card-title>{{ user?.realname }} {{ user?.surname }}</mat-card-title>
-        <mat-card-subtitle>{{ user?.username }}</mat-card-subtitle>
-      </div>
-    </mat-card-header>
-
-    <mat-divider></mat-divider>
-
-    <mat-card-content>
-
-      <!-- Información Básica -->
-      <div class="section-block">
-        <div class="section-block-header">
-          <mat-icon>person_outline</mat-icon>
-          <span>Información Básica</span>
-        </div>
-        <div class="info-row">
-          <mat-icon class="info-icon">cake</mat-icon>
-          <span class="info-label">Fecha de nacimiento</span>
-          <span class="info-value">{{ user?.birthDate | date }}</span>
-        </div>
-        <div class="info-row">
-          <mat-icon class="info-icon">badge</mat-icon>
-          <span class="info-label">Tipo de cuenta</span>
-          <span class="info-value">{{ userRol }}</span>
-        </div>
-        <div class="info-row" *ngIf="user?.localidad">
-          <mat-icon class="info-icon">location_on</mat-icon>
-          <span class="info-label">Localidad</span>
-          <span class="info-value">{{ user?.localidad }}</span>
-        </div>
-      </div>
-
-      <ng-container *ngIf="userRol === 'Tatuador'">
-
-        <!-- Información Profesional -->
-        <div class="section-block">
-          <div class="section-block-header">
-            <mat-icon>work_outline</mat-icon>
-            <span>Información Profesional</span>
-          </div>
-          <div class="info-row" *ngIf="user?.estudio">
-            <mat-icon class="info-icon">store</mat-icon>
-            <span class="info-label">Estudio</span>
-            <span class="info-value">{{ user?.estudio }}</span>
-          </div>
-          <div
-            class="info-row"
-            *ngIf="user?.antiguedad !== undefined && user?.antiguedad !== null"
-          >
-            <mat-icon class="info-icon">timeline</mat-icon>
-            <span class="info-label">Antigüedad</span>
-            <span class="info-value"
-              >{{ user?.antiguedad }}
-              {{ user?.antiguedad === 1 ? "año" : "años" }} de
-              experiencia</span
-            >
-          </div>
-          <div
-            *ngIf="user?.especialidades && user?.especialidades!.length > 0"
-            class="info-row info-row--wrap"
-          >
-            <mat-icon class="info-icon">style</mat-icon>
-            <span class="info-label">Especialidades</span>
-            <mat-chip-set
-              aria-label="Especialidades del tatuador"
-              class="especialidades-view"
-            >
-              <mat-chip *ngFor="let esp of user?.especialidades">{{
-                esp.nombre
-              }}</mat-chip>
-            </mat-chip-set>
-          </div>
-          <div class="info-row" *ngIf="user?.instagramHandle">
-            <span class="info-icon ig-icon-small">
-              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-            </span>
-            <span class="info-label">Instagram</span>
-            <a
-              [href]="'https://www.instagram.com/' + user!.instagramHandle!.replace('@','')"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="info-value ig-link"
-            >{{ '@' + user!.instagramHandle!.replace('@','') }}</a>
-          </div>
-        </div>
-
-        <!-- Instagram -->
-        <div class="section-block">
-          <div class="section-block-header">
-            <span class="instagram-icon-header">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="17"
-                height="17"
-              >
-                <path
-                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-                />
-              </svg>
-            </span>
-            <span>Instagram</span>
-            <span
-              *ngIf="!instagramStatus.connected"
-              class="instagram-status-badge disconnected"
-            >
-              <mat-icon>link_off</mat-icon>
-              No vinculada
-            </span>
-            <span
-              *ngIf="instagramStatus.connected"
-              class="instagram-status-badge connected"
-            >
-              <mat-icon>check_circle</mat-icon>
-              Vinculada
-            </span>
-          </div>
-
-          <p
-            *ngIf="instagramMessage"
-            [class.instagram-message-success]="!instagramMessageIsError"
-            [class.instagram-message-error]="instagramMessageIsError"
-            class="instagram-message"
-          >
-            <mat-icon>{{
-              instagramMessageIsError ? "error_outline" : "check_circle"
-            }}</mat-icon>
-            {{ instagramMessage }}
-          </p>
-
-          <!-- No vinculado -->
-          <div *ngIf="!instagramStatus.connected" class="instagram-connect-area">
-            <div *ngIf="showInstagramWarning" class="instagram-preflight-warning">
-              <div class="instagram-preflight-header">
-                <mat-icon class="preflight-warning-icon">warning_amber</mat-icon>
-                <span>Requisito previo para vincular</span>
-              </div>
-              <p>
-                Para vincular tu cuenta de Instagram necesitás tener un perfil de
-                tipo <strong>Creador de contenido</strong> o
-                <strong>Empresa</strong>. Las cuentas personales no son
-                compatibles con esta integración.
-              </p>
-              <p class="preflight-steps-title">
-                <strong>¿Tenés una cuenta personal? Seguí estos pasos:</strong>
-              </p>
-              <ol class="preflight-steps">
-                <li>Abrí Instagram y entrá a tu perfil.</li>
-                <li>Tocá el menú (☰) → <em>Configuración y privacidad</em>.</li>
-                <li>Seleccioná <em>Tipo de cuenta y herramientas</em>.</li>
-                <li>
-                  Elegí <em>Cambiar a cuenta profesional</em> y seleccioná
-                  <strong>Creador</strong> o <strong>Empresa</strong>.
-                </li>
-              </ol>
-              <p class="preflight-note">
-                Una vez que hayas configurado tu cuenta profesional, podés
-                continuar con la vinculación.
-              </p>
-              <div class="preflight-actions">
-                <button
-                  class="btn-preflight-cancel"
-                  (click)="cancelConnectInstagram()"
-                >
-                  <mat-icon>close</mat-icon>
-                  Cancelar
-                </button>
-                <button
-                  class="btn-instagram-connect"
-                  appNoDoubleSubmit
-                  (click)="confirmConnectInstagram()"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="20"
-                    height="20"
-                    fill="#fff"
-                  >
-                    <path
-                      d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-                    />
-                  </svg>
-                  Vincular cuenta
-                </button>
-              </div>
-            </div>
-
-            <button
-              *ngIf="!showInstagramWarning"
-              class="btn-instagram-connect"
-              (click)="connectInstagram()"
-              [disabled]="instagramLoading"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="#fff"
-              >
-                <path
-                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-                />
-              </svg>
-              Vincular cuenta
-            </button>
-          </div>
-
-          <!-- Vinculado -->
-          <div *ngIf="instagramStatus.connected" class="instagram-connected-area">
-            <p
-              *ngIf="instagramStatus.instagramUserId"
-              class="instagram-account-id-text"
-            >
-              ID: {{ instagramStatus.instagramUserId }}
-            </p>
-            <p *ngIf="instagramStatus.expiresAt" class="instagram-expires">
-              Token válido hasta:
-              {{ instagramStatus.expiresAt | date: "dd/MM/yyyy" }}
-            </p>
-            <div class="instagram-actions">
-              <button
-                class="btn-instagram-sync"
-                appNoDoubleSubmit
-                (click)="syncInstagramPosts()"
-                [disabled]="instagramLoading"
-              >
-                <mat-icon>sync</mat-icon>
-                {{ instagramLoading ? "Sincronizando..." : "Sincronizar posts" }}
-              </button>
-              <button
-                class="btn-instagram-disconnect"
-                appNoDoubleSubmit
-                (click)="disconnectInstagram()"
-                [disabled]="instagramLoading"
-              >
-                <mat-icon>link_off</mat-icon>
-                Desvincular
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </ng-container>
-    </mat-card-content>
-
-    <mat-divider></mat-divider>
-
-    <mat-card-actions *ngIf="userLoginOn && !editMode" class="action-buttons">
-      <div class="edit-button" (click)="editMode = true">
-        <mat-icon>edit</mat-icon>
-        <span>Editar datos</span>
-      </div>
-      <div class="edit-button" (click)="requestPasswordChange()">
-        <mat-icon>lock</mat-icon>
-        <span>Cambiar contraseña</span>
-      </div>
-    </mat-card-actions>
-
-    <!-- Confirmación cambio de contraseña -->
-    <div *ngIf="showPasswordConfirm" class="password-confirm-panel">
-      <div class="password-confirm-header">
-        <mat-icon class="password-confirm-icon">lock_reset</mat-icon>
-        <span>Cambiar contraseña</span>
-      </div>
-      <p>Se enviará un correo a <strong>{{ user?.email }}</strong> con un enlace para restablecer tu contraseña.</p>
-      <div class="password-confirm-actions">
-        <button class="btn-preflight-cancel" (click)="cancelPasswordChange()" [disabled]="passwordResetLoading">
-          <mat-icon>close</mat-icon>
-          Cancelar
-        </button>
-        <button class="btn-password-confirm" appNoDoubleSubmit (click)="confirmPasswordChange()" [disabled]="passwordResetLoading">
-          <mat-icon>send</mat-icon>
-          {{ passwordResetLoading ? 'Enviando...' : 'Enviar correo' }}
-        </button>
-      </div>
-    </div>
-  </mat-card>
-
-  <!-- ===================== MODO EDICIÓN ===================== -->
-  <mat-card *ngIf="userLoginOn && editMode" class="edit-form-card">
-    <mat-card-title class="profile-title">Editar datos personales</mat-card-title>
-
-    <mat-divider></mat-divider>
-
-    <mat-card-content>
-      <form [formGroup]="registerForm">
-
-        <!-- Sección: Foto de perfil -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <mat-icon>photo_camera</mat-icon>
-            <span>Foto de perfil</span>
-          </div>
-          <div class="profile-picture-edit-container">
-            <div class="profile-picture-single-wrapper">
-              <img
-                [src]="previewImageUrl || (user?.profilePhoto | serverUrl)"
-                alt="Foto de perfil"
-                class="profile-picture-single"
-              />
-              <button
-                mat-icon-button
-                class="edit-photo-btn"
-                (click)="triggerFileInput()"
-                [disabled]="isPhotoBlockedByInstagram"
-              >
-                <mat-icon>{{ isPhotoBlockedByInstagram ? "lock" : "edit" }}</mat-icon>
-              </button>
-              <input
-                type="file"
-                accept=".jpg, .jpeg, .png, .webp"
-                hidden
-                (change)="onFileSelected($event)"
-                #fileInput
-              />
-            </div>
-          </div>
-          <p
-            *ngIf="isPhotoBlockedByInstagram"
-            class="instagram-photo-blocked-notice"
-          >
-            <mat-icon>info_outline</mat-icon>
-            Tu foto de perfil está sincronizada con Instagram y se actualiza
-            automáticamente.
-          </p>
-        </div>
-
-        <!-- Sección: Datos personales -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <mat-icon>person</mat-icon>
-            <span>Datos personales</span>
-          </div>
-
-          <div class="row">
-            <mat-form-field appearance="outline" class="col-12">
-              <mat-label>Nombre</mat-label>
-              <input matInput formControlName="realname" />
-            </mat-form-field>
-          </div>
-
-          <div class="row">
-            <mat-form-field appearance="outline" class="col-12">
-              <mat-label>Apellido</mat-label>
-              <input matInput formControlName="surname" />
-            </mat-form-field>
-          </div>
-
-          <div class="row">
-            <mat-form-field appearance="outline" class="col-12">
-              <mat-label>E-Mail</mat-label>
-              <input matInput formControlName="email" />
-            </mat-form-field>
-          </div>
-
-          <div class="row">
-            <mat-form-field appearance="outline" class="col-6">
-              <mat-label>Nombre de usuario</mat-label>
-              <input matInput formControlName="username" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="col-6">
-              <mat-label>Nacimiento</mat-label>
-              <input
-                matInput
-                [matDatepicker]="picker"
-                formControlName="birthDate"
-                [max]="today"
-                (input)="onDateInput($event)"
-                placeholder="dd/mm/yyyy"
-              />
-              <mat-datepicker-toggle
-                matIconSuffix
-                [for]="picker"
-              ></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Sección: Localidad -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <mat-icon>location_on</mat-icon>
-            <span>Localidad</span>
-          </div>
-
-          <div class="location-field-row">
-            <mat-form-field appearance="outline" class="location-input">
-              <mat-label>Dirección o localidad</mat-label>
-              <mat-icon matPrefix>place</mat-icon>
-              <input
-                matInput
-                formControlName="localidad"
-                placeholder="Ej: Tucuman 2850, Rosario, Santa Fe"
-                [matAutocomplete]="locationAuto"
-                autocomplete="off"
-              />
-              <mat-autocomplete
-                #locationAuto="matAutocomplete"
-                (optionSelected)="onLocationSelected($event)"
-              >
-                <mat-option *ngFor="let s of locationSuggestions" [value]="s.displayName">
-                  <mat-icon style="font-size:16px;vertical-align:middle;margin-right:6px">place</mat-icon>
-                  {{ s.displayName }}
-                </mat-option>
-              </mat-autocomplete>
-            </mat-form-field>
-
-            <button
-              mat-icon-button
-              type="button"
-              class="btn-gps"
-              (click)="usarGPS()"
-              [disabled]="isGPSLocating"
-              matTooltip="Usar mi ubicación GPS"
-            >
-              <mat-spinner *ngIf="isGPSLocating" diameter="20"></mat-spinner>
-              <mat-icon *ngIf="!isGPSLocating">my_location</mat-icon>
-            </button>
-          </div>
-
-          <div *ngIf="geocodedDisplayName && geocodedLat" class="location-verified-badge">
-            <mat-icon>check_circle</mat-icon>
-            Ubicación verificada: {{ geocodedDisplayName.split(',').slice(0, 2).join(',') }}
-          </div>
-        </div>
-
-        <!-- Sección: Información profesional (Tatuador) -->
-        <div class="form-section" *ngIf="userId && userRol === 'Tatuador'">
-          <div class="form-section-header">
-            <mat-icon>work</mat-icon>
-            <span>Información profesional</span>
-          </div>
-          <app-tatuador
-            [userId]="userId"
-            [initialEstudio]="user?.estudio"
-            [initialFechaInicio]="user?.fechaInicioActividad"
-            (especialidadesChange)="onEspecialidadesChange($event)"
-          >
-          </app-tatuador>
-
-          <div class="row" style="margin-top: 8px">
-            <mat-form-field appearance="outline" class="col-12">
-              <mat-label>Instagram</mat-label>
-              <input matInput formControlName="instagramHandle" placeholder="@tu_usuario" />
-              <mat-hint>Ingresá tu usuario de Instagram (ej: &#64;mi_usuario)</mat-hint>
-            </mat-form-field>
-          </div>
-        </div>
-
-      </form>
-    </mat-card-content>
-
-    <mat-divider></mat-divider>
-
-    <mat-card-actions class="action-buttons">
-      <button mat-stroked-button color="warn" (click)="editMode = false">
-        Cancelar
-      </button>
-      <button
-        mat-raised-button
-        class="normal-button"
-        appNoDoubleSubmit
-        (click)="onUpdateProfile()"
-        [disabled]="registerForm.invalid"
+  @if ((userLoginOn && !editMode) || !userLoginOn) {
+    <mat-card
+      class="personal-details-card"
       >
-        Guardar
-      </button>
-    </mat-card-actions>
-  </mat-card>
-</div>
+      <mat-card-header>
+        <div mat-card-avatar class="profile-picture-container">
+          <img
+            [src]="previewImageUrl || (user?.profilePhoto | serverUrl)"
+            alt="Foto de perfil"
+            class="profile-picture"
+            />
+          </div>
+          <div mat-card-header-text>
+            <mat-card-title>{{ user?.realname }} {{ user?.surname }}</mat-card-title>
+            <mat-card-subtitle>{{ user?.username }}</mat-card-subtitle>
+          </div>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content>
+          <!-- Información Básica -->
+          <div class="section-block">
+            <div class="section-block-header">
+              <mat-icon>person_outline</mat-icon>
+              <span>Información Básica</span>
+            </div>
+            <div class="info-row">
+              <mat-icon class="info-icon">cake</mat-icon>
+              <span class="info-label">Fecha de nacimiento</span>
+              <span class="info-value">{{ user?.birthDate | date }}</span>
+            </div>
+            <div class="info-row">
+              <mat-icon class="info-icon">badge</mat-icon>
+              <span class="info-label">Tipo de cuenta</span>
+              <span class="info-value">{{ userRol }}</span>
+            </div>
+            @if (user?.localidad) {
+              <div class="info-row">
+                <mat-icon class="info-icon">location_on</mat-icon>
+                <span class="info-label">Localidad</span>
+                <span class="info-value">{{ user?.localidad }}</span>
+              </div>
+            }
+          </div>
+          @if (userRol === 'Tatuador') {
+            <!-- Información Profesional -->
+            <div class="section-block">
+              <div class="section-block-header">
+                <mat-icon>work_outline</mat-icon>
+                <span>Información Profesional</span>
+              </div>
+              @if (user?.estudio) {
+                <div class="info-row">
+                  <mat-icon class="info-icon">store</mat-icon>
+                  <span class="info-label">Estudio</span>
+                  <span class="info-value">{{ user?.estudio }}</span>
+                </div>
+              }
+              @if (user?.antiguedad !== undefined && user?.antiguedad !== null) {
+                <div
+                  class="info-row"
+                  >
+                  <mat-icon class="info-icon">timeline</mat-icon>
+                  <span class="info-label">Antigüedad</span>
+                  <span class="info-value"
+                    >{{ user?.antiguedad }}
+                    {{ user?.antiguedad === 1 ? "año" : "años" }} de
+                    experiencia</span
+                    >
+                  </div>
+                }
+                @if (user?.especialidades && user?.especialidades!.length > 0) {
+                  <div
+                    class="info-row info-row--wrap"
+                    >
+                    <mat-icon class="info-icon">style</mat-icon>
+                    <span class="info-label">Especialidades</span>
+                    <mat-chip-set
+                      aria-label="Especialidades del tatuador"
+                      class="especialidades-view"
+                      >
+                      @for (esp of user?.especialidades; track esp) {
+                        <mat-chip>{{
+                          esp.nombre
+                        }}</mat-chip>
+                      }
+                    </mat-chip-set>
+                  </div>
+                }
+                @if (user?.instagramHandle) {
+                  <div class="info-row">
+                    <span class="info-icon ig-icon-small">
+                      <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </span>
+                    <span class="info-label">Instagram</span>
+                    <a
+                      [href]="'https://www.instagram.com/' + user!.instagramHandle!.replace('@','')"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="info-value ig-link"
+                    >{{ '@' + user!.instagramHandle!.replace('@','') }}</a>
+                  </div>
+                }
+              </div>
+              <!-- Instagram -->
+              <div class="section-block">
+                <div class="section-block-header">
+                  <span class="instagram-icon-header">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="17"
+                      height="17"
+                      >
+                      <path
+                        d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                        />
+                      </svg>
+                    </span>
+                    <span>Instagram</span>
+                    @if (!instagramStatus.connected) {
+                      <span
+                        class="instagram-status-badge disconnected"
+                        >
+                        <mat-icon>link_off</mat-icon>
+                        No vinculada
+                      </span>
+                    }
+                    @if (instagramStatus.connected) {
+                      <span
+                        class="instagram-status-badge connected"
+                        >
+                        <mat-icon>check_circle</mat-icon>
+                        Vinculada
+                      </span>
+                    }
+                  </div>
+                  @if (instagramMessage) {
+                    <p
+                      [class.instagram-message-success]="!instagramMessageIsError"
+                      [class.instagram-message-error]="instagramMessageIsError"
+                      class="instagram-message"
+                      >
+                      <mat-icon>{{
+                        instagramMessageIsError ? "error_outline" : "check_circle"
+                      }}</mat-icon>
+                      {{ instagramMessage }}
+                    </p>
+                  }
+                  <!-- No vinculado -->
+                  @if (!instagramStatus.connected) {
+                    <div class="instagram-connect-area">
+                      @if (showInstagramWarning) {
+                        <div class="instagram-preflight-warning">
+                          <div class="instagram-preflight-header">
+                            <mat-icon class="preflight-warning-icon">warning_amber</mat-icon>
+                            <span>Requisito previo para vincular</span>
+                          </div>
+                          <p>
+                            Para vincular tu cuenta de Instagram necesitás tener un perfil de
+                            tipo <strong>Creador de contenido</strong> o
+                            <strong>Empresa</strong>. Las cuentas personales no son
+                            compatibles con esta integración.
+                          </p>
+                          <p class="preflight-steps-title">
+                            <strong>¿Tenés una cuenta personal? Seguí estos pasos:</strong>
+                          </p>
+                          <ol class="preflight-steps">
+                            <li>Abrí Instagram y entrá a tu perfil.</li>
+                            <li>Tocá el menú (☰) → <em>Configuración y privacidad</em>.</li>
+                            <li>Seleccioná <em>Tipo de cuenta y herramientas</em>.</li>
+                            <li>
+                              Elegí <em>Cambiar a cuenta profesional</em> y seleccioná
+                              <strong>Creador</strong> o <strong>Empresa</strong>.
+                            </li>
+                          </ol>
+                          <p class="preflight-note">
+                            Una vez que hayas configurado tu cuenta profesional, podés
+                            continuar con la vinculación.
+                          </p>
+                          <div class="preflight-actions">
+                            <button
+                              class="btn-preflight-cancel"
+                              (click)="cancelConnectInstagram()"
+                              >
+                              <mat-icon>close</mat-icon>
+                              Cancelar
+                            </button>
+                            <button
+                              class="btn-instagram-connect"
+                              appNoDoubleSubmit
+                              (click)="confirmConnectInstagram()"
+                              >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                width="20"
+                                height="20"
+                                fill="#fff"
+                                >
+                                <path
+                                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                                  />
+                                </svg>
+                                Vincular cuenta
+                              </button>
+                            </div>
+                          </div>
+                        }
+                        @if (!showInstagramWarning) {
+                          <button
+                            class="btn-instagram-connect"
+                            (click)="connectInstagram()"
+                            [disabled]="instagramLoading"
+                            >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              width="20"
+                              height="20"
+                              fill="#fff"
+                              >
+                              <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                                />
+                              </svg>
+                              Vincular cuenta
+                            </button>
+                          }
+                        </div>
+                      }
+                      <!-- Vinculado -->
+                      @if (instagramStatus.connected) {
+                        <div class="instagram-connected-area">
+                          @if (instagramStatus.instagramUserId) {
+                            <p
+                              class="instagram-account-id-text"
+                              >
+                              ID: {{ instagramStatus.instagramUserId }}
+                            </p>
+                          }
+                          @if (instagramStatus.expiresAt) {
+                            <p class="instagram-expires">
+                              Token válido hasta:
+                              {{ instagramStatus.expiresAt | date: "dd/MM/yyyy" }}
+                            </p>
+                          }
+                          <div class="instagram-actions">
+                            <button
+                              class="btn-instagram-sync"
+                              appNoDoubleSubmit
+                              (click)="syncInstagramPosts()"
+                              [disabled]="instagramLoading"
+                              >
+                              <mat-icon>sync</mat-icon>
+                              {{ instagramLoading ? "Sincronizando..." : "Sincronizar posts" }}
+                            </button>
+                            <button
+                              class="btn-instagram-disconnect"
+                              appNoDoubleSubmit
+                              (click)="disconnectInstagram()"
+                              [disabled]="instagramLoading"
+                              >
+                              <mat-icon>link_off</mat-icon>
+                              Desvincular
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </mat-card-content>
+                <mat-divider></mat-divider>
+                @if (userLoginOn && !editMode) {
+                  <mat-card-actions class="action-buttons">
+                    <div class="edit-button" (click)="editMode = true">
+                      <mat-icon>edit</mat-icon>
+                      <span>Editar datos</span>
+                    </div>
+                    <div class="edit-button" (click)="requestPasswordChange()">
+                      <mat-icon>lock</mat-icon>
+                      <span>Cambiar contraseña</span>
+                    </div>
+                  </mat-card-actions>
+                }
+                <!-- Confirmación cambio de contraseña -->
+                @if (showPasswordConfirm) {
+                  <div class="password-confirm-panel">
+                    <div class="password-confirm-header">
+                      <mat-icon class="password-confirm-icon">lock_reset</mat-icon>
+                      <span>Cambiar contraseña</span>
+                    </div>
+                    <p>Se enviará un correo a <strong>{{ user?.email }}</strong> con un enlace para restablecer tu contraseña.</p>
+                    <div class="password-confirm-actions">
+                      <button class="btn-preflight-cancel" (click)="cancelPasswordChange()" [disabled]="passwordResetLoading">
+                        <mat-icon>close</mat-icon>
+                        Cancelar
+                      </button>
+                      <button class="btn-password-confirm" appNoDoubleSubmit (click)="confirmPasswordChange()" [disabled]="passwordResetLoading">
+                        <mat-icon>send</mat-icon>
+                        {{ passwordResetLoading ? 'Enviando...' : 'Enviar correo' }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </mat-card>
+            }
+
+            <!-- ===================== MODO EDICIÓN ===================== -->
+            @if (userLoginOn && editMode) {
+              <mat-card class="edit-form-card">
+                <mat-card-title class="profile-title">Editar datos personales</mat-card-title>
+                <mat-divider></mat-divider>
+                <mat-card-content>
+                  <form [formGroup]="registerForm">
+                    <!-- Sección: Foto de perfil -->
+                    <div class="form-section">
+                      <div class="form-section-header">
+                        <mat-icon>photo_camera</mat-icon>
+                        <span>Foto de perfil</span>
+                      </div>
+                      <div class="profile-picture-edit-container">
+                        <div class="profile-picture-single-wrapper">
+                          <img
+                            [src]="previewImageUrl || (user?.profilePhoto | serverUrl)"
+                            alt="Foto de perfil"
+                            class="profile-picture-single"
+                            />
+                            <button
+                              mat-icon-button
+                              class="edit-photo-btn"
+                              (click)="triggerFileInput()"
+                              [disabled]="isPhotoBlockedByInstagram"
+                              >
+                              <mat-icon>{{ isPhotoBlockedByInstagram ? "lock" : "edit" }}</mat-icon>
+                            </button>
+                            <input
+                              type="file"
+                              accept=".jpg, .jpeg, .png, .webp"
+                              hidden
+                              (change)="onFileSelected($event)"
+                              #fileInput
+                              />
+                            </div>
+                          </div>
+                          @if (isPhotoBlockedByInstagram) {
+                            <p
+                              class="instagram-photo-blocked-notice"
+                              >
+                              <mat-icon>info_outline</mat-icon>
+                              Tu foto de perfil está sincronizada con Instagram y se actualiza
+                              automáticamente.
+                            </p>
+                          }
+                        </div>
+                        <!-- Sección: Datos personales -->
+                        <div class="form-section">
+                          <div class="form-section-header">
+                            <mat-icon>person</mat-icon>
+                            <span>Datos personales</span>
+                          </div>
+                          <div class="row">
+                            <mat-form-field appearance="outline" class="col-12">
+                              <mat-label>Nombre</mat-label>
+                              <input matInput formControlName="realname" />
+                            </mat-form-field>
+                          </div>
+                          <div class="row">
+                            <mat-form-field appearance="outline" class="col-12">
+                              <mat-label>Apellido</mat-label>
+                              <input matInput formControlName="surname" />
+                            </mat-form-field>
+                          </div>
+                          <div class="row">
+                            <mat-form-field appearance="outline" class="col-12">
+                              <mat-label>E-Mail</mat-label>
+                              <input matInput formControlName="email" />
+                            </mat-form-field>
+                          </div>
+                          <div class="row">
+                            <mat-form-field appearance="outline" class="col-6">
+                              <mat-label>Nombre de usuario</mat-label>
+                              <input matInput formControlName="username" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="col-6">
+                              <mat-label>Nacimiento</mat-label>
+                              <input
+                                matInput
+                                [matDatepicker]="picker"
+                                formControlName="birthDate"
+                                [max]="today"
+                                (input)="onDateInput($event)"
+                                placeholder="dd/mm/yyyy"
+                                />
+                                <mat-datepicker-toggle
+                                  matIconSuffix
+                                  [for]="picker"
+                                ></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                              </mat-form-field>
+                            </div>
+                          </div>
+                          <!-- Sección: Localidad -->
+                          <div class="form-section">
+                            <div class="form-section-header">
+                              <mat-icon>location_on</mat-icon>
+                              <span>Localidad</span>
+                            </div>
+                            <div class="location-field-row">
+                              <mat-form-field appearance="outline" class="location-input">
+                                <mat-label>Dirección o localidad</mat-label>
+                                <mat-icon matPrefix>place</mat-icon>
+                                <input
+                                  matInput
+                                  formControlName="localidad"
+                                  placeholder="Ej: Tucuman 2850, Rosario, Santa Fe"
+                                  [matAutocomplete]="locationAuto"
+                                  autocomplete="off"
+                                  />
+                                  <mat-autocomplete
+                                    #locationAuto="matAutocomplete"
+                                    (optionSelected)="onLocationSelected($event)"
+                                    >
+                                    @for (s of locationSuggestions; track s) {
+                                      <mat-option [value]="s.displayName">
+                                        <mat-icon style="font-size:16px;vertical-align:middle;margin-right:6px">place</mat-icon>
+                                        {{ s.displayName }}
+                                      </mat-option>
+                                    }
+                                  </mat-autocomplete>
+                                </mat-form-field>
+                                <button
+                                  mat-icon-button
+                                  type="button"
+                                  class="btn-gps"
+                                  (click)="usarGPS()"
+                                  [disabled]="isGPSLocating"
+                                  matTooltip="Usar mi ubicación GPS"
+                                  >
+                                  @if (isGPSLocating) {
+                                    <mat-spinner diameter="20"></mat-spinner>
+                                  }
+                                  @if (!isGPSLocating) {
+                                    <mat-icon>my_location</mat-icon>
+                                  }
+                                </button>
+                              </div>
+                              @if (geocodedDisplayName && geocodedLat) {
+                                <div class="location-verified-badge">
+                                  <mat-icon>check_circle</mat-icon>
+                                  Ubicación verificada: {{ geocodedDisplayName.split(',').slice(0, 2).join(',') }}
+                                </div>
+                              }
+                            </div>
+                            <!-- Sección: Información profesional (Tatuador) -->
+                            @if (userId && userRol === 'Tatuador') {
+                              <div class="form-section">
+                                <div class="form-section-header">
+                                  <mat-icon>work</mat-icon>
+                                  <span>Información profesional</span>
+                                </div>
+                                <app-tatuador
+                                  [userId]="userId"
+                                  [initialEstudio]="user?.estudio"
+                                  [initialFechaInicio]="user?.fechaInicioActividad"
+                                  (especialidadesChange)="onEspecialidadesChange($event)"
+                                  >
+                                </app-tatuador>
+                                <div class="row" style="margin-top: 8px">
+                                  <mat-form-field appearance="outline" class="col-12">
+                                    <mat-label>Instagram</mat-label>
+                                    <input matInput formControlName="instagramHandle" placeholder="@tu_usuario" />
+                                    <mat-hint>Ingresá tu usuario de Instagram (ej: &#64;mi_usuario)</mat-hint>
+                                  </mat-form-field>
+                                </div>
+                              </div>
+                            }
+                          </form>
+                        </mat-card-content>
+                        <mat-divider></mat-divider>
+                        <mat-card-actions class="action-buttons">
+                          <button mat-stroked-button color="warn" (click)="editMode = false">
+                            Cancelar
+                          </button>
+                          <button
+                            mat-raised-button
+                            class="normal-button"
+                            appNoDoubleSubmit
+                            (click)="onUpdateProfile()"
+                            [disabled]="registerForm.invalid"
+                            >
+                            Guardar
+                          </button>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>

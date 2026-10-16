@@ -1,20 +1,34 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { LoginService } from './services/auth/login.service';
 import { LoadingService } from './services/loading.service';
 import { ThemeService } from './core/services/theme.service';
 import { UserService } from './services/user/user.service';
 import { RolApl } from './models/rol.models';
+import { AsyncPipe } from '@angular/common';
+import { HeaderComponent } from './shared/header/header.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
+import { SweItemMenuComponent } from './components/sweitemmenu/sweitemmenu.component';
+import { LoadingOverlayComponent } from './components/loading-overlay/loading-overlay.component';
+import { FooterComponent } from './shared/footer/footer.component';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  standalone: false
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    imports: [HeaderComponent, MatIconButton, RouterLink, MatIcon, ThemeToggleComponent, SweItemMenuComponent, LoadingOverlayComponent, RouterOutlet, FooterComponent, AsyncPipe]
 })
 export class AppComponent implements OnInit, OnDestroy {
+  private loginService = inject(LoginService);
+  private themeService = inject(ThemeService);
+  private loadingService = inject(LoadingService);
+  private userService = inject(UserService);
+  private router = inject(Router);
+
   title = 'linked-client';
   isLoading$: Observable<boolean>;
 
@@ -28,13 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private readonly AUTH_ROUTES = ['/login', '/register', '/forgotPass', '/reset-password'];
 
-  constructor(
-    private loginService: LoginService,
-    private themeService: ThemeService,
-    private loadingService: LoadingService,
-    private userService: UserService,
-    private router: Router,
-  ) {
+  constructor() {
     this.isLoading$ = this.loadingService.loading$;
   }
 

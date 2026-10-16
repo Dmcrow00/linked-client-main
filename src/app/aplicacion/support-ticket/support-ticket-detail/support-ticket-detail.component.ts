@@ -1,7 +1,7 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
-import { NgIf, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatError } from '@angular/material/form-field';
@@ -19,24 +19,34 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
   templateUrl: './support-ticket-detail.component.html',
   styleUrls: ['./support-ticket-detail.component.scss'],
   imports: [
-    ReactiveFormsModule, NgIf, DatePipe,
-    MatIcon, MatButton,
-    MatFormField, MatError, MatSelect, MatOption, MatInput,
-    NoDoubleSubmitDirective,
-  ],
+    ReactiveFormsModule,
+    DatePipe,
+    MatIcon,
+    MatButton,
+    MatFormField,
+    MatError,
+    MatSelect,
+    MatOption,
+    MatInput,
+    NoDoubleSubmitDirective
+],
 })
 export class SupportTicketDetailComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private supportTicketService = inject(SupportTicketService);
+  private userService = inject(UserService);
+  private dialog = inject(MatDialog);
+  dialogRef = inject<MatDialogRef<SupportTicketDetailComponent>>(MatDialogRef);
+  data = inject<{
+    supportTicket: SupportTicket;
+}>(MAT_DIALOG_DATA);
+
   gestionForm: FormGroup;
   saving = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private supportTicketService: SupportTicketService,
-    private userService: UserService,
-    private dialog: MatDialog,
-    public dialogRef: MatDialogRef<SupportTicketDetailComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { supportTicket: SupportTicket }
-  ) {
+  constructor() {
+    const data = this.data;
+
     this.gestionForm = this.fb.group({
       status: [data.supportTicket.status + '' === 'true'],
       adminResponse: ['', [Validators.required, Validators.minLength(10)]],

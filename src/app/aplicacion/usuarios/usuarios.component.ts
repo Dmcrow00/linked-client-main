@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 import { UserService } from 'src/app/services/user/user.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,7 +13,7 @@ import { MatSelect, MatOption } from '@angular/material/select';
 import { MatInput } from '@angular/material/input';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { NgFor, NgIf, NgClass, Location } from '@angular/common';
+import { NgClass, Location } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
@@ -24,15 +24,42 @@ import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
     templateUrl: './usuarios.component.html',
     styleUrls: ['./usuarios.component.scss'],
     imports: [
-      MatIcon, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput,
-      MatButton, MatIconButton, NgFor, NgIf, NgClass, MatTooltip, MatChipsModule,
-      MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell,
-      MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-      MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
-      MatSort, MatSortHeader
-    ]
+    MatIcon,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatInput,
+    MatButton,
+    MatIconButton,
+    NgClass,
+    MatTooltip,
+    MatChipsModule,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatHeaderCell,
+    MatCellDef,
+    MatCell,
+    MatHeaderRowDef,
+    MatHeaderRow,
+    MatRowDef,
+    MatRow,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatSort,
+    MatSortHeader
+]
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
+  private userService = inject(UserService);
+  private solicitudService = inject(SolicitudTatuadorService);
+  private dialog = inject(MatDialog);
+  private location = inject(Location);
+
   usuarios: User[] = [];
   filteredUsuarios: User[] = [];
   availableRoles: RolApl[] = [];
@@ -51,13 +78,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   sortDir: 'asc' | 'desc' = 'asc';
 
   displayedColumns: string[] = ['user', 'roles', 'estado', 'actions'];
-
-  constructor(
-    private userService: UserService,
-    private solicitudService: SolicitudTatuadorService,
-    private dialog: MatDialog,
-    private location: Location
-  ) {}
 
   goBack(): void { this.location.back(); }
 

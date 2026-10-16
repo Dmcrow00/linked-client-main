@@ -4,22 +4,26 @@
   <div class="dialog-header">
 
     <!-- Vista Tatuador: muestra info del cliente -->
-    <div class="persona-info" *ngIf="esTatuador">
-      <img [src]="data.turno.cliente?.profilePhoto | serverUrl" class="avatar-persona" alt="Cliente">
-      <div>
-        <h2>{{ data.turno.cliente?.realname }} {{ data.turno.cliente?.surname }}</h2>
-        <p class="subtitle">&#64;{{ data.turno.cliente?.username }}</p>
+    @if (esTatuador) {
+      <div class="persona-info">
+        <img [src]="data.turno.cliente?.profilePhoto | serverUrl" class="avatar-persona" alt="Cliente">
+        <div>
+          <h2>{{ data.turno.cliente?.realname }} {{ data.turno.cliente?.surname }}</h2>
+          <p class="subtitle">&#64;{{ data.turno.cliente?.username }}</p>
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Vista Cliente: muestra info del tatuador -->
-    <div class="persona-info" *ngIf="!esTatuador">
-      <img [src]="tatuador?.profilePhoto | serverUrl" class="avatar-persona" alt="Tatuador">
-      <div>
-        <h2>{{ tatuador?.realname }} {{ tatuador?.surname }}</h2>
-        <p class="subtitle">{{ tatuador?.estudio || 'Artista tatuador' }}</p>
+    @if (!esTatuador) {
+      <div class="persona-info">
+        <img [src]="tatuador?.profilePhoto | serverUrl" class="avatar-persona" alt="Tatuador">
+        <div>
+          <h2>{{ tatuador?.realname }} {{ tatuador?.surname }}</h2>
+          <p class="subtitle">{{ tatuador?.estudio || 'Artista tatuador' }}</p>
+        </div>
       </div>
-    </div>
+    }
 
     <span class="estado-badge status-{{ data.turno.estado.toLowerCase() }}">
       {{ data.turno.estado }}
@@ -35,20 +39,23 @@
       <mat-dialog-content class="content-scroll">
 
         <!-- Mensaje de estado para el cliente -->
-        <div class="status-message {{ statusInfo.clase }}" *ngIf="!esTatuador">
-          <mat-icon>{{ statusInfo.icon }}</mat-icon>
-          <p>{{ statusInfo.mensaje }}</p>
-        </div>
+        @if (!esTatuador) {
+          <div class="status-message {{ statusInfo.clase }}">
+            <mat-icon>{{ statusInfo.icon }}</mat-icon>
+            <p>{{ statusInfo.mensaje }}</p>
+          </div>
+        }
 
         <!-- Info de fecha/hora -->
         <div class="info-grid relative-container">
 
-          <button mat-icon-button class="floating-edit-btn"
-                  *ngIf="esTatuador"
-                  (click)="abrirEdicion()"
-                  matTooltip="Editar fecha/hora">
-            <mat-icon>edit</mat-icon>
-          </button>
+          @if (esTatuador) {
+            <button mat-icon-button class="floating-edit-btn"
+              (click)="abrirEdicion()"
+              matTooltip="Editar fecha/hora">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
 
           <div class="info-item">
             <mat-icon>calendar_today</mat-icon>
@@ -58,10 +65,12 @@
             <mat-icon>schedule</mat-icon>
             <span>{{ data.turno.fechaHoraInicio | date:'HH:mm' }} — {{ data.turno.fechaHoraFin | date:'HH:mm' }}</span>
           </div>
-          <div class="info-item" *ngIf="esTatuador">
-            <mat-icon>email</mat-icon>
-            <span>{{ data.turno.cliente?.email }}</span>
-          </div>
+          @if (esTatuador) {
+            <div class="info-item">
+              <mat-icon>email</mat-icon>
+              <span>{{ data.turno.cliente?.email }}</span>
+            </div>
+          }
         </div>
 
         <!-- Descripción -->
@@ -73,14 +82,18 @@
         </div>
 
         <!-- Imágenes de referencia -->
-        <div class="section" *ngIf="data.turno.imagenesRef && data.turno.imagenesRef.length > 0">
-          <h3>Referencias visuales</h3>
-          <div class="galeria">
-            <div class="img-wrapper" *ngFor="let img of data.turno.imagenesRef; let i = index">
-              <img [src]="img | serverUrl" alt="Referencia" (click)="openLightbox(i)">
+        @if (data.turno.imagenesRef && data.turno.imagenesRef.length > 0) {
+          <div class="section">
+            <h3>Referencias visuales</h3>
+            <div class="galeria">
+              @for (img of data.turno.imagenesRef; track img; let i = $index) {
+                <div class="img-wrapper">
+                  <img [src]="img | serverUrl" alt="Referencia" (click)="openLightbox(i)">
+                </div>
+              }
             </div>
           </div>
-        </div>
+        }
 
       </mat-dialog-content>
     </mat-tab>
@@ -90,35 +103,42 @@
       <div class="chat-layout">
 
         <div class="messages-list" #messagesContainer>
-          <div class="message-bubble"
-               *ngFor="let msg of mensajes"
-               [class.own-message]="msg.usuarioEnviaId === currentUserId">
-            <div class="msg-header">
-              <strong>{{ msg.usuarioEnviaUsername }}</strong>
-              <span class="msg-time" *ngIf="msg.creationTimestamp">
-                {{ msg.creationTimestamp | date: 'dd/MM HH:mm' }}
-              </span>
+          @for (msg of mensajes; track msg) {
+            <div class="message-bubble"
+              [class.own-message]="msg.usuarioEnviaId === currentUserId">
+              <div class="msg-header">
+                <strong>{{ msg.usuarioEnviaUsername }}</strong>
+                @if (msg.creationTimestamp) {
+                  <span class="msg-time">
+                    {{ msg.creationTimestamp | date: 'dd/MM HH:mm' }}
+                  </span>
+                }
+              </div>
+              <div class="msg-body">{{ msg.texto }}</div>
             </div>
-            <div class="msg-body">{{ msg.texto }}</div>
-          </div>
+          }
 
-          <div *ngIf="mensajes.length === 0" class="no-messages">
-            No hay mensajes para este turno.
-          </div>
+          @if (mensajes.length === 0) {
+            <div class="no-messages">
+              No hay mensajes para este turno.
+            </div>
+          }
         </div>
 
-        <div class="chat-input-area"
-             *ngIf="data.turno.estado !== 'Completada' && data.turno.estado !== 'Cancelada' && data.turno.estado !== 'Rechazada'">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Escribir mensaje...</mat-label>
-            <textarea matInput [(ngModel)]="nuevoMensajeText" rows="1"
-                      style="resize:none"
-                      (keyup.enter)="enviarMensaje()"></textarea>
-            <button mat-icon-button matSuffix appNoDoubleSubmit [submitDelay]="800" [disabled]="!nuevoMensajeText.trim()" (click)="enviarMensaje()">
-              <mat-icon>send</mat-icon>
-            </button>
-          </mat-form-field>
-        </div>
+        @if (data.turno.estado !== 'Completada' && data.turno.estado !== 'Cancelada' && data.turno.estado !== 'Rechazada') {
+          <div class="chat-input-area"
+            >
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Escribir mensaje...</mat-label>
+              <textarea matInput [(ngModel)]="nuevoMensajeText" rows="1"
+                style="resize:none"
+              (keyup.enter)="enviarMensaje()"></textarea>
+              <button mat-icon-button matSuffix appNoDoubleSubmit [submitDelay]="800" [disabled]="!nuevoMensajeText.trim()" (click)="enviarMensaje()">
+                <mat-icon>send</mat-icon>
+              </button>
+            </mat-form-field>
+          </div>
+        }
 
       </div>
     </mat-tab>
@@ -131,56 +151,62 @@
     <button mat-button (click)="cerrar(null)">Cerrar</button>
 
     <!-- SOLO TATUADOR: gestión completa del turno -->
-    <ng-container *ngIf="esTatuador">
-      <ng-container *ngIf="data.turno.estado === 'Pendiente' || data.turno.estado === 'Propuesta'">
+    @if (esTatuador) {
+      @if (data.turno.estado === 'Pendiente' || data.turno.estado === 'Propuesta') {
         <button mat-stroked-button color="warn" appNoDoubleSubmit (click)="cerrar('rechazar')">
           <mat-icon>block</mat-icon> Rechazar
         </button>
         <button mat-raised-button color="primary" appNoDoubleSubmit (click)="cerrar('confirmar')">
           <mat-icon>check</mat-icon> Confirmar
         </button>
-      </ng-container>
-
-      <ng-container *ngIf="data.turno.estado === 'Confirmada'">
+      }
+      @if (data.turno.estado === 'Confirmada') {
         <button mat-stroked-button color="warn" appNoDoubleSubmit (click)="cerrar('rechazar')">Cancelar</button>
         <button mat-raised-button color="accent" appNoDoubleSubmit (click)="cerrar('completar')">
           <mat-icon>done_all</mat-icon> Marcar completado
         </button>
-      </ng-container>
-
-      <ng-container *ngIf="data.turno.estado === 'Rechazada' || data.turno.estado === 'Cancelada'">
+      }
+      @if (data.turno.estado === 'Rechazada' || data.turno.estado === 'Cancelada') {
         <button mat-stroked-button color="primary" appNoDoubleSubmit (click)="cerrar('restaurar')">
           <mat-icon>restore</mat-icon> Restaurar a pendiente
         </button>
-      </ng-container>
-    </ng-container>
+      }
+    }
 
     <!-- SOLO CLIENTE: puede cancelar si el turno está activo -->
-    <ng-container *ngIf="!esTatuador">
-      <ng-container *ngIf="data.turno.estado === 'Pendiente' || data.turno.estado === 'Confirmada'">
+    @if (!esTatuador) {
+      @if (data.turno.estado === 'Pendiente' || data.turno.estado === 'Confirmada') {
         <button mat-stroked-button color="warn" appNoDoubleSubmit (click)="cerrar('cancelar')">
           <mat-icon>cancel</mat-icon> Cancelar turno
         </button>
-      </ng-container>
-    </ng-container>
+      }
+    }
 
   </mat-dialog-actions>
 
   <!-- LIGHTBOX -->
-  <div class="lightbox-overlay" *ngIf="lightboxIndex !== null" (click)="closeLightbox()">
-    <button class="lightbox-close" (click)="closeLightbox()">
-      <mat-icon>close</mat-icon>
-    </button>
-    <button class="lightbox-nav prev" *ngIf="data.turno.imagenesRef!.length > 1" (click)="$event.stopPropagation(); lightboxPrev()">
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <img class="lightbox-img" [src]="lightboxUrl" alt="Referencia ampliada" (click)="$event.stopPropagation()">
-    <button class="lightbox-nav next" *ngIf="data.turno.imagenesRef!.length > 1" (click)="$event.stopPropagation(); lightboxNext()">
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-    <div class="lightbox-counter" *ngIf="data.turno.imagenesRef!.length > 1">
-      {{ lightboxIndex! + 1 }} / {{ data.turno.imagenesRef!.length }}
+  @if (lightboxIndex !== null) {
+    <div class="lightbox-overlay" (click)="closeLightbox()">
+      <button class="lightbox-close" (click)="closeLightbox()">
+        <mat-icon>close</mat-icon>
+      </button>
+      @if (data.turno.imagenesRef!.length > 1) {
+        <button class="lightbox-nav prev" (click)="$event.stopPropagation(); lightboxPrev()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+      }
+      <img class="lightbox-img" [src]="lightboxUrl" alt="Referencia ampliada" (click)="$event.stopPropagation()">
+      @if (data.turno.imagenesRef!.length > 1) {
+        <button class="lightbox-nav next" (click)="$event.stopPropagation(); lightboxNext()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      }
+      @if (data.turno.imagenesRef!.length > 1) {
+        <div class="lightbox-counter">
+          {{ lightboxIndex! + 1 }} / {{ data.turno.imagenesRef!.length }}
+        </div>
+      }
     </div>
-  </div>
+  }
 
 </div>

@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TrabajosService } from 'src/app/services/trabajos/trabajos.service';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
@@ -17,20 +17,18 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     selector: 'app-subir-trabajo',
     templateUrl: './subir-trabajo.component.html',
     styleUrl: './subir-trabajo.component.scss',
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, NgIf, NgFor, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatDialogActions, MatButton, MatProgressSpinner, NoDoubleSubmitDirective]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatDialogActions, MatButton, MatProgressSpinner, NoDoubleSubmitDirective]
 })
 export class SubirTrabajoComponent {
+  private dialogRef = inject<MatDialogRef<SubirTrabajoComponent>>(MatDialogRef);
+  private trabajosService = inject(TrabajosService);
+  private snackBar = inject(MatSnackBar);
+
   selectedFiles: File[] = [];
   previewUrls: string[] = [];
   descripcion: string = '';
   isUploading = false;
   maxFiles = 5;
-
-  constructor(
-    private dialogRef: MatDialogRef<SubirTrabajoComponent>,
-    private trabajosService: TrabajosService,
-    private snackBar: MatSnackBar
-  ) {}
 
 onFileSelected(event: any): void {
     const files = event.target.files;

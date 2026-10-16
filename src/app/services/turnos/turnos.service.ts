@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { TurnoMensaje } from 'src/app/models/turno/turno-mensaje.model';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
@@ -16,9 +16,9 @@ export interface SolicitarTurnoDto {
   providedIn: 'root'
 })
 export class TurnosService {
-  private apiUrl = `${environment.urlApi}turnos`;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) { }
+  private apiUrl = `${environment.urlApi}turnos`;
 
   // El endpoint recibe multipart con cada dato como parte independiente.
   solicitarTurno(datos: SolicitarTurnoDto, files: File[]): Observable<TurnoSesion> {
