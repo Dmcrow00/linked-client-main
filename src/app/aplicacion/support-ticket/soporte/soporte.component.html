@@ -19,42 +19,50 @@
   <div class="soporte-content">
 
     <!-- Loading -->
-    <p class="tickets-empty" *ngIf="loadingTickets">Cargando...</p>
+    @if (loadingTickets) {
+      <p class="tickets-empty">Cargando...</p>
+    }
 
     <!-- Sin tickets -->
-    <div class="tickets-empty-state" *ngIf="!loadingTickets && myTickets.length === 0">
-      <mat-icon>confirmation_number</mat-icon>
-      <p>Todavía no enviaste ningún ticket.</p>
-      <span>Usá el botón + para enviar tu primera consulta.</span>
-    </div>
+    @if (!loadingTickets && myTickets.length === 0) {
+      <div class="tickets-empty-state">
+        <mat-icon>confirmation_number</mat-icon>
+        <p>Todavía no enviaste ningún ticket.</p>
+        <span>Usá el botón + para enviar tu primera consulta.</span>
+      </div>
+    }
 
     <!-- Lista -->
-    <div class="ticket-list" *ngIf="!loadingTickets && myTickets.length > 0">
-      <div class="ticket-card" *ngFor="let t of myTickets">
-
-        <div class="ticket-card-header">
-          <div class="ticket-meta">
-            <span class="ticket-id">#{{ t.id }}</span>
-            <span class="ticket-date">{{ t.creationtimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
-            <span class="ticket-category" *ngIf="t.category">{{ t.category }}</span>
+    @if (!loadingTickets && myTickets.length > 0) {
+      <div class="ticket-list">
+        @for (t of myTickets; track t) {
+          <div class="ticket-card">
+            <div class="ticket-card-header">
+              <div class="ticket-meta">
+                <span class="ticket-id">#{{ t.id }}</span>
+                <span class="ticket-date">{{ t.creationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+                @if (t.category) {
+                  <span class="ticket-category">{{ t.category }}</span>
+                }
+              </div>
+              <span class="ticket-status" [class.resolved]="!t.status">
+                {{ t.status ? 'PENDIENTE' : 'RESUELTO' }}
+              </span>
+            </div>
+            <p class="ticket-description">{{ t.description }}</p>
+            @if (t.adminResponse) {
+              <div class="ticket-response">
+                <div class="response-label">
+                  <mat-icon>chat</mat-icon>
+                  Respuesta del equipo
+                </div>
+                <p class="response-text">{{ t.adminResponse }}</p>
+              </div>
+            }
           </div>
-          <span class="ticket-status" [class.resolved]="t.status + '' === 'true'">
-            {{ t.status + '' === 'true' ? 'RESUELTO' : 'PENDIENTE' }}
-          </span>
-        </div>
-
-        <p class="ticket-description">{{ t.description }}</p>
-
-        <div class="ticket-response" *ngIf="t.admin_response">
-          <div class="response-label">
-            <mat-icon>chat</mat-icon>
-            Respuesta del equipo
-          </div>
-          <p class="response-text">{{ t.admin_response }}</p>
-        </div>
-
+        }
       </div>
-    </div>
+    }
   </div>
 
 

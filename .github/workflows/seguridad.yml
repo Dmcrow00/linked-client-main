@@ -1,0 +1,54 @@
+# Seguridad del cliente de linked en la integración continua: secretos en el historial, análisis estático del código y
+# dependencias con vulnerabilidades conocidas (npm audit, sólo las que llegan al navegador). Corre en cada push y pull
+# request a develop y main, y todos los lunes.
+
+name: Seguridad
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+
+concurrency:
+  group: seguridad-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  secretos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (todo el historial)
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 git /repo --redact --no-banner
+
+  codigo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Semgrep (TypeScript y OWASP Top 10)
+        run: >
+          docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.95.0
+          semgrep scan --config p/typescript --config p/owasp-top-ten --error --metrics=off src
+
+  dependencias:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      # Sólo con el lockfile: @dmcrow00/ng-core es una dependencia local (file:) que acá no está bajada.
+      - name: npm audit (dependencias de producción, altas y críticas)
+        run: npm audit --omit=dev --audit-level=high --package-lock-only

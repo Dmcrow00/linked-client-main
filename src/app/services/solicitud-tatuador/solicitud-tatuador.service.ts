@@ -1,17 +1,18 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface SolicitudTatuador {
   id: number;
-  idUser: number;
   estudio: string | null;
-  especialidadesIds: number[];
+  // Llega como arreglo JSON serializado, por ejemplo "[1, 3]".
+  especialidadesIds: string | null;
   status: 'pendiente' | 'aprobada' | 'rechazada';
   notas: string | null;
   adminUser: string | null;
-  creationtimestamp: string;
+  creationTimestamp: string;
   user: {
     id: number;
     username: string;
@@ -25,19 +26,19 @@ export interface SolicitudTatuador {
 
 @Injectable({ providedIn: 'root' })
 export class SolicitudTatuadorService {
+  private http = inject(HttpClient);
+
   private endpoint = `${environment.urlApi}solicitudes-tatuador`;
 
-  constructor(private http: HttpClient) {}
-
   getAll(): Observable<SolicitudTatuador[]> {
-    return this.http.get<SolicitudTatuador[]>(`${this.endpoint}/`);
+    return this.http.get<ApiResponse<SolicitudTatuador[]>>(this.endpoint).pipe(map(unwrap));
   }
 
-  aprobar(id: number): Observable<SolicitudTatuador> {
-    return this.http.put<SolicitudTatuador>(`${this.endpoint}/${id}/aprobar`, {});
+  aprobar(id: number): Observable<void> {
+    return this.http.put<ApiResponse<void>>(`${this.endpoint}/${id}/aprobar`, {}).pipe(map(unwrap));
   }
 
-  rechazar(id: number, notas?: string): Observable<SolicitudTatuador> {
-    return this.http.put<SolicitudTatuador>(`${this.endpoint}/${id}/rechazar`, { notas });
+  rechazar(id: number, notas?: string): Observable<void> {
+    return this.http.put<ApiResponse<void>>(`${this.endpoint}/${id}/rechazar`, { notas }).pipe(map(unwrap));
   }
 }

@@ -1,41 +1,35 @@
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-export interface EstiloDetectado {
-  nombre: string;
-  confianza: number; // 0-100
-}
-
 export interface TatuadorUbicacion {
-  idUser: number;
-  realname?: string;
-  surname?: string;
+  id: number;
   username: string;
-  profile_photo?: string;
+  profilePhoto?: string;
   estudio?: string;
   localidad?: string;
-  antiguedad?: number;
-  especialidades: { id: number; nombre: string }[];
+  especialidades?: { id: number; nombre: string }[];
   lat: number;
   lng: number;
-  instagram_handle?: string;
+  instagramHandle?: string;
   distancia?: number;   // km — calculada en frontend
   matchScore?: number;  // % de coincidencia con estilos detectados
 }
 
 export interface BusquedaEstiloResponse {
-  estilosDetectados: EstiloDetectado[];
+  // Vacío hasta que el backend incorpore el análisis de estilos con IA.
+  estilosDetectados: string[];
   tatuadores: TatuadorUbicacion[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class BusquedaEstiloService {
+  private http = inject(HttpClient);
+
 
   private apiUrl = `${environment.urlApi}busqueda`;
-
-  constructor(private http: HttpClient) {}
 
   /**
    * Envía imagen(es) al backend para análisis de estilo y obtiene tatuadores sugeridos.
@@ -45,21 +39,21 @@ export class BusquedaEstiloService {
     imagenes: File[],
     lat: number,
     lng: number,
-    radioKm: number = 50
+    radioKm = 50
   ): Observable<BusquedaEstiloResponse> {
     const form = new FormData();
     imagenes.forEach(img => form.append('imagenes', img));
     form.append('lat', lat.toString());
     form.append('lng', lng.toString());
     form.append('radioKm', radioKm.toString());
-    return this.http.post<BusquedaEstiloResponse>(`${this.apiUrl}/por-estilo`, form);
+    return this.http.post<ApiResponse<BusquedaEstiloResponse>>(`${this.apiUrl}/por-estilo`, form).pipe(map(unwrap));
   }
 
   /**
    * Obtiene todos los tatuadores con ubicación (cuando no se usa análisis IA).
    */
   getTatuadoresConUbicacion(): Observable<TatuadorUbicacion[]> {
-    return this.http.get<TatuadorUbicacion[]>(`${this.apiUrl}/tatuadores-ubicacion`);
+    return this.http.get<ApiResponse<TatuadorUbicacion[]>>(`${this.apiUrl}/tatuadores-ubicacion`).pipe(map(unwrap));
   }
 
   /** Calcula distancia en km entre dos coordenadas (Haversine). */

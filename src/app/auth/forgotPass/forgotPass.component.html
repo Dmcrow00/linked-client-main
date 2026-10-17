@@ -34,33 +34,37 @@
           <label class="field-label" for="email">Correo electrónico</label>
           <mat-form-field appearance="outline" class="field">
             <input matInput id="email" formControlName="email"
-                   placeholder="tu@email.com" autocomplete="email" />
-            <mat-error *ngIf="emailControl?.hasError('required')">El correo es requerido</mat-error>
-            <mat-error *ngIf="emailControl?.hasError('email')">Ingresá un correo válido</mat-error>
-          </mat-form-field>
+              placeholder="tu@email.com" autocomplete="email" />
+              @if (emailControl?.hasError('required')) {
+                <mat-error>El correo es requerido</mat-error>
+              }
+              @if (emailControl?.hasError('email')) {
+                <mat-error>Ingresá un correo válido</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="captcha-wrap">
+            <re-captcha siteKey="6LfpC-ErAAAAAElCUyzRD1hS7p0VBHyK9RLOHV32"
+              (resolved)="onCaptchaResolved($event)">
+            </re-captcha>
+          </div>
+
+          <button mat-raised-button type="submit" class="btn-primary" appNoDoubleSubmit
+            [disabled]="!captchaValid || forgotPassForm.invalid">
+            Enviar enlace de recuperación
+          </button>
+
+        </form>
+
+        <div class="form-footer">
+          <a routerLink="/login" class="back-link">
+            <mat-icon>arrow_back</mat-icon>
+            Volver al inicio de sesión
+          </a>
         </div>
 
-        <div class="captcha-wrap">
-          <re-captcha siteKey="6LfpC-ErAAAAAElCUyzRD1hS7p0VBHyK9RLOHV32"
-                      (resolved)="onCaptchaResolved($event)">
-          </re-captcha>
-        </div>
-
-        <button mat-raised-button type="submit" class="btn-primary" appNoDoubleSubmit
-                [disabled]="!captchaValid || forgotPassForm.invalid">
-          Enviar enlace de recuperación
-        </button>
-
-      </form>
-
-      <div class="form-footer">
-        <a routerLink="/login" class="back-link">
-          <mat-icon>arrow_back</mat-icon>
-          Volver al inicio de sesión
-        </a>
       </div>
-
     </div>
-  </div>
 
-</div>
+  </div>

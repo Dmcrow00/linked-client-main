@@ -1,5 +1,5 @@
 <div class="page-hero">
-<div class="hero-content">
+  <div class="hero-content">
     <button mat-icon-button class="back-btn" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
     </button>
@@ -32,145 +32,151 @@
               matInput
               [(ngModel)]="filterUsername"
               placeholder="Buscar por username"
-            />
-          </mat-form-field>
+              />
+            </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Rol</mat-label>
-            <mat-select
-              [(ngModel)]="filterRolId"
-              (ngModelChange)="aplicarFiltro()"
-            >
-              <mat-option [value]="''">Todos</mat-option>
-              <mat-option *ngFor="let rol of availableRoles" [value]="rol.id">
-                {{ rol.description }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Rol</mat-label>
+              <mat-select
+                [(ngModel)]="filterRolId"
+                (ngModelChange)="aplicarFiltro()"
+                >
+                <mat-option [value]="''">Todos</mat-option>
+                @for (rol of availableRoles; track rol) {
+                  <mat-option [value]="rol.id">
+                    {{ rol.description }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Estado</mat-label>
-            <mat-select
-              [(ngModel)]="filterEstado"
-              (ngModelChange)="aplicarFiltro()"
-            >
-              <mat-option value="todos">Todos</mat-option>
-              <mat-option value="pendiente_tatuador">Rol pendiente</mat-option>
-              <mat-option value="tatuador_activo">Tatuador activo</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select
+                [(ngModel)]="filterEstado"
+                (ngModelChange)="aplicarFiltro()"
+                >
+                <mat-option value="todos">Todos</mat-option>
+                <mat-option value="pendiente_tatuador">Rol pendiente</mat-option>
+                <mat-option value="tatuador_activo">Tatuador activo</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-        <div class="filtros-actions">
-          <button mat-button color="warn" type="button" (click)="resetFiltro()">
-            Limpiar
-          </button>
-          <button
-            mat-raised-button
-            class="btn-buscar"
-            type="button"
-            (click)="aplicarFiltro()"
-          >
-            Buscar
-          </button>
-        </div>
-      </mat-expansion-panel>
-    </mat-accordion>
-
-    <div class="tabla-separador"></div>
-
-    <!-- ── Tabla ── -->
-    <div class="tabla-wrap">
-      <table
-        mat-table
-        matSort
-        [dataSource]="filteredUsuarios"
-        (matSortChange)="onSortChange($event)"
-        class="mat-elevation-z2 full-width"
-      >
-        <!-- Usuario -->
-        <ng-container matColumnDef="user">
-          <th
-            mat-header-cell
-            *matHeaderCellDef
-            mat-sort-header="username"
-            class="col-center"
-          >
-            Usuario
-          </th>
-          <td
-            mat-cell
-            *matCellDef="let row"
-            [ngClass]="{
-              'row-tatuador': isTatuadorActivo(row.idUser),
-              'row-pendiente':
-                isPendienteTatuador(row.idUser) &&
-                !isTatuadorActivo(row.idUser),
-            }"
-          >
-            <div class="user-cell">
-              <span class="username">{{ row.username }}</span>
-              <span class="email">{{ row.email }}</span>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Roles -->
-        <ng-container matColumnDef="roles">
-          <th mat-header-cell *matHeaderCellDef class="col-center">Roles</th>
-          <td mat-cell *matCellDef="let row" class="col-center">
-            <div class="chips-wrap chips-center">
-              <span
-                *ngFor="let r of getRolesDesc(row.idUser)"
-                class="role-chip"
-                >{{ r }}</span
-              >
-              <span
-                *ngIf="getRolesDesc(row.idUser).length === 0"
-                class="no-role"
-                >—</span
-              >
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Estado -->
-        <ng-container matColumnDef="estado">
-          <th mat-header-cell *matHeaderCellDef class="col-center">Estado</th>
-          <td mat-cell *matCellDef="let row" class="col-center">
-            <span
-              *ngIf="getEstadoBadge(row.idUser) as badge"
-              class="estado-badge"
-              [ngClass]="badge.css"
-            >
-              {{ badge.label }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Acciones -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="col-center">Acciones</th>
-          <td mat-cell *matCellDef="let row" class="col-center">
-            <button
-              mat-icon-button
-              (click)="openEditDialog(row.idUser)"
-              matTooltip="Editar roles"
-            >
-              <mat-icon>manage_accounts</mat-icon>
+          <div class="filtros-actions">
+            <button mat-button color="warn" type="button" (click)="resetFiltro()">
+              Limpiar
             </button>
-          </td>
-        </ng-container>
+            <button
+              mat-raised-button
+              class="btn-buscar"
+              type="button"
+              (click)="aplicarFiltro()"
+              >
+              Buscar
+            </button>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
+      <div class="tabla-separador"></div>
 
-      <div *ngIf="filteredUsuarios.length === 0" class="empty-state">
-        <mat-icon>person_off</mat-icon>
-        <p>No se encontraron usuarios con los filtros aplicados.</p>
+      <!-- ── Tabla ── -->
+      <div class="tabla-wrap">
+        <table
+          mat-table
+          matSort
+          [dataSource]="filteredUsuarios"
+          (matSortChange)="onSortChange($event)"
+          class="mat-elevation-z2 full-width"
+          >
+          <!-- Usuario -->
+          <ng-container matColumnDef="user">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header="username"
+              class="col-center"
+              >
+              Usuario
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let row"
+            [ngClass]="{
+              'row-tatuador': isTatuadorActivo(row.id),
+              'row-pendiente':
+                isPendienteTatuador(row.id) && !isTatuadorActivo(row.id),
+            }"
+              >
+              <div class="user-cell">
+                <span class="username">{{ row.username }}</span>
+                <span class="email">{{ row.email }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Roles -->
+          <ng-container matColumnDef="roles">
+            <th mat-header-cell *matHeaderCellDef class="col-center">Roles</th>
+            <td mat-cell *matCellDef="let row" class="col-center">
+              <div class="chips-wrap chips-center">
+                @for (r of getRolesDesc(row.id); track r) {
+                  <span
+                    class="role-chip"
+                    >{{ r }}</span
+                    >
+                }
+                @if (getRolesDesc(row.id).length === 0) {
+                  <span
+                    class="no-role"
+                    >—</span
+                    >
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef class="col-center">Estado</th>
+              <td mat-cell *matCellDef="let row" class="col-center">
+                @if (getEstadoBadge(row.id); as badge) {
+                  <span
+                    class="estado-badge"
+                    [ngClass]="badge.css"
+                    >
+                    {{ badge.label }}
+                  </span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="col-center">Acciones</th>
+              <td mat-cell *matCellDef="let row" class="col-center">
+                <button
+                  mat-icon-button
+                  (click)="openEditDialog(row.id)"
+                  matTooltip="Editar roles"
+                  >
+                  <mat-icon>manage_accounts</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+
+          @if (filteredUsuarios.length === 0) {
+            <div class="empty-state">
+              <mat-icon>person_off</mat-icon>
+              <p>No se encontraron usuarios con los filtros aplicados.</p>
+            </div>
+          }
+        </div>
       </div>
+      <!-- /content-wrap -->
     </div>
-  </div>
-  <!-- /content-wrap -->
-</div>

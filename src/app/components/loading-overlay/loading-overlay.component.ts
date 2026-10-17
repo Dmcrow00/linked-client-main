@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { LoadingService } from 'src/app/services/loading.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
@@ -9,7 +9,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     imports: [MatProgressSpinner]
 })
 export class LoadingOverlayComponent {
-  loading$ = this.loadingService.loading$;
+  private loadingService = inject(LoadingService);
 
-  constructor(private loadingService: LoadingService) {}
+  loading$ = this.loadingService.loading$;
 }

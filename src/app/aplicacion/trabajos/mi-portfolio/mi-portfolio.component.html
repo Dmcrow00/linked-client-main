@@ -1,5 +1,5 @@
 <div class="page-hero">
-<div class="hero-content">
+  <div class="hero-content">
     <button mat-icon-button class="back-btn" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
     </button>
@@ -16,85 +16,103 @@
 <div class="mi-portfolio-container" [class.is-loading]="instagramLoading">
 
   <!-- Overlay de carga -->
-  <div *ngIf="instagramLoading" class="portfolio-loading-overlay">
-    <div class="portfolio-spinner"></div>
-    <p class="portfolio-loading-text">{{ instagramLoadingMessage }}</p>
-  </div>
+  @if (instagramLoading) {
+    <div class="portfolio-loading-overlay">
+      <div class="portfolio-spinner"></div>
+      <p class="portfolio-loading-text">{{ instagramLoadingMessage }}</p>
+    </div>
+  }
 
   <!-- Cabecera del perfil -->
-  <div class="profile-header" *ngIf="user">
-    <div class="avatar-wrapper">
-      <img
-        [src]="user.profile_photo | serverUrl"
-        alt="Foto de perfil"
-        class="profile-avatar"
-      />
+  @if (user) {
+    <div class="profile-header">
+      <div class="avatar-wrapper">
+        <img
+          [src]="user.profilePhoto | serverUrl"
+          alt="Foto de perfil"
+          class="profile-avatar"
+          />
+        </div>
+        <div class="profile-info">
+          <h1 class="artist-name">{{ user.realname }} {{ user.surname }}</h1>
+          <p class="username">{{ user.username }}</p>
+          <div class="stats-row">
+            @if (user.estudio) {
+              <span class="stat-item">
+                <mat-icon>storefront</mat-icon>
+                {{ user.estudio }}
+              </span>
+            }
+            @if (user.antiguedad) {
+              <span class="stat-item">
+                <mat-icon>history_edu</mat-icon>
+                {{ user.antiguedad }} {{ user.antiguedad === 1 ? 'año' : 'años' }} de experiencia
+              </span>
+            }
+          </div>
+          @if (user.especialidades && user.especialidades.length > 0) {
+            <div class="tags-row">
+              @for (esp of user.especialidades; track esp) {
+                <span class="tag">{{ esp.nombre }}</span>
+              }
+            </div>
+          }
+          <!-- Sección Instagram -->
+          @if (instagramStatus.connected) {
+            <div class="instagram-sync-area">
+              <button
+                class="btn-instagram-sync"
+                appNoDoubleSubmit
+                (click)="syncInstagram()"
+                [disabled]="instagramLoading"
+                >
+                <mat-icon>sync</mat-icon>
+                {{ instagramLoading ? 'Sincronizando...' : 'Sincronizar con Instagram' }}
+              </button>
+              @if (syncMessage) {
+                <p
+                  class="sync-message"
+                  [class.sync-message--success]="!syncMessageIsError"
+                  [class.sync-message--error]="syncMessageIsError"
+                  >
+                  <mat-icon>{{ syncMessageIsError ? 'error_outline' : 'check_circle' }}</mat-icon>
+                  {{ syncMessage }}
+                </p>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Título galería -->
+    <div class="gallery-title">
+      <h3>Mis Publicaciones</h3>
+      @if (!isLoading) {
+        <span class="count">{{ trabajos.length }} publicaciones</span>
+      }
     </div>
 
-    <div class="profile-info">
-      <h1 class="artist-name">{{ user.realname }} {{ user.surname }}</h1>
-      <p class="username">{{ user.username }}</p>
-
-      <div class="stats-row">
-        <span class="stat-item" *ngIf="user.estudio">
-          <mat-icon>storefront</mat-icon>
-          {{ user.estudio }}
-        </span>
-        <span class="stat-item" *ngIf="user.antiguedad">
-          <mat-icon>history_edu</mat-icon>
-          {{ user.antiguedad }} {{ user.antiguedad === 1 ? 'año' : 'años' }} de experiencia
-        </span>
+    <!-- Grid de trabajos -->
+    @if (!isLoading && trabajos.length > 0) {
+      <div class="galeria-grid">
+        @for (trabajo of trabajos; track trabajo) {
+          <app-post-tile
+            [trabajo]="trabajo"
+            [isLiked]="false"
+            [showArtistInfo]="false"
+            (click)="abrirDetalle(trabajo)"
+          ></app-post-tile>
+        }
       </div>
+    }
 
-      <div class="tags-row" *ngIf="user.especialidades && user.especialidades.length > 0">
-        <span class="tag" *ngFor="let esp of user.especialidades">{{ esp.nombre }}</span>
+    <!-- Estado vacío -->
+    @if (!isLoading && trabajos.length === 0) {
+      <div class="empty-state">
+        <mat-icon>image_not_supported</mat-icon>
+        <p>Todavía no publicaste ningún trabajo.</p>
       </div>
+    }
 
-      <!-- Sección Instagram -->
-      <div *ngIf="instagramStatus.connected" class="instagram-sync-area">
-        <button
-          class="btn-instagram-sync"
-          appNoDoubleSubmit
-          (click)="syncInstagram()"
-          [disabled]="instagramLoading"
-        >
-          <mat-icon>sync</mat-icon>
-          {{ instagramLoading ? 'Sincronizando...' : 'Sincronizar con Instagram' }}
-        </button>
-        <p
-          *ngIf="syncMessage"
-          class="sync-message"
-          [class.sync-message--success]="!syncMessageIsError"
-          [class.sync-message--error]="syncMessageIsError"
-        >
-          <mat-icon>{{ syncMessageIsError ? 'error_outline' : 'check_circle' }}</mat-icon>
-          {{ syncMessage }}
-        </p>
-      </div>
-    </div>
   </div>
-
-  <!-- Título galería -->
-  <div class="gallery-title">
-    <h3>Mis Publicaciones</h3>
-    <span class="count" *ngIf="!isLoading">{{ trabajos.length }} publicaciones</span>
-  </div>
-
-  <!-- Grid de trabajos -->
-  <div class="galeria-grid" *ngIf="!isLoading && trabajos.length > 0">
-    <app-post-tile
-      *ngFor="let trabajo of trabajos"
-      [trabajo]="trabajo"
-      [isLiked]="false"
-      [showArtistInfo]="false"
-      (click)="abrirDetalle(trabajo)"
-    ></app-post-tile>
-  </div>
-
-  <!-- Estado vacío -->
-  <div *ngIf="!isLoading && trabajos.length === 0" class="empty-state">
-    <mat-icon>image_not_supported</mat-icon>
-    <p>Todavía no publicaste ningún trabajo.</p>
-  </div>
-
-</div>

@@ -2,7 +2,7 @@
   
   <div class="image-wrapper">
     
-    <img [src]="trabajo.fotos[currentImageIndex].image_path | serverUrl" 
+    <img [src]="trabajo.fotos[currentImageIndex] | serverUrl"
          class="tile-image" 
          loading="lazy"
          (error)="hasError = true"

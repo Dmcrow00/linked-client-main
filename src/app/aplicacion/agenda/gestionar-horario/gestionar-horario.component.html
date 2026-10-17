@@ -4,67 +4,90 @@
 
 <mat-dialog-content class="mat-typography">
 
-  <div *ngIf="isLoading" class="loading-spinner">
-    <mat-spinner diameter="50"></mat-spinner>
-    <p>Cargando horario...</p>
-  </div>
-
-  <div *ngIf="errorCarga" class="error-message">
-    <mat-icon color="warn">error_outline</mat-icon>
-    <p>{{ errorCarga }}</p>
-    <button mat-stroked-button color="primary" (click)="loadHorario()">Reintentar</button>
-  </div>
-
-  <form *ngIf="!isLoading && !errorCarga" [formGroup]="horarioForm">
-    <div formArrayName="dias" class="dias-container">
-      <div
-        *ngFor="let diaGroup of diasFormArray.controls; let i = index"
-        [formGroupName]="i"
-        class="dia-card"
-        [class.dia-card--activo]="diaGroup.get('enabled')?.value"
-      >
-        <div class="dia-header">
-          <h3>{{ diasSemana[diaGroup.get('dia_semana')?.value] }}</h3>
-          <mat-slide-toggle formControlName="enabled" color="primary"></mat-slide-toggle>
-        </div>
-
-        <div *ngIf="diaGroup.get('enabled')?.value" class="dia-inputs">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Inicio</mat-label>
-            <input matInput type="time" formControlName="hora_inicio" required>
-            <mat-error *ngIf="diaGroup.get('hora_inicio')?.hasError('required')">Requerido</mat-error>
-            <mat-error *ngIf="diaGroup.get('hora_inicio')?.hasError('pattern')">HH:MM</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Fin</mat-label>
-            <input matInput type="time" formControlName="hora_fin" required>
-            <mat-error *ngIf="diaGroup.get('hora_fin')?.hasError('required')">Requerido</mat-error>
-            <mat-error *ngIf="diaGroup.get('hora_fin')?.hasError('pattern')">HH:MM</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Duración (min)</mat-label>
-            <input matInput type="number" formControlName="duracion_turno_min" min="1" required>
-            <mat-error *ngIf="diaGroup.get('duracion_turno_min')?.hasError('required')">Requerido</mat-error>
-            <mat-error *ngIf="diaGroup.get('duracion_turno_min')?.hasError('min')">Mín. 1</mat-error>
-          </mat-form-field>
-        </div>
-
-        <div *ngIf="!diaGroup.get('enabled')?.value" class="dia-disabled-message">
-          Libre
-        </div>
-      </div>
+  @if (isLoading) {
+    <div class="loading-spinner">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando horario...</p>
     </div>
-  </form>
+  }
+
+  @if (errorCarga) {
+    <div class="error-message">
+      <mat-icon color="warn">error_outline</mat-icon>
+      <p>{{ errorCarga }}</p>
+      <button mat-stroked-button color="primary" (click)="loadHorario()">Reintentar</button>
+    </div>
+  }
+
+  @if (!isLoading && !errorCarga) {
+    <form [formGroup]="horarioForm">
+      <div formArrayName="dias" class="dias-container">
+        @for (diaGroup of diasFormArray.controls; track diaGroup; let i = $index) {
+          <div
+            [formGroupName]="i"
+            class="dia-card"
+            [class.dia-card--activo]="diaGroup.get('enabled')?.value"
+            >
+            <div class="dia-header">
+              <h3>{{ diasSemana[diaGroup.get('dia_semana')?.value] }}</h3>
+              <mat-slide-toggle formControlName="enabled" color="primary"></mat-slide-toggle>
+            </div>
+            @if (diaGroup.get('enabled')?.value) {
+              <div class="dia-inputs">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>Inicio</mat-label>
+                  <input matInput type="time" formControlName="hora_inicio" required>
+                  @if (diaGroup.get('hora_inicio')?.hasError('required')) {
+                    <mat-error>Requerido</mat-error>
+                  }
+                  @if (diaGroup.get('hora_inicio')?.hasError('pattern')) {
+                    <mat-error>HH:MM</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>Fin</mat-label>
+                  <input matInput type="time" formControlName="hora_fin" required>
+                  @if (diaGroup.get('hora_fin')?.hasError('required')) {
+                    <mat-error>Requerido</mat-error>
+                  }
+                  @if (diaGroup.get('hora_fin')?.hasError('pattern')) {
+                    <mat-error>HH:MM</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>Duración (min)</mat-label>
+                  <input matInput type="number" formControlName="duracion_turno_min" min="1" required>
+                  @if (diaGroup.get('duracion_turno_min')?.hasError('required')) {
+                    <mat-error>Requerido</mat-error>
+                  }
+                  @if (diaGroup.get('duracion_turno_min')?.hasError('min')) {
+                    <mat-error>Mín. 1</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            }
+            @if (!diaGroup.get('enabled')?.value) {
+              <div class="dia-disabled-message">
+                Libre
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </form>
+  }
 
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-stroked-button (click)="onCancel()">Cancelar</button>
   <button mat-raised-button class="create-button" appNoDoubleSubmit (click)="onSubmit()" [disabled]="horarioForm.invalid || isSaving || !horarioForm.dirty">
-    <mat-icon *ngIf="!isSaving">save</mat-icon>
-    <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
+    @if (!isSaving) {
+      <mat-icon>save</mat-icon>
+    }
+    @if (isSaving) {
+      <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+    }
     {{ isSaving ? 'Guardando...' : 'Guardar Horario' }}
   </button>
 </mat-dialog-actions>

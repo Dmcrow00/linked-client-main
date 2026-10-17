@@ -1,13 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { LoginService } from '../../services/auth/login.service';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProximamenteService } from 'src/app/services/proximamente.service';
-import { HelpDialogComponent } from 'src/app/components/help-dialog/help-dialog.component';
 import { SupportTicketCreateComponent } from 'src/app/aplicacion/support-ticket/support-ticket-create/support-ticket-create.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from 'src/app/services/user/user.service';
-import { NgIf } from '@angular/common';
+
 import { MatIconButton } from '@angular/material/button';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
@@ -17,25 +16,23 @@ import { ThemeToggleComponent } from '../../components/theme-toggle/theme-toggle
     selector: 'app-nav',
     templateUrl: './nav.component.html',
     styleUrls: ['./nav.component.scss'],
-    imports: [RouterLink, NgIf, MatIconButton, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, ThemeToggleComponent]
+    imports: [RouterLink, MatIconButton, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, ThemeToggleComponent]
 })
 export class NavComponent implements OnInit, OnDestroy {
-  searchTerm: string = '';
-  userLoginOn: boolean = false;
+  private loginService = inject(LoginService);
+  private userService = inject(UserService);
+  private router = inject(Router);
+  private proximamenteService = inject(ProximamenteService);
+  private dialog = inject(MatDialog);
+
+  searchTerm = '';
+  userLoginOn = false;
   username: string | null = null;
   userRol: string | null = null;
-  currentUrl: string = '';
+  currentUrl = '';
   private subscriptions: Subscription = new Subscription();
 
-  constructor(
-    private loginService: LoginService,
-    private userService: UserService,
-    private router: Router,
-    private proximamenteService: ProximamenteService,
-    private dialog: MatDialog
-  ) { }
-
-  menuOpen: boolean = false; // Estado inicial cerrado
+  menuOpen = false; // Estado inicial cerrado
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen; // Cambia el estado
@@ -67,9 +64,6 @@ export class NavComponent implements OnInit, OnDestroy {
             this.userRol = null;
           }
         },
-        error: (err) => {
-          console.error('Error al suscribirse al estado de login', err);
-        },
       })
     );
   }
@@ -92,9 +86,8 @@ export class NavComponent implements OnInit, OnDestroy {
             this.username = username
           };
         },
-        error: (err) => {
-          console.error('Error al obtener el nombre de usuario', err);
-        },
+        // Si no llega el nombre, la barra sigue sin él.
+        error: () => (this.username = null),
       })
     );
   }
@@ -105,9 +98,6 @@ export class NavComponent implements OnInit, OnDestroy {
       this.loginService.userRol.subscribe({
         next: (role) => {
           this.userRol = role; // Asigna el rol
-        },
-        error: (err) => {
-          console.error('Error al obtener el rol del usuario', err);
         },
       })
     );

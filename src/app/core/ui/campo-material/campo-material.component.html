@@ -1,0 +1,30 @@
+@let f = field();
+<mat-form-field appearance="outline" class="campo-material">
+  <mat-label>{{ f.label }}</mat-label>
+  @switch (f.type) {
+    @case ('select') {
+      <mat-select [id]="inputId()" [formControl]="control()">
+        @if (f.emptyOption) {
+          <mat-option [value]="null">{{ f.emptyOption }}</mat-option>
+        }
+        @for (o of opciones(); track o.value) {
+          <mat-option [value]="o.value" [disabled]="!!o.disabled">{{ o.label }}</mat-option>
+        }
+      </mat-select>
+    }
+    @case ('textarea') {
+      <textarea matInput [id]="inputId()" [rows]="f.rows ?? 4" [formControl]="control()" [placeholder]="f.placeholder ?? ''"
+                [attr.maxlength]="f.maxLength ?? null"></textarea>
+    }
+    @default {
+      <input matInput [id]="inputId()" [type]="tipoTexto()" [formControl]="control()" [placeholder]="f.placeholder ?? ''"
+             [attr.maxlength]="f.maxLength ?? null" [attr.autocomplete]="f.autocomplete ?? null" />
+    }
+  }
+  @if (f.hint) {
+    <mat-hint>{{ f.hint }}</mat-hint>
+  }
+  @if (error(); as e) {
+    <mat-error>{{ e }}</mat-error>
+  }
+</mat-form-field>

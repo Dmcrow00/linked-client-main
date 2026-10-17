@@ -1,75 +1,53 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
-import { NgIf, DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DatePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
-import { MatFormField, MatError } from '@angular/material/form-field';
-import { MatSelect, MatOption } from '@angular/material/select';
-import { MatInput } from '@angular/material/input';
+import { DynamicFormComponent, FieldConfig, buildForm, useSaveForm } from '@dmcrow00/ng-core/forms';
 
 import { SupportTicket } from '../support-ticket.model';
 import { SupportTicketService } from '../support-ticket.service';
-import { UserService } from 'src/app/services/user/user.service';
-import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
-import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 
+interface Respuesta {
+  adminResponse: string;
+}
+
+const CAMPOS: FieldConfig<Respuesta>[] = [
+  {
+    key: 'adminResponse',
+    type: 'textarea',
+    label: 'Respuesta al cliente',
+    placeholder: 'Redactá la respuesta que recibirá el usuario por correo...',
+    required: true,
+    minLength: 10,
+    rows: 5,
+    errors: { required: 'La respuesta es requerida.' },
+  },
+];
+
+/** Detalle de un ticket y su respuesta. Responder lo cierra (lo resuelve) en el servidor; cierra con true. */
 @Component({
   selector: 'app-support-ticket-detail',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './support-ticket-detail.component.html',
   styleUrls: ['./support-ticket-detail.component.scss'],
-  imports: [
-    ReactiveFormsModule, NgIf, DatePipe,
-    MatIcon, MatButton,
-    MatFormField, MatError, MatSelect, MatOption, MatInput,
-    NoDoubleSubmitDirective,
-  ],
+  imports: [DatePipe, MatIcon, MatButton, DynamicFormComponent],
 })
-export class SupportTicketDetailComponent implements OnInit {
-  gestionForm: FormGroup;
-  saving = false;
+export class SupportTicketDetailComponent {
+  private supportTicketService = inject(SupportTicketService);
+  private dialogRef = inject<MatDialogRef<SupportTicketDetailComponent, boolean>>(MatDialogRef);
+  protected readonly data = inject<{ supportTicket: SupportTicket }>(MAT_DIALOG_DATA);
 
-  constructor(
-    private fb: FormBuilder,
-    private supportTicketService: SupportTicketService,
-    private userService: UserService,
-    private dialog: MatDialog,
-    public dialogRef: MatDialogRef<SupportTicketDetailComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { supportTicket: SupportTicket }
-  ) {
-    this.gestionForm = this.fb.group({
-      status: [data.supportTicket.status + '' === 'true'],
-      admin_response: ['', [Validators.required, Validators.minLength(10)]],
-    });
-  }
+  protected readonly campos = CAMPOS;
+  protected readonly form = buildForm<Respuesta>(CAMPOS, {});
+  protected readonly estado = useSaveForm({ errorMessage: 'No se pudo enviar la respuesta.' });
 
-  ngOnInit(): void {}
-
-  onRespond(): void {
-    if (this.gestionForm.invalid) return;
-    this.saving = true;
-
-    this.userService.getLoggedInUsername().subscribe((username) => {
-      const payload = {
-        status: this.gestionForm.value.status,
-        admin_response: this.gestionForm.value.admin_response,
-        modificationuser: username ?? '',
-      };
-
-      this.supportTicketService.respondToTicket(this.data.supportTicket.id, payload).subscribe({
-        next: () => {
-          this.saving = false;
-          this.dialogRef.close(true);
-        },
-        error: (err) => {
-          this.saving = false;
-          const msg = err?.error?.msg || 'Error al enviar la respuesta';
-          this.dialog.open(ErrorDialogComponent, {
-            data: { type: 'error', message: msg },
-          });
-        },
-      });
-    });
+  async onRespond(): Promise<void> {
+    if (!this.estado.validate(this.form)) return;
+    await this.estado.save(
+      () => this.supportTicketService.respondToTicket(this.data.supportTicket.id, this.form.getRawValue().adminResponse),
+      () => this.dialogRef.close(true)
+    );
   }
 
   onClose(): void {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MatDialogContent } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions } from '@angular/material/card';
@@ -12,7 +12,8 @@ import { MatButton } from '@angular/material/button';
     imports: [CdkScrollable, MatDialogContent, MatCard, MatCardHeader, MatCardAvatar, MatIcon, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions, MatButton]
 })
 export class HelpDialogComponent {
-  constructor(public dialogRef: MatDialogRef<HelpDialogComponent>) {}
+  dialogRef = inject<MatDialogRef<HelpDialogComponent>>(MatDialogRef);
+
 
   onClose(): void {
     this.dialogRef.close();

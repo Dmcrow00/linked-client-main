@@ -1,7 +1,7 @@
 export class Reserva {
-    id: number = 0;
-    nombre: string = '';
-    fecha: string = '';
-    imagen: string = '';
-    estado: string = '';
+    id = 0;
+    nombre = '';
+    fecha = '';
+    imagen = '';
+    estado = '';
 }

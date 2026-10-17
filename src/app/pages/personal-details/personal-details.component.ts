@@ -1,11 +1,11 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { User } from '../../models/user.model';
 import { UserService } from '../../services/user/user.service';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DatePipe, NgIf, NgFor } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, Subscription, Subject } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { Especialidad } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.model';
 import { TatuadorService } from 'src/app/services/user/tatuador.service';
@@ -24,10 +24,11 @@ import { ServerUrlPipe } from '../../pipes/server-url.pipe';
 import { InstagramService, InstagramStatus } from '../../services/instagram/instagram.service';
 import { GeocodingService, GeoResult } from '../../services/geocoding/geocoding.service';
 import { ForgotPasswordService } from 'src/app/services/auth/forgotpass.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
+import { AvisosService } from 'src/app/core/avisos.service';
+import { apiErrorMessage } from '@dmcrow00/ng-core/http';
 
 
 @Component({
@@ -35,19 +36,30 @@ import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-sub
     templateUrl: './personal-details.component.html',
     styleUrls: ['./personal-details.component.scss'],
     providers: [DatePipe],
-    imports: [MatChipsModule, NgIf, NgFor, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatDivider, MatCardContent, MatChip, MatCardActions, MatIcon, MatIconButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, TatuadorComponent, MatButton, DatePipe, ServerUrlPipe, MatSnackBarModule, MatProgressSpinner, MatTooltip, MatAutocompleteModule, NoDoubleSubmitDirective]
+    imports: [MatChipsModule, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatDivider, MatCardContent, MatChip, MatCardActions, MatIcon, MatIconButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, TatuadorComponent, MatButton, DatePipe, ServerUrlPipe, MatSnackBarModule, MatProgressSpinner, MatTooltip, MatAutocompleteModule, NoDoubleSubmitDirective]
 })
 export class PersonalDetailsComponent implements OnInit, OnDestroy {
+  private userService = inject(UserService);
+  private tatuadorService = inject(TatuadorService);
+  private formBuilder = inject(FormBuilder);
+  private loginService = inject(LoginService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private instagramService = inject(InstagramService);
+  private geocodingService = inject(GeocodingService);
+  private forgotPasswordService = inject(ForgotPasswordService);
+  private avisos = inject(AvisosService);
+
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild(TatuadorComponent) tatuadorComponentRef!: TatuadorComponent;
 
   previewImageUrl: string | ArrayBuffer | null = null;
-  environment: string = '';
-  errorMessage: string = '';
+  environment = '';
+  errorMessage = '';
   userId: number | null = null;
   user?: User;
-  userLoginOn: boolean = false;
-  editMode: boolean = false;
+  userLoginOn = false;
+  editMode = false;
   userRol: string | null = null;
   especialidades: Especialidad[] = [];
   today: Date = new Date();
@@ -55,16 +67,16 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
 
   // Cambio de contraseña
-  showPasswordConfirm: boolean = false;
-  passwordResetLoading: boolean = false;
+  showPasswordConfirm = false;
+  passwordResetLoading = false;
 
   // Instagram
   instagramStatus: InstagramStatus = { connected: false };
-  instagramLoading: boolean = false;
-  instagramLoadingMessage: string = '';
-  instagramMessage: string = '';
-  instagramMessageIsError: boolean = false;
-  showInstagramWarning: boolean = false;
+  instagramLoading = false;
+  instagramLoadingMessage = '';
+  instagramMessage = '';
+  instagramMessageIsError = false;
+  showInstagramWarning = false;
 
   registerForm = this.formBuilder.group({
     id: this.formBuilder.control<number | null>(null),
@@ -72,10 +84,10 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     realname: this.formBuilder.control<string | null>(null),
     username: this.formBuilder.control<string | null>(null, Validators.required),
     email: this.formBuilder.control<string | null>(null, Validators.required),
-    birth_date: this.formBuilder.control<Date | null>(null, Validators.required),
+    birthDate: this.formBuilder.control<Date | null>(null, Validators.required),
     profileImage: this.formBuilder.control<File | null>(null),
     localidad: this.formBuilder.control<string | null>(null),
-    instagram_handle: this.formBuilder.control<string | null>(null),
+    instagramHandle: this.formBuilder.control<string | null>(null),
   });
 
   // Coordenadas geocodificadas, no en el formulario reactive sino como propiedades
@@ -85,19 +97,6 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
   isGeocoding = false;
   isGPSLocating = false;
   locationSuggestions: GeoResult[] = [];
-
-  constructor(
-    private userService: UserService,
-    private tatuadorService: TatuadorService,
-    private formBuilder: FormBuilder,
-    private loginService: LoginService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private instagramService: InstagramService,
-    private geocodingService: GeocodingService,
-    private forgotPasswordService: ForgotPasswordService,
-    private snackBar: MatSnackBar,
-  ) {}
 
   ngOnInit(): void {
     this.loadUserSession();
@@ -134,11 +133,11 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
       next: () => {
         this.passwordResetLoading = false;
         this.showPasswordConfirm = false;
-        this.snackBar.open(`Se envió un correo a ${this.user!.email} con el enlace para cambiar la contraseña.`, 'OK', { duration: 6000 });
+        this.avisos.success(`Se envió un correo a ${this.user!.email} con el enlace para cambiar la contraseña.`);
       },
-      error: () => {
+      error: (err) => {
         this.passwordResetLoading = false;
-        this.snackBar.open('Error al enviar el correo. Intentá de nuevo.', 'Cerrar', { duration: 4000 });
+        this.avisos.fallo(err, 'Error al enviar el correo. Intentá de nuevo.');
       }
     });
   }
@@ -205,14 +204,14 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     this.instagramLoadingMessage = 'Sincronizando posts...';
     this.instagramMessage = '';
     this.instagramService.syncPosts().subscribe({
-      next: (res) => {
-        this.instagramMessage = res.message;
+      next: () => {
+        this.instagramMessage = 'Publicaciones sincronizadas.';
         this.instagramMessageIsError = false;
         this.instagramLoading = false;
         if (this.userId) this.loadUserData(this.userId);
       },
       error: (err) => {
-        this.instagramMessage = err?.error?.message || 'Error al sincronizar los posts.';
+        this.instagramMessage = apiErrorMessage(err, 'Error al sincronizar los posts.');
         this.instagramMessageIsError = true;
         this.instagramLoading = false;
         this.loadInstagramStatus();
@@ -230,8 +229,8 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
         this.instagramLoading = false;
         if (this.userId) this.loadUserData(this.userId);
       },
-      error: () => {
-        this.instagramMessage = 'Error al desvincular.';
+      error: (err) => {
+        this.instagramMessage = apiErrorMessage(err, 'Error al desvincular.');
         this.instagramLoading = false;
       }
     });
@@ -269,9 +268,9 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
           realname: data.realname ?? '',
           username: data.username ?? '',
           email: data.email ?? '',
-          birth_date: data.birth_date ? new Date(data.birth_date) : null,
+          birthDate: data.birthDate ? new Date(data.birthDate) : null,
           localidad: data.localidad ?? '',
-          instagram_handle: data.instagram_handle ?? '',
+          instagramHandle: data.instagramHandle ?? '',
         }, { emitEvent: false });
         // Restaurar coordenadas previas si existen
         this.geocodedLat = data.lat ?? null;
@@ -280,13 +279,12 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
         this.loadUserRol();
         this.loadEspecialidades();
       },
-      error: (err) => (this.errorMessage = err?.message || 'Error al cargar datos'),
+      error: (err) => (this.errorMessage = apiErrorMessage(err, 'Error al cargar datos')),
     });
   }
 
   private loadEspecialidades(): void {
   if (!this.userId || !this.user) {
-    console.warn("Intentando cargar especialidades sin userId o sin objeto user inicializado.");
     return;
   }
 
@@ -296,8 +294,7 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
             this.user.especialidades = res;
         }
       },
-      error: (err) => {
-          console.error("Error al cargar especialidades del tatuador:", err);
+      error: () => {
           if(this.user) {
               this.user.especialidades = [];
           }
@@ -312,7 +309,6 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
           this.userRol = role;
           if (role === 'Tatuador') this.loadInstagramStatus();
         },
-        error: (err) => console.error('Error al obtener el rol', err),
       })
     );
   }
@@ -339,19 +335,19 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
         this.geocodedLat = result.lat;
         this.geocodedLng = result.lng;
         this.geocodedDisplayName = result.displayName;
-        this.snackBar.open(`Ubicación encontrada: ${result.displayName.split(',').slice(0, 2).join(',')}`, 'OK', { duration: 4000 });
+        this.avisos.success(`Ubicación encontrada: ${result.displayName.split(',').slice(0, 2).join(',')}`);
       } else {
         this.geocodedLat = null;
         this.geocodedLng = null;
         this.geocodedDisplayName = null;
-        this.snackBar.open('No se encontró esa localidad. Intentá con un nombre más específico.', 'Cerrar', { duration: 4000 });
+        this.avisos.error('No se encontró esa localidad. Intentá con un nombre más específico.');
       }
     });
   }
 
   usarGPS(): void {
     if (!navigator.geolocation) {
-      this.snackBar.open('Tu navegador no soporta geolocalización.', 'Cerrar', { duration: 3000 });
+      this.avisos.error('Tu navegador no soporta geolocalización.');
       return;
     }
     this.isGPSLocating = true;
@@ -364,16 +360,16 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
             this.geocodedLng = result.lng;
             this.geocodedDisplayName = result.displayName;
             this.registerForm.patchValue({ localidad: result.displayName }, { emitEvent: false });
-            this.snackBar.open(`Ubicación detectada: ${result.displayName.split(',').slice(0, 2).join(',')}`, 'OK', { duration: 4000 });
+            this.avisos.success(`Ubicación detectada: ${result.displayName.split(',').slice(0, 2).join(',')}`);
           } else {
             this.isGPSLocating = false;
-            this.snackBar.open('No se pudo determinar tu ubicación.', 'Cerrar', { duration: 3000 });
+            this.avisos.error('No se pudo determinar tu ubicación.');
           }
         });
       },
       () => {
         this.isGPSLocating = false;
-        this.snackBar.open('No se pudo obtener el GPS. Verificá los permisos del navegador.', 'Cerrar', { duration: 4000 });
+        this.avisos.error('No se pudo obtener el GPS. Verificá los permisos del navegador.');
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
@@ -390,8 +386,8 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     this.fileInput.nativeElement.click();
   }
 
-  onFileSelected(event: any): void {
-  const file = event.target.files?.[0];
+  onFileSelected(event: Event): void {
+  const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -423,12 +419,6 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
   // Guardar cambios (todos los endpoints)
   // ----------------------------------------------------------
 
-  especialidadesSeleccionadas: number[] = [];
-
-  onEspecialidadesChange(especialidades: Especialidad[]): void {
-    this.especialidadesSeleccionadas = especialidades.map(e => e.id);
-  }
-
   onUpdateProfile(): void {
   if (!this.userId || !this.user) {
     return;
@@ -443,30 +433,28 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
     // 1. Actualizar datos del usuario
   const formValues = this.registerForm.value;
 
-  let tatuadorData: { estudio?: string | null, fecha_inicio_actividad?: Date | null } = {
+  let tatuadorData: { estudio?: string | null, fechaInicioActividad?: Date | null } = {
     estudio: this.user?.estudio ?? null,
-    fecha_inicio_actividad: this.user?.fecha_inicio_actividad ?? null,
+    fechaInicioActividad: this.user?.fechaInicioActividad ? new Date(this.user.fechaInicioActividad) : null,
     };
 
     if (this.userRol === 'Tatuador' && this.tatuadorComponentRef) {
         tatuadorData = this.tatuadorComponentRef.getTatuadorData();
     }
 
+  // El backend sólo toma los campos editables del perfil: username y email no se actualizan por acá.
   const updatedUser: Partial<User> = {
-    ...this.user,
     realname: formValues.realname ?? undefined,
     surname: formValues.surname ?? undefined,
-    username: formValues.username ?? undefined,
-    email: formValues.email ?? undefined,
-    birth_date: formValues.birth_date
-      ? new Date(formValues.birth_date)
-      : undefined,
+    birthDate: formValues.birthDate ? this.aFechaIso(formValues.birthDate) : undefined,
     estudio: tatuadorData.estudio ?? undefined,
-    fecha_inicio_actividad: tatuadorData.fecha_inicio_actividad ? new Date(tatuadorData.fecha_inicio_actividad) : undefined,
+    fechaInicioActividad: tatuadorData.fechaInicioActividad
+      ? this.aFechaIso(tatuadorData.fechaInicioActividad)
+      : undefined,
     localidad: formValues.localidad ?? undefined,
     lat: this.geocodedLat ?? undefined,
     lng: this.geocodedLng ?? undefined,
-    instagram_handle: formValues.instagram_handle ?? undefined,
+    instagramHandle: formValues.instagramHandle ?? undefined,
   };
 
     requests.push(this.userService.updateUser(this.userId, updatedUser));
@@ -476,16 +464,11 @@ export class PersonalDetailsComponent implements OnInit, OnDestroy {
       requests.push(this.userService.updateProfilePhoto(this.userId, this.selectedFile));
     }
 
-    //  3. Si es tatuador, actualizar especialidades
-if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0) {
-  requests.push(
-      this.tatuadorService.assignEspecialidades(this.userId, this.especialidadesSeleccionadas)
-    );
-  }
+    // Las especialidades no se guardan desde acá: el backend sólo deja asignarlas a un administrador.
 
     //  Ejecutar todas las llamadas juntas
     forkJoin(requests).subscribe({
-      next: (responses) => {
+      next: (_responses) => {
         this.editMode = false;
         this.selectedFile = null;
         this.fileInput.nativeElement.value = '';
@@ -496,8 +479,7 @@ if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0)
       }
       },
       error: (err) => {
-        console.error('Error al guardar perfil', err);
-        this.errorMessage = 'Error al guardar los cambios.';
+        this.errorMessage = apiErrorMessage(err, 'Error al guardar los cambios.');
       },
     });
   }
@@ -513,19 +495,27 @@ if (this.userRol === 'Tatuador' && this.especialidadesSeleccionadas.length >= 0)
     if (this.userId) this.loadUserData(this.userId);
   }
 
+  // El backend espera un LocalDate: se envía la fecha local y no el ISO en UTC, que correría un día.
+  private aFechaIso(fecha: Date): string {
+    const mes = `${fecha.getMonth() + 1}`.padStart(2, '0');
+    const dia = `${fecha.getDate()}`.padStart(2, '0');
+    return `${fecha.getFullYear()}-${mes}-${dia}`;
+  }
+
   /** Formatea la fecha al escribir */
-  onDateInput(event: any) {
-    let value: string = event.target.value.replace(/\D/g, '');
+  onDateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value: string = input.value.replace(/\D/g, '');
     if (value.length >= 2) value = value.slice(0, 2) + '/' + value.slice(2);
     if (value.length >= 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-    event.target.value = value;
+    input.value = value;
   }
 
   // Getters de conveniencia
   get realname() { return this.registerForm.controls.realname; }
   get surname() { return this.registerForm.controls.surname; }
   get email() { return this.registerForm.controls.email; }
-  get birth_date() { return this.registerForm.controls.birth_date; }
+  get birthDate() { return this.registerForm.controls.birthDate; }
   get username() { return this.registerForm.controls.username; }
 
 }

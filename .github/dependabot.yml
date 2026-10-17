@@ -1,0 +1,22 @@
+# Actualizaciones semanales de dependencias npm y de las acciones de GitHub, contra develop.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      angular:
+        patterns: ['@angular/*', '@angular-devkit/*', 'angular-eslint', '@angular-eslint/*']
+    ignore:
+      # Los saltos de versión mayor de Angular se hacen con ng update y sus migraciones.
+      - dependency-name: '@angular/*'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly

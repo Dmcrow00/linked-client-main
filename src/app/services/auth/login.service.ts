@@ -1,16 +1,20 @@
-import { Injectable } from '@angular/core';
+import { ApiResponse, unwrap } from '@dmcrow00/ng-core/http';
+import { Injectable, inject } from '@angular/core';
 import { LoginRequest } from '../../models/loginRequest';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { tap, catchError, Observable, BehaviorSubject, map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { tap, Observable, BehaviorSubject, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { AuthState } from '@dmcrow00/ng-core/auth';
 import { jwtDecode } from 'jwt-decode';
 import { UserService } from '../user/user.service';
-import { ErrorHandlerService } from '../error-handler.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class LoginService {
+export class LoginService implements AuthState {
+  private http = inject(HttpClient);
+  private userService = inject(UserService);
+
   private currentUserLoginOnSubject: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
   private currentUserDataSubject: BehaviorSubject<string> =
@@ -18,11 +22,7 @@ export class LoginService {
   private currentUserRolSubject: BehaviorSubject<string> =
     new BehaviorSubject<string>('');
 
-  constructor(
-    private http: HttpClient,
-    private userService: UserService,
-    private errorHandler: ErrorHandlerService
-  ) {
+  constructor() {
     const token = sessionStorage.getItem('accessToken');
     this.currentUserLoginOnSubject.next(!!token);
     this.currentUserDataSubject.next(token || '');
@@ -32,21 +32,18 @@ export class LoginService {
     }
   }
 
-  login(credentials: LoginRequest): Observable<any> {
+  login(credentials: LoginRequest): Observable<string> {
     return this.http
-      .post<any>(`${environment.urlHost}auth/login`, credentials)
-      .pipe(
+      .post<ApiResponse<{ token: string }>>(`${environment.urlHost}auth/login`, credentials)
+      .pipe(map(unwrap),
         tap((response) => {
-          const token = response?.data?.token;
+          const token = response.token;
           sessionStorage.setItem('accessToken', token);
           this.currentUserDataSubject.next(token);
           this.currentUserLoginOnSubject.next(true);
           this.updateUserId(token);
         }),
-        map((response) => response?.data?.token),
-        catchError((error: HttpErrorResponse) =>
-          this.errorHandler.handleError(error)
-        )
+        map((response) => response.token)
       );
   }
 
@@ -76,7 +73,12 @@ export class LoginService {
     return !!sessionStorage.getItem('accessToken');
   }
 
-  get userData(): Observable<String> {
+  /** Para los guards de ng-core (`AuthState`). */
+  isAuthenticated(): boolean {
+    return this.isLoggedIn();
+  }
+
+  get userData(): Observable<string> {
     return this.currentUserDataSubject.asObservable();
   }
 

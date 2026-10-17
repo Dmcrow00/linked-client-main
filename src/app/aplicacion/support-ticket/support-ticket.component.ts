@@ -1,10 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { SupportTicket } from './support-ticket.model';
 import { SupportTicketService } from './support-ticket.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SupportTicketDetailComponent } from './support-ticket-detail/support-ticket-detail.component';
-import { SupportTicketDeleteComponent } from './support-ticket-delete/support-ticket-delete.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
@@ -16,7 +16,19 @@ import { MatSelect, MatOption } from '@angular/material/select';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { DatePipe, Location, NgIf, NgFor } from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
+import { ListStore } from '@dmcrow00/ng-core/list';
+import { ConfirmService } from '@dmcrow00/ng-core/ui';
+
+/** Los filtros del panel: se aplican sobre la lista ya cargada al tocar "Buscar". */
+interface FiltroTickets {
+  usuario: string;
+  fecha: Date | null;
+  /** true: abiertos (pendientes); false: resueltos; null: todos. */
+  abierto: boolean | null;
+}
+
+const SIN_FILTRO: FiltroTickets = { usuario: '', fecha: null, abierto: null };
 
 @Component({
   selector: 'app-support-ticket',
@@ -33,117 +45,94 @@ import { DatePipe, Location, NgIf, NgFor } from '@angular/common';
     DatePipe
   ],
 })
-export class SupportTicketComponent implements OnInit, OnDestroy {
-  supportTickets: SupportTicket[] = [];
-  filteredTickets: SupportTicket[] = [];
-  private destroy$ = new Subject<void>();
+export class SupportTicketComponent {
+  private supportTicketService = inject(SupportTicketService);
+  private dialog = inject(MatDialog);
+  private confirm = inject(ConfirmService);
+  private location = inject(Location);
 
-  filterFechaCarga: Date | null = null;
-  filterUsuario: string | null = null;
-  filterEstadoTicket: boolean | null = null;
+  readonly lista = new ListStore<SupportTicket>({
+    load: () => this.supportTicketService.getAllSupportTickets(),
+    remove: (t) => this.supportTicketService.deleteSupportTicket(t.id),
+    messages: {
+      loadError: 'No se pudieron cargar los tickets.',
+      saved: 'Respuesta enviada.',
+      deleted: 'Ticket eliminado.',
+      deleteError: 'No se pudo eliminar el ticket.',
+    },
+  });
 
-  displayedColumns: string[] = ['id', 'fechaCarga', 'user', 'status', 'actions'];
+  // Lo que se edita en el panel de filtros y lo que se aplicó con "Buscar".
+  filtro: FiltroTickets = { ...SIN_FILTRO };
+  private readonly aplicado = signal<FiltroTickets>(SIN_FILTRO);
 
-  constructor(
-    private supportTicketService: SupportTicketService,
-    private dialog: MatDialog,
-    private breakpointObserver: BreakpointObserver,
-    private location: Location
-  ) { }
+  readonly filteredTickets = computed(() => {
+    const { usuario, fecha, abierto } = this.aplicado();
+    const buscado = usuario.trim().toLowerCase();
+    const dia = fecha ? this.dia(fecha) : null;
+    return this.lista.items().filter(ticket =>
+      (!buscado || (ticket.usuarios ?? []).some(u => u.toLowerCase().includes(buscado))) &&
+      (!dia || (!!ticket.creationTimestamp && this.dia(new Date(ticket.creationTimestamp)) === dia)) &&
+      (abierto === null || ticket.status === abierto)
+    );
+  });
+
+  readonly displayedColumns = toSignal(
+    inject(BreakpointObserver).observe([Breakpoints.Handset]).pipe(
+      map(r => r.matches
+        ? ['id', 'fechaCarga', 'status', 'actions']
+        : ['id', 'fechaCarga', 'user', 'status', 'actions'])
+    ),
+    { initialValue: ['id', 'fechaCarga', 'user', 'status', 'actions'] }
+  );
 
   goBack(): void { this.location.back(); }
 
-  ngOnInit(): void {
-    this.loadSupportTickets();
-    this.setupResponsiveColumns();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private setupResponsiveColumns(): void {
-    this.breakpointObserver.observe([Breakpoints.Handset])
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        this.displayedColumns = result.matches
-          ? ['id', 'fechaCarga', 'status', 'actions']
-          : ['id', 'fechaCarga', 'user', 'status', 'actions'];
-      });
-  }
-
-  showDetails(id: number): void {
-    this.supportTicketService.getSupportTicket(id).subscribe((supportTicket) => {
-      const dialogRef = this.dialog.open(SupportTicketDetailComponent, {
+  showDetails(supportTicket: SupportTicket): void {
+    this.dialog
+      .open(SupportTicketDetailComponent, {
         width: '780px',
         maxWidth: '95vw',
         disableClose: true,
         data: { supportTicket },
+      })
+      .afterClosed()
+      .subscribe((respondio) => {
+        if (respondio) void this.lista.saved();
       });
-
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.loadSupportTickets();
-        }
-      });
-    });
   }
 
-  openDeleteDialog(id: number): void {
-    const dialogRef = this.dialog.open(SupportTicketDeleteComponent, {
-      width: '400px',
-      disableClose: true,
-      data: { id },
+  async openDeleteDialog(ticket: SupportTicket): Promise<void> {
+    const seguro = await this.confirm.ask({
+      title: 'Eliminar ticket',
+      message: `¿Eliminar el ticket #${ticket.id}? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      danger: true,
     });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadSupportTickets();
-      }
-    });
-  }
-
-  loadSupportTickets(): void {
-    this.supportTicketService.getAllSupportTickets().subscribe((data) => {
-      this.supportTickets = data;
-      this.filteredTickets = data;
-    });
+    if (seguro) await this.lista.remove(ticket);
   }
 
   aplicarFiltro(): void {
-    this.filteredTickets = this.supportTickets.filter(ticket => {
-      let d1: string | null = null;
-      let d2: string | null = null;
-
-      if (ticket.creationtimestamp && this.filterFechaCarga) {
-        d1 = new Date(ticket.creationtimestamp).toISOString().split('T')[0];
-        d2 = this.filterFechaCarga.toISOString().split('T')[0];
-      }
-
-      const coincideUsuario =
-        !this.filterUsuario || ticket.creationuser.toLowerCase().includes(this.filterUsuario.toLowerCase());
-
-      const coincideFecha = !this.filterFechaCarga || d1 === d2;
-
-      const coincideEstado =
-        this.filterEstadoTicket === null || ticket.status === this.filterEstadoTicket;
-
-      return coincideUsuario && coincideFecha && coincideEstado;
-    });
+    this.aplicado.set({ ...this.filtro });
   }
 
   resetFiltro(): void {
-    this.filterUsuario = '';
-    this.filterFechaCarga = null;
-    this.filterEstadoTicket = null;
-    this.filteredTickets = [...this.supportTickets];
+    this.filtro = { ...SIN_FILTRO };
+    this.aplicado.set(SIN_FILTRO);
   }
 
-  onDateInput(event: any) {
-    let value: string = event.target.value.replace(/\D/g, '');
+  onDateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value: string = input.value.replace(/\D/g, '');
     if (value.length >= 2) value = value.slice(0, 2) + '/' + value.slice(2);
     if (value.length >= 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-    event.target.value = value;
+    input.value = value;
+  }
+
+  /** El día local (aaaa-mm-dd), para comparar fechas sin la hora ni el corrimiento de UTC. */
+  private dia(fecha: Date): string {
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${fecha.getFullYear()}-${mes}-${dia}`;
   }
 }

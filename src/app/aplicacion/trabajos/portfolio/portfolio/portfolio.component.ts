@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component,  inject, OnInit } from '@angular/core';
 import { Trabajo } from 'src/app/models/trabajos/trabajos.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TrabajosService } from 'src/app/services/trabajos/trabajos.service';
@@ -7,35 +7,35 @@ import { TatuadorService } from 'src/app/services/user/tatuador.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
-import { NgIf, NgFor, Location } from '@angular/common';
+import { Location } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { ServerUrlPipe } from '../../../../pipes/server-url.pipe';
 import { PostTileComponent } from 'src/app/components/post-tile/post-tile.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 @Component({
     selector: 'app-portfolio',
     templateUrl: './portfolio.component.html',
     styleUrl: './portfolio.component.scss',
-    imports: [PostTileComponent, NgIf, MatIcon, NgFor, MatButton, MatIconButton, ServerUrlPipe]
+    imports: [PostTileComponent, MatIcon, MatButton, MatIconButton, ServerUrlPipe]
 })
-export class PortfolioComponent {
+export class PortfolioComponent implements OnInit {
+  private avisos = inject(AvisosService);
+private route = inject(ActivatedRoute);
+private router = inject(Router);
+private tatuadorService = inject(TatuadorService);
+private trabajosService = inject(TrabajosService);
+private loginService = inject(LoginService);
+private dialog = inject(MatDialog);
+private location = inject(Location);
+
 tatuador: Tatuador | null = null;
   trabajos: Trabajo[] = [];
-  misLikes: Set<number> = new Set();
+  misLikes = new Set<number>();
   
   isLoading = true;
   userLoginOn = false;
   esCliente = false;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private tatuadorService: TatuadorService,
-    private trabajosService: TrabajosService,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-    private location: Location
-  ) {}
 
   ngOnInit(): void {
     // Obtener ID de la URL
@@ -63,8 +63,9 @@ tatuador: Tatuador | null = null;
   }
 
   cargarPerfil(id: number) {
-    this.tatuadorService.getTatuadores().subscribe(tatuadores => {
-        this.tatuador = tatuadores.find(t => t.idUser === id) || null;
+    this.tatuadorService.getPerfilPublico(id).subscribe({
+      next: (tatuador) => this.tatuador = tatuador,
+      error: () => this.tatuador = null
     });
   }
 
@@ -74,24 +75,28 @@ tatuador: Tatuador | null = null;
         this.trabajos = data;
         this.isLoading = false;
       },
-      error: () => this.isLoading = false
+      error: (err) => {
+        this.isLoading = false;
+        this.avisos.fallo(err, 'No se pudieron cargar los trabajos.');
+      }
     });
   }
 
   cargarMisLikes() {
-    this.trabajosService.getMisLikesIds().subscribe(ids => this.misLikes = new Set(ids));
+    // Sin los Me Gusta propios los trabajos se ven igual, sólo sin marcar.
+    this.trabajosService.getMisLikesIds().subscribe({ next: ids => this.misLikes = new Set(ids), error: () => this.misLikes.clear() });
   }
 
   // --- Acciones ---
 
   irAReservar() {
     if (this.tatuador) {
-        this.router.navigate(['/reserva/horarios', this.tatuador.idUser]);
+        this.router.navigate(['/reserva/horarios', this.tatuador.id]);
     }
   }
 
   abrirDetalle(trabajo: Trabajo) {
-     const dialogRef = this.dialog.open(DetalleTrabajoComponent, {
+     this.dialog.open(DetalleTrabajoComponent, {
       width: '460px',
       maxWidth: '100vw',
       maxHeight: '90vh',
@@ -107,19 +112,18 @@ tatuador: Tatuador | null = null;
     if (!this.userLoginOn || !this.esCliente) return;
     
     const yaTieneLike = this.misLikes.has(trabajo.id);
-    if (!trabajo.favoritos) trabajo.favoritos = [];
 
     if (yaTieneLike) {
         this.misLikes.delete(trabajo.id);
-        trabajo.favoritos.pop();
+        trabajo.likesCount--;
         this.trabajosService.quitarLike(trabajo.id).subscribe({
-            error: () => { this.misLikes.add(trabajo.id); trabajo.favoritos?.push({}); }
+            error: (err) => { this.misLikes.add(trabajo.id); trabajo.likesCount++; this.avisos.fallo(err, 'No se pudo quitar el Me Gusta.'); }
         });
     } else {
         this.misLikes.add(trabajo.id);
-        trabajo.favoritos.push({});
+        trabajo.likesCount++;
         this.trabajosService.darLike(trabajo.id).subscribe({
-            error: () => { this.misLikes.delete(trabajo.id); trabajo.favoritos?.pop(); }
+            error: (err) => { this.misLikes.delete(trabajo.id); trabajo.likesCount--; this.avisos.fallo(err, 'No se pudo guardar el Me Gusta.'); }
         });
     }
   }

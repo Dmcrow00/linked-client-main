@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { ReservaStateService } from 'src/app/services/reserva/reserva-state.service';
+import { DatosReserva, ReservaStateService } from 'src/app/services/reserva/reserva-state.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
@@ -18,12 +18,10 @@ import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
     ]
 })
 export class ConfirmacionReservaComponent implements OnInit {
-  reserva: any;
+  private router = inject(Router);
+  private reservaStateService = inject(ReservaStateService);
 
-  constructor(
-    private router: Router,
-    private reservaStateService: ReservaStateService
-  ) {}
+  reserva: DatosReserva | null = null;
 
   ngOnInit(): void {  
     this.reserva = this.reservaStateService.getDatos();
@@ -34,7 +32,7 @@ export class ConfirmacionReservaComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/perfil/mis-turnos']); 
+    this.router.navigate(['/mis-reservas']); 
   }
 
   volverInicio(): void {

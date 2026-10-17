@@ -1,14 +1,12 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { GestionarHorarioComponent } from './gestionar-horario/gestionar-horario.component';
-import { AgendaService } from './agenda.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow } from '@angular/material/table';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { TurnosService, TurnoTatuadorResponse } from 'src/app/services/turnos/turnos.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TurnosService } from 'src/app/services/turnos/turnos.service';
 import { AgendaDetalleComponent } from './agenda-detalle/agenda-detalle.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { EditarTurnoComponent } from './editar-turno/editar-turno.component';
@@ -20,17 +18,26 @@ import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field'
 import { MatSelect, MatOption } from '@angular/material/select';
 import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { NgIf, NgClass, DatePipe, Location } from '@angular/common';
+import { NgClass, DatePipe, Location } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
+import { AvisosService } from 'src/app/core/avisos.service';
+import { ConfirmService } from '@dmcrow00/ng-core/ui';
 
 @Component({
   selector: 'app-agenda',
   templateUrl: './agenda.component.html',
   styleUrl: './agenda.component.scss',
-  imports: [MatButton, MatIcon, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, NgIf, MatProgressSpinner, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatPaginator, DatePipe]
+  imports: [MatButton, MatIcon, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatProgressSpinner, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatPaginator, DatePipe]
 })
 export class AgendaComponent implements OnInit, OnDestroy {
+  private dialog = inject(MatDialog);
+  private turnosService = inject(TurnosService);
+  private avisos = inject(AvisosService);
+  private confirm = inject(ConfirmService);
+  private breakpointObserver = inject(BreakpointObserver);
+  private location = inject(Location);
+
 
   displayedColumns: string[] = ['fecha', 'hora', 'cliente', 'estado', 'acciones'];
   dataSource = new MatTableDataSource<TurnoSesion>([]);
@@ -38,8 +45,8 @@ export class AgendaComponent implements OnInit, OnDestroy {
   filteredTurnos: TurnoSesion[] = [];
 
   // Filtros
-  filterEstado: string = '';
-  filterUsername: string = '';
+  filterEstado = '';
+  filterUsername = '';
   filterFechaDesde: Date | null = null;
   filterFechaHasta: Date | null = null;
   today = new Date();
@@ -60,14 +67,6 @@ export class AgendaComponent implements OnInit, OnDestroy {
   isLoadingTurnos = false;
   errorTurnos: string | null = null;
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private dialog: MatDialog,
-    private turnosService: TurnosService,
-    private snackBar: MatSnackBar,
-    private breakpointObserver: BreakpointObserver,
-    private location: Location
-  ) { }
 
   goBack(): void { this.location.back(); }
 
@@ -92,7 +91,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
         nombreCliente.includes(searchTerms.username.toLowerCase());
 
       // Filtro por Fecha
-      const fechaTurno = new Date(data.fecha_hora_inicio);
+      const fechaTurno = new Date(data.fechaHoraInicio);
       fechaTurno.setHours(0, 0, 0, 0); // Ignorar hora para comparar días
 
       let coincideFecha = true;
@@ -113,7 +112,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
 
   aplicarFiltro(): void {
     if (this.filterFechaDesde && this.filterFechaHasta && this.filterFechaDesde > this.filterFechaHasta) {
-      alert('La fecha "desde" no puede ser mayor que la fecha "hasta".');
+      this.avisos.error('La fecha "desde" no puede ser mayor que la fecha "hasta".');
       return;
     }
 
@@ -152,12 +151,13 @@ export class AgendaComponent implements OnInit, OnDestroy {
     return !this.filterFechaDesde || d >= this.filterFechaDesde;
   };
 
-  onDateInput(event: any) {
+  onDateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
     // Tu lógica para formatear input manual de fecha
-    let value: string = event.target.value.replace(/\D/g, '');
+    let value: string = input.value.replace(/\D/g, '');
     if (value.length >= 2) value = value.slice(0, 2) + '/' + value.slice(2);
     if (value.length >= 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-    event.target.value = value;
+    input.value = value;
   }
 
   ngOnInit(): void {
@@ -184,7 +184,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
   }
 
   abrirConfiguracionHorario(): void {
-    const dialogRef = this.dialog.open(GestionarHorarioComponent, {
+    this.dialog.open(GestionarHorarioComponent, {
       panelClass: 'horario-dialog', disableClose: true,
     });
   }
@@ -192,18 +192,18 @@ export class AgendaComponent implements OnInit, OnDestroy {
 
 
   configurarOrdenamiento() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.dataSource.sortingDataAccessor = (item: TurnoSesion, property: string): string | number => {
       switch (property) {
         case 'fecha':
         case 'hora':
           // Convertir a timestamp para ordenar números correctamente
-          return new Date(item.fecha_hora_inicio).getTime();
+          return new Date(item.fechaHoraInicio).getTime();
         case 'cliente':
           return (item.cliente?.realname || '').toLowerCase();
         case 'estado':
           return (item.estado || '').toLowerCase();
         default:
-          return item[property];
+          return String(item[property as keyof TurnoSesion] ?? '');
       }
     };
   }
@@ -215,12 +215,11 @@ export class AgendaComponent implements OnInit, OnDestroy {
     this.errorTurnos = null;
 
     this.turnosService.getMisTurnos().subscribe({
-      next: (turnosTatuador: TurnoTatuadorResponse[]) => {
-        this.dataSource.data = turnosTatuador.map(tt => tt.turnoSesion);
+      next: (turnos: TurnoSesion[]) => {
+        this.dataSource.data = turnos;
         this.isLoadingTurnos = false;
       },
-      error: (err) => {
-        console.error("Error al cargar turnos:", err);
+      error: () => {
         this.errorTurnos = "No se pudieron cargar los turnos.";
         this.isLoadingTurnos = false;
       }
@@ -238,7 +237,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
         (data.cliente?.realname || '') +
         (data.cliente?.surname || '') +
         data.estado +
-        new Date(data.fecha_hora_inicio!).toLocaleDateString('es-AR'); // "dd/MM/yyyy"
+        new Date(data.fechaHoraInicio).toLocaleDateString('es-AR'); // "dd/MM/yyyy"
       return dataStr.toLowerCase().includes(filter);
     };
 
@@ -287,7 +286,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
   private gestionarTurno(id: number, nuevoEstado: string): void {
     this.turnosService.gestionarTurno(id, nuevoEstado).subscribe({
       next: (turnoActualizado) => {
-        this.snackBar.open(`Turno ${nuevoEstado.toLowerCase()} correctamente.`, 'OK', { duration: 3000 });
+        this.avisos.success(`Turno ${nuevoEstado.toLowerCase()} correctamente.`);
         const index = this.dataSource.data.findIndex(t => t.id === id);
         if (index > -1) {
           this.dataSource.data[index] = turnoActualizado;
@@ -296,10 +295,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
           this.loadTurnos(); // Fallback por si no lo encuentra
         }
       },
-      error: (err) => {
-        console.error(err);
-        this.snackBar.open(`Error: ${err.error?.message || 'No se pudo actualizar el turno.'}`, 'Cerrar', { duration: 5000 });
-      }
+      error: (err) => this.avisos.fallo(err, 'No se pudo actualizar el turno.')
     });
   }
 
@@ -321,33 +317,23 @@ export class AgendaComponent implements OnInit, OnDestroy {
   }
 
   // Método para restaurar (deshacer rechazo)
-  restaurarTurno(turno: TurnoSesion): void {
-    if (confirm('¿Deseas restaurar este turno al estado Pendiente?')) {
+  async restaurarTurno(turno: TurnoSesion): Promise<void> {
+    if (await this.confirm.ask({ title: 'Restaurar turno', message: '¿Deseas restaurar este turno al estado Pendiente?', confirmText: 'Restaurar' })) {
       this.gestionarTurno(turno.id!, 'Pendiente');
     }
   }
 
   // 3. Modificar rechazarTurno para agregar confirmación
-  rechazarTurno(turno: TurnoSesion): void {
-    // Usamos el confirm nativo o un Dialog tuyo
-    if (confirm(`¿Estás seguro de RECHAZAR el turno de ${turno.cliente?.realname}?`)) {
+  async rechazarTurno(turno: TurnoSesion): Promise<void> {
+    const seguro = await this.confirm.ask({
+      title: 'Rechazar turno',
+      message: `¿Estás seguro de RECHAZAR el turno de ${turno.cliente?.realname}?`,
+      confirmText: 'Rechazar',
+      danger: true,
+    });
+    if (seguro) {
       this.gestionarTurno(turno.id!, 'Rechazada');
     }
   }
 
-  // 4. Nuevo método para el servicio (simulado aquí)
-  /*private actualizarTurnoCompleto(id: number, datos: any): void {
-      this.isLoadingTurnos = true;
-      this.turnosService.updateTurno(id, datos).subscribe({
-          next: (turnoUpdate) => {
-              this.snackBar.open('Turno actualizado correctamente', 'Cerrar', { duration: 3000 });
-              this.loadTurnos(); // Recargamos para ver cambios (o actualizamos localmente)
-          },
-          error: (err) => {
-              this.snackBar.open('Error al actualizar turno', 'Cerrar', { duration: 3000 });
-              this.isLoadingTurnos = false;
-          }
-      });
-  }
-  */
 }

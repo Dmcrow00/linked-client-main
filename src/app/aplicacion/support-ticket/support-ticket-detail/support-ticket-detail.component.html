@@ -9,8 +9,8 @@
         <p class="gt-subtitle">Soporte técnico</p>
       </div>
     </div>
-    <span class="status-badge" [class.resolved]="data.supportTicket.status + '' === 'true'">
-      {{ data.supportTicket.status + '' === 'true' ? 'RESUELTO' : 'PENDIENTE' }}
+    <span class="status-badge" [class.resolved]="!data.supportTicket.status">
+      {{ data.supportTicket.status ? 'PENDIENTE' : 'RESUELTO' }}
     </span>
   </div>
 
@@ -23,34 +23,34 @@
       <div class="detail-row">
         <div class="detail-item">
           <span class="detail-label">Usuario</span>
-          <span class="detail-value">{{ data.supportTicket.creationuser }}</span>
+          <span class="detail-value">{{ data.supportTicket.usuarios?.join(', ') || 'Anónimo' }}</span>
         </div>
         <div class="detail-sep"></div>
         <div class="detail-item">
           <span class="detail-label">Fecha de carga</span>
-          <span class="detail-value">{{ data.supportTicket.creationtimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="detail-value">{{ data.supportTicket.creationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
-        <ng-container *ngIf="data.supportTicket.category">
+        @if (data.supportTicket.category) {
           <div class="detail-sep"></div>
           <div class="detail-item">
             <span class="detail-label">Categoría</span>
             <span class="detail-value">{{ data.supportTicket.category }}</span>
           </div>
-        </ng-container>
-        <ng-container *ngIf="data.supportTicket.priority">
+        }
+        @if (data.supportTicket.priority) {
           <div class="detail-sep"></div>
           <div class="detail-item">
             <span class="detail-label">Prioridad</span>
             <span class="detail-value">{{ data.supportTicket.priority }}</span>
           </div>
-        </ng-container>
-        <ng-container *ngIf="data.supportTicket.modificationuser">
+        }
+        @if (data.supportTicket.modificationTimestamp) {
           <div class="detail-sep"></div>
           <div class="detail-item">
             <span class="detail-label">Última gestión</span>
-            <span class="detail-value">{{ data.supportTicket.modificationuser }}</span>
+            <span class="detail-value">{{ data.supportTicket.modificationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
-        </ng-container>
+        }
       </div>
 
       <div class="description-block">
@@ -65,50 +65,29 @@
     <section class="gt-section">
       <h3 class="section-title">Gestión y respuesta</h3>
 
-      <form [formGroup]="gestionForm">
-        <div class="field-group">
-          <label class="field-label">Estado del ticket</label>
-          <mat-form-field appearance="outline" class="field-full">
-            <mat-select formControlName="status">
-              <mat-option [value]="false">Pendiente</mat-option>
-              <mat-option [value]="true">Resuelto</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Respuesta al cliente</label>
-          <mat-form-field appearance="outline" class="field-full">
-            <textarea
-              matInput
-              formControlName="admin_response"
-              placeholder="Redactá la respuesta que recibirá el usuario por correo..."
-              rows="5">
-            </textarea>
-            <mat-error *ngIf="gestionForm.get('admin_response')?.hasError('required')">
-              La respuesta es requerida
-            </mat-error>
-          </mat-form-field>
-          <p class="field-hint">
-            <mat-icon class="hint-icon">mail_outline</mat-icon>
-            Se enviará un correo al usuario con el estado actualizado y esta respuesta.
-          </p>
-        </div>
-      </form>
+      <dmc-dynamic-form [fields]="campos" [form]="form" [submitted]="estado.submitted()" idPrefix="ticket"
+                        (send)="onRespond()" />
+      <p class="field-hint">
+        <mat-icon class="hint-icon">mail_outline</mat-icon>
+        Se enviará un correo al usuario con esta respuesta y el ticket quedará resuelto.
+      </p>
+      @if (estado.error(); as error) {
+        <p class="gt-error" role="alert">{{ error }}</p>
+      }
     </section>
 
   </div>
 
   <!-- Acciones -->
   <div class="gt-actions">
-    <button mat-stroked-button type="button" (click)="onClose()">
+    <button mat-stroked-button type="button" [disabled]="estado.saving()" (click)="onClose()">
       Cerrar
     </button>
-    <button mat-raised-button class="btn-save" type="button" appNoDoubleSubmit
-            [disabled]="gestionForm.invalid || saving"
-            (click)="onRespond()">
-      <mat-icon *ngIf="!saving">send</mat-icon>
-      <span>{{ saving ? 'Enviando...' : 'Guardar y notificar' }}</span>
+    <button mat-raised-button class="btn-save" type="button" [disabled]="estado.saving()" (click)="onRespond()">
+      @if (!estado.saving()) {
+        <mat-icon>send</mat-icon>
+      }
+      <span>{{ estado.saving() ? 'Enviando...' : 'Guardar y notificar' }}</span>
     </button>
   </div>
 

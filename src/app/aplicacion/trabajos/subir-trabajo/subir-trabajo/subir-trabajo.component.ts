@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { TrabajosService } from 'src/app/services/trabajos/trabajos.service';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
@@ -12,56 +11,43 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-subir-trabajo',
     templateUrl: './subir-trabajo.component.html',
     styleUrl: './subir-trabajo.component.scss',
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, NgIf, NgFor, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatDialogActions, MatButton, MatProgressSpinner, NoDoubleSubmitDirective]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatDialogActions, MatButton, MatProgressSpinner, NoDoubleSubmitDirective]
 })
 export class SubirTrabajoComponent {
+  private dialogRef = inject<MatDialogRef<SubirTrabajoComponent>>(MatDialogRef);
+  private trabajosService = inject(TrabajosService);
+  private avisos = inject(AvisosService);
+
   selectedFiles: File[] = [];
   previewUrls: string[] = [];
-  descripcion: string = '';
+  descripcion = '';
   isUploading = false;
   maxFiles = 5;
 
-  constructor(
-    private dialogRef: MatDialogRef<SubirTrabajoComponent>,
-    private trabajosService: TrabajosService,
-    private snackBar: MatSnackBar
-  ) {}
+onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
 
-onFileSelected(event: any): void {
-    const files = event.target.files;
-    
-    if (files) {
-      // Validar cantidad total
-      if (this.selectedFiles.length + files.length > this.maxFiles) {
-        alert(`Solo puedes subir hasta ${this.maxFiles} fotos por publicación.`);
-        return;
-      }
+    if (this.selectedFiles.length + files.length > this.maxFiles) {
+      this.avisos.error(`Solo puedes subir hasta ${this.maxFiles} fotos por publicación.`);
+      return;
+    }
 
-      // Procesar cada archivo
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
-        if (!file.type.startsWith('image/')) {
-           continue; 
-        }
-
-        this.selectedFiles.push(file);
-
-        // Generar preview
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previewUrls.push(e.target.result);
-        };
-        reader.readAsDataURL(file);
-      }
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      this.selectedFiles.push(file);
+      const reader = new FileReader();
+      reader.onload = () => this.previewUrls.push(reader.result as string);
+      reader.readAsDataURL(file);
     }
     // Limpiar input para permitir seleccionar más
-    event.target.value = null;
+    input.value = '';
   }
 
   removeImage(index: number): void {
@@ -76,13 +62,12 @@ onFileSelected(event: any): void {
     
     // 👇 CAMBIO: Pasar el array 'this.selectedFiles'
     this.trabajosService.subirTrabajo(this.descripcion, this.selectedFiles).subscribe({
-      next: (res) => {
-        this.snackBar.open('¡Trabajo publicado con éxito!', 'Genial', { duration: 3000 });
+      next: (_res) => {
+        this.avisos.success('¡Trabajo publicado con éxito!');
         this.dialogRef.close(true); 
       },
       error: (err) => {
-        console.error(err);
-        this.snackBar.open('Error al subir las imágenes. Intenta de nuevo.', 'Cerrar', { duration: 5000 });
+        this.avisos.fallo(err, 'Error al subir las imágenes. Intenta de nuevo.');
         this.isUploading = false;
       }
     });

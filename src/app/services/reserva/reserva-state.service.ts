@@ -1,24 +1,32 @@
 import { Injectable } from '@angular/core';
+import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
+
+/** Lo que muestra la confirmación de una reserva recién pedida. */
+export interface DatosReserva {
+  tatuador: Tatuador | null;
+  /** ISO 8601. */
+  fechaHoraInicio: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservaStateService {
-  private datosReserva: any = {};
+  private datosReserva: DatosReserva | null = null;
   private imagenesReferencia: File[] = [];
 
-  setDatos(datos: any): void {
+  setDatos(datos: DatosReserva): void {
     this.datosReserva = datos;
   }
 
-  getDatos(): any {
+  getDatos(): DatosReserva | null {
     const datos = this.datosReserva;
     this.clear();
     return datos;
   }
 
   clear(): void {
-    this.datosReserva = {};
+    this.datosReserva = null;
   }
 
   setImagenes(files: File[]): void {

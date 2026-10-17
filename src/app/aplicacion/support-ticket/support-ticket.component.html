@@ -24,16 +24,16 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
 
-        <form #filterForm="ngForm">
+        <form #filterForm="ngForm" (ngSubmit)="aplicarFiltro()">
           <div class="filtros-grid">
             <mat-form-field appearance="outline">
               <mat-label>Usuario</mat-label>
-              <input [(ngModel)]="filterUsuario" matInput type="text" name="usuarioTicket" minlength="1" />
+              <input [(ngModel)]="filtro.usuario" matInput type="text" name="usuarioTicket" />
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Fecha carga</mat-label>
-              <input [(ngModel)]="filterFechaCarga" matInput [matDatepicker]="picker1" name="fecha_carga"
+              <input [(ngModel)]="filtro.fecha" matInput [matDatepicker]="picker1" name="fecha_carga"
                 (input)="onDateInput($event)" placeholder="dd/mm/yyyy" />
               <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
               <mat-datepicker #picker1></mat-datepicker>
@@ -41,9 +41,10 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Estado</mat-label>
-              <mat-select [(ngModel)]="filterEstadoTicket" name="status">
-                <mat-option [value]="'true'">Resuelto</mat-option>
-                <mat-option [value]="'false'">Pendiente</mat-option>
+              <mat-select [(ngModel)]="filtro.abierto" name="status">
+                <mat-option [value]="null">Todos</mat-option>
+                <mat-option [value]="true">Pendiente</mat-option>
+                <mat-option [value]="false">Resuelto</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -62,7 +63,13 @@
     </mat-accordion>
 
     <div class="tabla-wrap">
-      <table mat-table [dataSource]="filteredTickets" class="mat-elevation-z8 full-width">
+      @if (lista.error(); as error) {
+        <div class="lista-error" role="alert">
+          <span>{{ error }}</span>
+          <button mat-stroked-button type="button" (click)="lista.load()">Reintentar</button>
+        </div>
+      }
+      <table mat-table [dataSource]="filteredTickets()" class="mat-elevation-z8 full-width">
         <!-- ID  -->
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef>ID</th>
@@ -72,20 +79,20 @@
         <!-- Fecha de carga -->
         <ng-container matColumnDef="fechaCarga">
           <th mat-header-cell *matHeaderCellDef>Fecha Carga</th>
-          <td mat-cell *matCellDef="let row" class="col-center">{{ row.creationtimestamp | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td mat-cell *matCellDef="let row" class="col-center">{{ row.creationTimestamp | date: 'dd/MM/yyyy HH:mm' }}</td>
         </ng-container>
 
         <!-- User -->
         <ng-container matColumnDef="user">
           <th mat-header-cell *matHeaderCellDef>Usuario</th>
-          <td mat-cell *matCellDef="let row" class="col-center">{{ row.creationuser }}</td>
+          <td mat-cell *matCellDef="let row" class="col-center">{{ row.usuarios?.join(', ') || 'Anónimo' }}</td>
         </ng-container>
 
         <!-- Estado -->
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef>Estado</th>
           <td mat-cell *matCellDef="let row" class="col-center">
-            {{ row.status === 'true' ? 'RESUELTO' : 'PENDIENTE' }}
+            {{ row.status ? 'PENDIENTE' : 'RESUELTO' }}
           </td>
         </ng-container>
 
@@ -93,18 +100,23 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Acciones</th>
           <td mat-cell *matCellDef="let row" class="col-center">
-            <button mat-icon-button color="primary" (click)="showDetails(row.id)" matTooltip="Gestionar ticket">
+            <button mat-icon-button color="primary" (click)="showDetails(row)" matTooltip="Gestionar ticket">
               <mat-icon>manage_accounts</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="openDeleteDialog(row.id)" matTooltip="Eliminar">
+            <button mat-icon-button color="warn" [disabled]="lista.deleting()" (click)="openDeleteDialog(row)" matTooltip="Eliminar">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
       </table>
+      @if (lista.empty()) {
+        <p class="lista-vacia">No hay tickets.</p>
+      } @else if (!lista.loading() && filteredTickets().length === 0) {
+        <p class="lista-vacia">Ningún ticket coincide con los filtros.</p>
+      }
     </div>
 
   </div>

@@ -1,71 +1,85 @@
-<div class="page-hero" *ngIf="showHero">
-<div class="hero-content">
-    <button mat-icon-button class="back-btn" (click)="goBack()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <div class="hero-icon-wrap">
-      <mat-icon>how_to_reg</mat-icon>
-    </div>
-    <div>
-      <h1 class="hero-title">Solicitudes</h1>
-      <p class="hero-sub">Revisá y aprobá solicitudes de tatuador.</p>
+@if (showHero) {
+  <div class="page-hero">
+    <div class="hero-content">
+      <button mat-icon-button class="back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="hero-icon-wrap">
+        <mat-icon>how_to_reg</mat-icon>
+      </div>
+      <div>
+        <h1 class="hero-title">Solicitudes</h1>
+        <p class="hero-sub">Revisá y aprobá solicitudes de tatuador.</p>
+      </div>
     </div>
   </div>
-</div>
+}
 
 <div class="page-wrapper">
 
-  <div class="loading-state" *ngIf="loading">
-    <mat-icon>hourglass_top</mat-icon>
-    <span>Cargando solicitudes...</span>
-  </div>
+  @if (loading) {
+    <div class="loading-state">
+      <mat-icon>hourglass_top</mat-icon>
+      <span>Cargando solicitudes...</span>
+    </div>
+  }
 
   <!-- Pendientes -->
-  <section *ngIf="!loading">
-    <div class="section-title">
-      <span>Pendientes</span>
-      <span class="badge" *ngIf="pendientes.length > 0">{{ pendientes.length }}</span>
-    </div>
-
-    <div class="empty-state" *ngIf="pendientes.length === 0">
-      <mat-icon>check_circle_outline</mat-icon>
-      <p>No hay solicitudes pendientes.</p>
-    </div>
-
-    <div class="solicitud-card" *ngFor="let sol of pendientes">
-      <div class="card-main">
-        <div class="user-info">
-          <span class="username">&#64;{{ sol.user.username }}</span>
-          <span class="email">{{ sol.user.email }}</span>
-          <span class="localidad" *ngIf="sol.user.localidad">
-            <mat-icon>place</mat-icon>{{ sol.user.localidad }}
-          </span>
-        </div>
-        <div class="card-details">
-          <div class="detail-item" *ngIf="sol.estudio">
-            <mat-icon>storefront</mat-icon>
-            <span>{{ sol.estudio }}</span>
-          </div>
-          <div class="detail-item">
-            <mat-icon>brush</mat-icon>
-            <span>{{ getNombresEspecialidades(sol.especialidadesIds) }}</span>
-          </div>
-          <div class="detail-item">
-            <mat-icon>schedule</mat-icon>
-            <span>{{ sol.creationtimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
-        </div>
+  @if (!loading) {
+    <section>
+      <div class="section-title">
+        <span>Pendientes</span>
+        @if (pendientes.length > 0) {
+          <span class="badge">{{ pendientes.length }}</span>
+        }
       </div>
-      <div class="card-actions">
-        <button mat-raised-button class="btn-aprobar" appNoDoubleSubmit (click)="aprobar(sol)">
-          <mat-icon>check</mat-icon> Aprobar
-        </button>
-        <button mat-stroked-button class="btn-rechazar" appNoDoubleSubmit (click)="rechazar(sol)">
-          <mat-icon>close</mat-icon> Rechazar
-        </button>
-      </div>
-    </div>
-  </section>
+      @if (pendientes.length === 0) {
+        <div class="empty-state">
+          <mat-icon>check_circle_outline</mat-icon>
+          <p>No hay solicitudes pendientes.</p>
+        </div>
+      }
+      @for (sol of pendientes; track sol) {
+        <div class="solicitud-card">
+          <div class="card-main">
+            <div class="user-info">
+              <span class="username">&#64;{{ sol.user.username }}</span>
+              <span class="email">{{ sol.user.email }}</span>
+              @if (sol.user.localidad) {
+                <span class="localidad">
+                  <mat-icon>place</mat-icon>{{ sol.user.localidad }}
+                </span>
+              }
+            </div>
+            <div class="card-details">
+              @if (sol.estudio) {
+                <div class="detail-item">
+                  <mat-icon>storefront</mat-icon>
+                  <span>{{ sol.estudio }}</span>
+                </div>
+              }
+              <div class="detail-item">
+                <mat-icon>brush</mat-icon>
+                <span>{{ getNombresEspecialidades(sol.especialidadesIds) }}</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ sol.creationTimestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button mat-raised-button class="btn-aprobar" appNoDoubleSubmit (click)="aprobar(sol)">
+              <mat-icon>check</mat-icon> Aprobar
+            </button>
+            <button mat-stroked-button class="btn-rechazar" appNoDoubleSubmit (click)="rechazar(sol)">
+              <mat-icon>close</mat-icon> Rechazar
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+  }
 
 
 </div>

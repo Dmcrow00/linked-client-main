@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Tatuador } from 'src/app/models/tatuador/tatuador.model';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Location, NgIf, NgFor } from '@angular/common';
+import { Location } from '@angular/common';
 import { TatuadorService } from 'src/app/services/user/tatuador.service';
 import { AgendaService } from '../../agenda/agenda.service';
 import { SolicitarTurnoDto, TurnosService } from 'src/app/services/turnos/turnos.service';
@@ -13,27 +13,30 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCalendar } from '@angular/material/datepicker';
 import { FormsModule } from '@angular/forms';
 import { environment } from 'src/environments/environment';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-seleccionar-horario',
     templateUrl: './seleccionar-horario.component.html',
     styleUrl: './seleccionar-horario.component.scss',
-    imports: [MatIconButton, MatRipple, MatIcon, NgIf, MatCalendar, NgFor, FormsModule, NoDoubleSubmitDirective]
+    imports: [MatIconButton, MatRipple, MatIcon, MatCalendar, FormsModule, NoDoubleSubmitDirective]
 })
 export class SeleccionarHorarioComponent implements OnInit {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private location = inject(Location);
+  private tatuadorService = inject(TatuadorService);
+  private agendaService = inject(AgendaService);
+  private turnosService = inject(TurnosService);
+  private reservaStateService = inject(ReservaStateService);
+  private avisos = inject(AvisosService);
+
 
   minDate: Date;
   maxDate: Date;
   isSaving = false;
 
-  constructor(private router: Router,
-              private route: ActivatedRoute,
-              private location: Location,
-              private tatuadorService: TatuadorService,
-              private agendaService: AgendaService,
-              private turnosService: TurnosService,
-              private reservaStateService: ReservaStateService
-  ){
+  constructor(){
     this.minDate = new Date();
     this.minDate.setDate(this.minDate.getDate() + 1);
 
@@ -46,7 +49,7 @@ export class SeleccionarHorarioComponent implements OnInit {
   selectedTatuador: Tatuador | null = null;
   tatuadorId: number | null = null;
   selectedDate: Date | null = null;
-  selectedTime: string = '';
+  selectedTime = '';
 
   // Horarios
   horarios: string[] = [];
@@ -58,7 +61,7 @@ export class SeleccionarHorarioComponent implements OnInit {
   isLoadingFechas = false;
 
   // Descripción
-  descripcionCliente: string = '';
+  descripcionCliente = '';
 
   // Imágenes
   selectedFiles: File[] = [];
@@ -76,13 +79,16 @@ export class SeleccionarHorarioComponent implements OnInit {
     const idStr = this.route.snapshot.paramMap.get('tatuadorId');
     if (idStr) {
       this.tatuadorId = +idStr;
-      this.tatuadorService.getTatuadores().subscribe(tatuadores => {
-        this.selectedTatuador = tatuadores.find(t => t.idUser === this.tatuadorId) || null;
-        if (!this.selectedTatuador) {
-          this.router.navigate(['/reserva/listado']);
-        } else {
-          this.cargarFechasBloqueadas();
-        }
+      this.tatuadorService.getTatuadores().subscribe({
+        next: tatuadores => {
+          this.selectedTatuador = tatuadores.find(t => t.id === this.tatuadorId) || null;
+          if (!this.selectedTatuador) {
+            this.router.navigate(['/reserva/listado']);
+          } else {
+            this.cargarFechasBloqueadas();
+          }
+        },
+        error: err => this.avisos.fallo(err, 'No se pudo cargar el tatuador.'),
       });
     } else {
       this.router.navigate(['/reserva/listado']);
@@ -93,9 +99,7 @@ export class SeleccionarHorarioComponent implements OnInit {
       this.selectedFiles = [...imgs];
       imgs.forEach(file => {
         const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previewImages.push(e.target.result);
-        };
+        reader.onload = () => this.previewImages.push(reader.result as string);
         reader.readAsDataURL(file);
       });
     }
@@ -135,8 +139,7 @@ export class SeleccionarHorarioComponent implements OnInit {
           this.errorHorarios = 'No hay horarios disponibles para este día.';
         }
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
         this.isLoadingHorarios = false;
         this.errorHorarios = 'Error al cargar los horarios del tatuador.';
       }
@@ -160,59 +163,53 @@ export class SeleccionarHorarioComponent implements OnInit {
     this.previewImages.splice(index, 1);
   }
 
-  onFileSelected(event: any): void {
-    const files = event.target.files;
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
 
-    if (files) {
-      const totalFiles = this.selectedFiles.length + files.length;
-
-      if (totalFiles > this.maxFiles) {
-        alert(`Solo puedes subir un máximo de ${this.maxFiles} imágenes.`);
-        event.target.value = null;
-        return;
-      }
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        this.selectedFiles.push(file);
-
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previewImages.push(e.target.result);
-        };
-        reader.readAsDataURL(file);
-      }
+    if (this.selectedFiles.length + files.length > this.maxFiles) {
+      this.avisos.error(`Solo puedes subir un máximo de ${this.maxFiles} imágenes.`);
+      input.value = '';
+      return;
     }
 
-    event.target.value = null;
+    for (const file of files) {
+      this.selectedFiles.push(file);
+      const reader = new FileReader();
+      reader.onload = () => this.previewImages.push(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+
+    input.value = '';
   }
 
   confirmarReserva(): void {
     if (!this.canConfirm() || !this.selectedDate || !this.tatuadorId) {
-      alert("Por favor, completa la fecha, hora, descripción y sube al menos una imagen.");
+      this.avisos.error('Por favor, completa la fecha, hora, descripción y sube al menos una imagen.');
       return;
     }
     this.isSaving = true;
 
     const [hInicio, mInicio] = this.selectedTime.split(':');
-    const fecha_hora_inicio = new Date(this.selectedDate);
-    fecha_hora_inicio.setHours(parseInt(hInicio), parseInt(mInicio), 0, 0);
+    const fechaHoraInicio = new Date(this.selectedDate);
+    fechaHoraInicio.setHours(parseInt(hInicio), parseInt(mInicio), 0, 0);
 
-    const fecha_hora_fin = new Date(fecha_hora_inicio);
-    fecha_hora_fin.setMinutes(fecha_hora_fin.getMinutes() + 60);
+    const fechaHoraFin = new Date(fechaHoraInicio);
+    fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + 60);
 
+    // El backend parsea ISO local sin zona horaria.
     const solicitudDto: SolicitarTurnoDto = {
       tatuadorId: this.tatuadorId,
-      fecha_hora_inicio: fecha_hora_inicio.toISOString(),
-      fecha_hora_fin: fecha_hora_fin.toISOString(),
-      descripcion_cliente: this.descripcionCliente
+      fechaHoraInicio: this.aIsoLocal(fechaHoraInicio),
+      fechaHoraFin: this.aIsoLocal(fechaHoraFin),
+      descripcionCliente: this.descripcionCliente
     };
 
     this.turnosService.solicitarTurno(solicitudDto, this.selectedFiles).subscribe({
-      next: (turnoCreado) => {
+      next: (_turnoCreado) => {
         const datosParaConfirmar = {
             tatuador: this.selectedTatuador,
-            fecha_hora_inicio: fecha_hora_inicio.toISOString(),
+            fechaHoraInicio: fechaHoraInicio.toISOString(),
         };
 
         this.reservaStateService.setDatos(datosParaConfirmar);
@@ -221,11 +218,17 @@ export class SeleccionarHorarioComponent implements OnInit {
         this.router.navigate(['/reserva/confirmacion']);
       },
       error: (err) => {
-        console.error(err);
-        alert(`Error: ${err.error?.message || 'No se pudo procesar la solicitud.'}`);
+        this.avisos.fallo(err, 'No se pudo procesar la solicitud.');
         this.isSaving = false;
       }
     });
+  }
+
+  // toISOString() convierte a UTC y correría el turno; el backend espera la hora local elegida.
+  private aIsoLocal(fecha: Date): string {
+    const pad = (n: number) => `${n}`.padStart(2, '0');
+    return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())}` +
+           `T${pad(fecha.getHours())}:${pad(fecha.getMinutes())}:00`;
   }
 
   getPhotoUrl(photo?: string): string {

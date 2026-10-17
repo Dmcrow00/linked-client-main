@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component,     inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
@@ -8,7 +8,8 @@ import { Router, RouterOutlet } from '@angular/router';
     imports: [RouterOutlet]
 })
 export class ReservaComponent{
-  constructor( private router: Router){}
+  private router = inject(Router);
+
 
   iniciarReserva(): void {
     this.router.navigate(['/reserva/listado']);

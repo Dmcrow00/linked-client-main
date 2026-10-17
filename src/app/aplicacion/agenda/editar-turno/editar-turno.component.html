@@ -1,53 +1,63 @@
 <h2 mat-dialog-title>Editar Turno</h2>
 <mat-dialog-content>
   <form [formGroup]="form" class="edit-form">
-    
+
     <div class="row">
-        <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Fecha</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="fecha" [min]="minDate">
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
+      <mat-form-field appearance="outline" class="col-12">
+        <mat-label>Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="fecha" [min]="minDate">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
 
-        <mat-form-field appearance="outline" class="col-12">
-   <mat-label>Horario Disponible</mat-label>
-            
-            <mat-select formControlName="hora" placeholder="Selecciona hora">
-                
-                <mat-option *ngIf="isLoadingHorarios" disabled>
-                    <mat-spinner diameter="20" style="display:inline-block; vertical-align:middle"></mat-spinner> 
-                    Buscando...
-                </mat-option>
+      <mat-form-field appearance="outline" class="col-12">
+        <mat-label>Horario Disponible</mat-label>
 
-                <mat-option *ngIf="!isLoadingHorarios && horariosDisponibles.length === 0" disabled>
-                    No hay horarios libres
-                </mat-option>
+        <mat-select formControlName="hora" placeholder="Selecciona hora">
 
-                <mat-option *ngFor="let h of horariosDisponibles" [value]="h">
-                    {{ h }}
-                </mat-option>
-                
-<mat-option *ngIf="!horariosDisponibles.includes((data.turno.fecha_hora_inicio | date:'HH:mm') || '') && 
-                                   (fecha?.value | date:'dd/MM/yyyy') === (data.turno.fecha_hora_inicio | date:'dd/MM/yyyy')"
-                            [value]="data.turno.fecha_hora_inicio | date:'HH:mm'">
-                    {{ data.turno.fecha_hora_inicio | date:'HH:mm' }} (Actual)
-                </mat-option>
+          @if (isLoadingHorarios) {
+            <mat-option disabled>
+              <mat-spinner diameter="20" style="display:inline-block; vertical-align:middle"></mat-spinner>
+              Buscando...
+            </mat-option>
+          }
 
-            </mat-select>
-            <mat-error *ngIf="hora?.hasError('required')">Requerido</mat-error>
-        </mat-form-field>
+          @if (!isLoadingHorarios && horariosDisponibles.length === 0) {
+            <mat-option disabled>
+              No hay horarios libres
+            </mat-option>
+          }
 
-        <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Estado</mat-label>
-            <mat-select formControlName="estado">
-                <mat-option value="Pendiente">Pendiente</mat-option>
-                <mat-option value="Confirmada">Confirmada</mat-option>
-                <mat-option value="Completada">Completada</mat-option>
-                <mat-option value="Rechazada">Rechazada</mat-option>
-                <mat-option value="Cancelada">Cancelada</mat-option>
-            </mat-select>
-        </mat-form-field>
+          @for (h of horariosDisponibles; track h) {
+            <mat-option [value]="h">
+              {{ h }}
+            </mat-option>
+          }
+
+          @if (!horariosDisponibles.includes((data.turno.fechaHoraInicio | date:'HH:mm') || '') &&
+            (fecha?.value | date:'dd/MM/yyyy') === (data.turno.fechaHoraInicio | date:'dd/MM/yyyy')) {
+            <mat-option
+              [value]="data.turno.fechaHoraInicio | date:'HH:mm'">
+              {{ data.turno.fechaHoraInicio | date:'HH:mm' }} (Actual)
+            </mat-option>
+          }
+
+        </mat-select>
+        @if (hora?.hasError('required')) {
+          <mat-error>Requerido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-12">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Pendiente">Pendiente</mat-option>
+          <mat-option value="Confirmada">Confirmada</mat-option>
+          <mat-option value="Completada">Completada</mat-option>
+          <mat-option value="Rechazada">Rechazada</mat-option>
+          <mat-option value="Cancelada">Cancelada</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
 
   </form>

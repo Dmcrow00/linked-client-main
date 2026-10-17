@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -16,12 +8,10 @@ import * as L from 'leaflet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { FormsModule } from '@angular/forms';
 
-import { TatuadorService } from 'src/app/services/user/tatuador.service';
 import {
   BusquedaEstiloService,
   TatuadorUbicacion,
@@ -30,8 +20,9 @@ import { ReservaStateService } from 'src/app/services/reserva/reserva-state.serv
 import { GeocodingService, GeoResult } from 'src/app/services/geocoding/geocoding.service';
 import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
 import { environment } from 'src/environments/environment';
+import { AvisosService } from 'src/app/core/avisos.service';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
   iconUrl: 'assets/leaflet/marker-icon.png',
@@ -49,13 +40,20 @@ L.Icon.Default.mergeOptions({
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatSliderModule,
     MatAutocompleteModule,
     ServerUrlPipe,
   ],
 })
 export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy {
+  private busquedaService = inject(BusquedaEstiloService);
+  private reservaStateService = inject(ReservaStateService);
+  private geocodingService = inject(GeocodingService);
+  private avisos = inject(AvisosService);
+  private router = inject(Router);
+  private ngZone = inject(NgZone);
+  private location = inject(Location);
+
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
 
@@ -84,17 +82,6 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
   private userMarker?: L.Marker;
   private userCircle?: L.Circle;
   private artistMarkers: L.Marker[] = [];
-
-  constructor(
-    private tatuadorService: TatuadorService,
-    private busquedaService: BusquedaEstiloService,
-    private reservaStateService: ReservaStateService,
-    private geocodingService: GeocodingService,
-    private snackBar: MatSnackBar,
-    private router: Router,
-    private ngZone: NgZone,
-    private location: Location,
-  ) {}
 
   goBack(): void {
     this.location.back();
@@ -144,7 +131,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
     this.artistMarkers = [];
 
     lista.forEach(tatuador => {
-      const photo = tatuador.profile_photo;
+      const photo = tatuador.profilePhoto;
       const photoUrl = photo
         ? (photo.startsWith('http') ? photo : `${environment.urlImg}${photo}`)
         : 'assets/images/default-avatar.png';
@@ -166,7 +153,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
         .bindPopup(this.buildPopupContent(tatuador));
 
       marker.on('click', () => {
-        this.ngZone.run(() => this.scrollToCard(tatuador.idUser));
+        this.ngZone.run(() => this.scrollToCard(tatuador.id));
       });
 
       this.artistMarkers.push(marker);
@@ -174,12 +161,11 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private buildPopupContent(t: TatuadorUbicacion): string {
-    const esps = t.especialidades.slice(0, 3).map(e => e.nombre).join(', ');
+    const esps = (t.especialidades ?? []).slice(0, 3).map(e => e.nombre).join(', ');
     const dist = t.distancia ? `${t.distancia.toFixed(1)} km` : '';
     return `
       <div class="map-popup">
-        <strong>${t.realname ?? ''} ${t.surname ?? ''}</strong>
-        <span class="popup-username">@${t.username}</span>
+        <strong>@${t.username}</strong>
         ${t.estudio ? `<span class="popup-studio">${t.estudio}</span>` : ''}
         ${esps ? `<span class="popup-esps">${esps}</span>` : ''}
         ${dist ? `<span class="popup-dist"><b>${dist}</b> de distancia</span>` : ''}
@@ -191,7 +177,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
   ────────────────────────────── */
   obtenerUbicacion(): void {
     if (!navigator.geolocation) {
-      this.snackBar.open('Tu navegador no soporta geolocalización.', 'Cerrar', { duration: 3000 });
+      this.avisos.error('Tu navegador no soporta geolocalización.');
       return;
     }
     this.isLocating = true;
@@ -209,7 +195,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
       () => {
         this.ngZone.run(() => {
           this.isLocating = false;
-          this.snackBar.open('No se pudo obtener tu ubicación. Verifica los permisos.', 'Cerrar', { duration: 4000 });
+          this.avisos.error('No se pudo obtener tu ubicación. Verifica los permisos.');
         });
       },
       { enableHighAccuracy: true, timeout: 8000 }
@@ -258,12 +244,12 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
           this.centrarMapaEnUsuario();
           this.aplicarFiltros();
         } else {
-          this.snackBar.open('No se encontró la ubicación. Intentá con otro nombre.', 'Cerrar', { duration: 3500 });
+          this.avisos.info('No se encontró la ubicación. Intentá con otro nombre.');
         }
       },
       error: () => {
         this.isGeocoding = false;
-        this.snackBar.open('Error al buscar la ubicación.', 'Cerrar', { duration: 3000 });
+        this.avisos.error('Error al buscar la ubicación.');
       }
     });
   }
@@ -338,7 +324,7 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
 
     if (this.estilosSeleccionados.size > 0) {
       resultado = resultado.filter(t =>
-        t.especialidades.some(e => this.estilosSeleccionados.has(e.nombre))
+        (t.especialidades ?? []).some(e => this.estilosSeleccionados.has(e.nombre))
       );
     }
 
@@ -365,28 +351,14 @@ export class BuscarTatuadorComponent implements OnInit, AfterViewInit, OnDestroy
      CARGA INICIAL
   ────────────────────────────── */
   private cargarTatuadoresMapa(): void {
-    this.tatuadorService.getTatuadores().subscribe({
+    // El listado público del backend: no exige sesión (users/tatuadores sí).
+    this.busquedaService.getTatuadoresConUbicacion().subscribe({
       next: (tatuadores) => {
-        this.todosLosTatuadores = tatuadores
-          .filter(t => t.lat != null && t.lng != null)
-          .map(t => ({
-            idUser: t.idUser,
-            realname: t.realname,
-            surname: t.surname,
-            username: t.username,
-            profile_photo: t.profile_photo,
-            estudio: t.estudio,
-            localidad: t.localidad ?? undefined,
-            antiguedad: t.antiguedad,
-            especialidades: t.especialidades ?? [],
-            lat: t.lat!,
-            lng: t.lng!,
-            instagram_handle: t.instagram_handle ?? undefined,
-          }));
+        this.todosLosTatuadores = tatuadores.map(t => ({ ...t, especialidades: t.especialidades ?? [] }));
 
         const estilosSet = new Set<string>();
         this.todosLosTatuadores.forEach(t =>
-          t.especialidades.forEach(e => estilosSet.add(e.nombre))
+          (t.especialidades ?? []).forEach(e => estilosSet.add(e.nombre))
         );
         this.estilosDisponibles = Array.from(estilosSet).sort();
 

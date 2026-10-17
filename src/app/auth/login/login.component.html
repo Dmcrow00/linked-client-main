@@ -34,53 +34,57 @@
           <label class="field-label" for="username">Usuario</label>
           <mat-form-field appearance="outline" class="field">
             <input matInput id="username" formControlName="username"
-                   placeholder="nombre de usuario" autocomplete="username" />
-            <mat-error *ngIf="username?.invalid">El usuario es requerido</mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="field-group">
-          <div class="label-row">
-            <label class="field-label" for="password">Contraseña</label>
-            <a routerLink="/forgotPass" class="forgot-link">¿Olvidaste tu contraseña?</a>
+              placeholder="nombre de usuario" autocomplete="username" />
+              @if (username?.invalid) {
+                <mat-error>El usuario es requerido</mat-error>
+              }
+            </mat-form-field>
           </div>
-          <mat-form-field appearance="outline" class="field">
-            <input matInput id="password" [type]="hide ? 'password' : 'text'"
-                   formControlName="password" placeholder="tu contraseña"
-                   autocomplete="current-password" />
-            <button mat-icon-button matSuffix type="button"
-                    (click)="hide = !hide"
-                    [attr.aria-label]="hide ? 'Mostrar contraseña' : 'Ocultar contraseña'">
-              <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+
+          <div class="field-group">
+            <div class="label-row">
+              <label class="field-label" for="password">Contraseña</label>
+              <a routerLink="/forgotPass" class="forgot-link">¿Olvidaste tu contraseña?</a>
+            </div>
+            <mat-form-field appearance="outline" class="field">
+              <input matInput id="password" [type]="hide ? 'password' : 'text'"
+                formControlName="password" placeholder="tu contraseña"
+                autocomplete="current-password" />
+                <button mat-icon-button matSuffix type="button"
+                  (click)="hide = !hide"
+                  [attr.aria-label]="hide ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+                  <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordControl?.invalid) {
+                  <mat-error>La contraseña es requerida</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="captcha-wrap">
+              <re-captcha siteKey="6LfpC-ErAAAAAElCUyzRD1hS7p0VBHyK9RLOHV32"
+                (resolved)="onCaptchaResolved($event)">
+              </re-captcha>
+            </div>
+
+            <button mat-raised-button type="submit" class="btn-primary" appNoDoubleSubmit
+              [disabled]="!captchaValid || loginForm.invalid">
+              Iniciar sesión
             </button>
-            <mat-error *ngIf="passwordControl?.invalid">La contraseña es requerida</mat-error>
-          </mat-form-field>
+
+          </form>
+
+          <div class="form-footer">
+            <span>¿No tenés cuenta?</span>
+            <a routerLink="/register" class="link-action">Registrate</a>
+          </div>
+
+          <div class="form-footer support-link">
+            <span>¿Necesitás ayuda?</span>
+            <a class="link-action" (click)="openSupportTicket()" role="button" tabindex="0" (keydown.enter)="openSupportTicket()" style="cursor:pointer;">Enviá un ticket de soporte</a>
+          </div>
+
         </div>
-
-        <div class="captcha-wrap">
-          <re-captcha siteKey="6LfpC-ErAAAAAElCUyzRD1hS7p0VBHyK9RLOHV32"
-                      (resolved)="onCaptchaResolved($event)">
-          </re-captcha>
-        </div>
-
-        <button mat-raised-button type="submit" class="btn-primary" appNoDoubleSubmit
-                [disabled]="!captchaValid || loginForm.invalid">
-          Iniciar sesión
-        </button>
-
-      </form>
-
-      <div class="form-footer">
-        <span>¿No tenés cuenta?</span>
-        <a routerLink="/register" class="link-action">Registrate</a>
-      </div>
-
-      <div class="form-footer support-link">
-        <span>¿Necesitás ayuda?</span>
-        <a class="link-action" (click)="openSupportTicket()" style="cursor:pointer;">Enviá un ticket de soporte</a>
       </div>
 
     </div>
-  </div>
-
-</div>

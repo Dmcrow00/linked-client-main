@@ -1,10 +1,10 @@
 <div class="screen-container">
-  
+
   <div class="page-header">
     <button mat-icon-button (click)="goBack()" class="btn-back">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    
+
     <div class="title-container">
       <h1>Encuentra tu Artista</h1>
       <p>Explora los mejores tatuadores y reserva tu turno</p>
@@ -14,74 +14,81 @@
   <div class="search-container">
     <div class="search-box">
       <mat-icon class="search-icon">search</mat-icon>
-      <input type="text" 
-           placeholder="Buscar por nombre, usuario o especialidad..." 
-           class="search-input"
-           (input)="filtrar($event)">    
-          </div>
-  </div>
-
-  <div *ngIf="errorCarga" class="error-state">
-    <p>{{ errorCarga }}</p>
-    <button mat-button color="warn" (click)="cargarTatuadores()">Reintentar</button>
-  </div>
-
-  <div *ngIf="!errorCarga">
-    <div *ngIf="tatuadores.length > 0; else noHayTatuadores" class="tatuadores-grid">
-      
-      <div class="tatuador-card" 
-           *ngFor="let tatuador of tatuadores"
-           (click)="seleccionarTatuador(tatuador)"
-           [class.selected]="tatuador.idUser === selectedTatuadorId">
-        
-        <div class="card-top">
-            <img [src]="tatuador?.profile_photo | serverUrl" 
-                 [alt]="tatuador.realname" 
-                 class="avatar">
-        </div>
-        
-        <div class="card-content">
-          <h3>{{ tatuador.realname }} {{ tatuador.surname }}</h3>
-          <p class="username">{{ tatuador.username }}</p>
-          
-          <div class="meta-info">
-            <span class="meta-item" *ngIf="tatuador.estudio">
-              <mat-icon>storefront</mat-icon> {{ tatuador.estudio }}
-            </span>
-            <span class="meta-item">
-              <mat-icon>history_edu</mat-icon> {{ tatuador.antiguedad || '1' }} años
-            </span>
-          </div>
-
-          <div class="chips-wrapper" *ngIf="tatuador.especialidades && tatuador.especialidades.length > 0">
-            <span class="chip" *ngFor="let esp of tatuador.especialidades.slice(0, 3)">
-                {{ esp.nombre }}
-            </span>
-            <span class="chip-more" *ngIf="tatuador.especialidades.length > 3">
-                +{{ tatuador.especialidades.length - 3 }}
-            </span>
-          </div>
-        </div>
-
-        <div class="card-actions">
-            <button class="btn-secondary" (click)="verTrabajos(tatuador.idUser, $event)">
-                Ver Portfolio
-            </button>
-            <button class="btn-primary" 
-                    *ngIf="tatuador.idUser === selectedTatuadorId" 
-                    (click)="confirmarSeleccion()">
-                Reservar Aquí
-            </button>
-        </div>
-
+      <input type="text"
+        placeholder="Buscar por nombre, usuario o especialidad..."
+        class="search-input"
+        (input)="filtrar($event)">
       </div>
     </div>
 
-    <ng-template #noHayTatuadores>
-      <div class="empty-state">
-        <mat-icon>face</mat-icon>
-        <p>No encontramos tatuadores disponibles.</p>
+    @if (errorCarga) {
+      <div class="error-state">
+        <p>{{ errorCarga }}</p>
+        <button mat-button color="warn" (click)="cargarTatuadores()">Reintentar</button>
       </div>
-    </ng-template>
-  </div>
-</div>
+    }
+
+    @if (!errorCarga) {
+      <div>
+        @if (tatuadores.length > 0) {
+          <div class="tatuadores-grid">
+            @for (tatuador of tatuadores; track tatuador) {
+              <div class="tatuador-card"
+                (click)="seleccionarTatuador(tatuador)" role="button" tabindex="0" (keydown.enter)="seleccionarTatuador(tatuador)"
+                [class.selected]="tatuador.id === selectedTatuadorId">
+                <div class="card-top">
+                  <img [src]="tatuador?.profilePhoto | serverUrl"
+                    [alt]="tatuador.realname"
+                    class="avatar">
+                  </div>
+                  <div class="card-content">
+                    <h3>{{ tatuador.realname }} {{ tatuador.surname }}</h3>
+                    <p class="username">{{ tatuador.username }}</p>
+                    <div class="meta-info">
+                      @if (tatuador.estudio) {
+                        <span class="meta-item">
+                          <mat-icon>storefront</mat-icon> {{ tatuador.estudio }}
+                        </span>
+                      }
+                      <span class="meta-item">
+                        <mat-icon>history_edu</mat-icon> {{ tatuador.antiguedad || '1' }} años
+                      </span>
+                    </div>
+                    @if (tatuador.especialidades && tatuador.especialidades.length > 0) {
+                      <div class="chips-wrapper">
+                        @for (esp of tatuador.especialidades.slice(0, 3); track esp) {
+                          <span class="chip">
+                            {{ esp.nombre }}
+                          </span>
+                        }
+                        @if (tatuador.especialidades.length > 3) {
+                          <span class="chip-more">
+                            +{{ tatuador.especialidades.length - 3 }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <div class="card-actions">
+                    <button class="btn-secondary" (click)="verTrabajos(tatuador.id, $event)">
+                      Ver Portfolio
+                    </button>
+                    @if (tatuador.id === selectedTatuadorId) {
+                      <button class="btn-primary"
+                        (click)="confirmarSeleccion()">
+                        Reservar Aquí
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>face</mat-icon>
+              <p>No encontramos tatuadores disponibles.</p>
+            </div>
+          }
+        </div>
+      }
+    </div>

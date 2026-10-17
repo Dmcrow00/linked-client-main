@@ -1,0 +1,8 @@
+# Las claves de sitio de reCAPTCHA (6L…) son públicas: van en el HTML que recibe cualquier navegador.
+# La clave secreta vive sólo en el backend.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Claves de sitio de reCAPTCHA (públicas)"
+regexes = ['''6L[0-9A-Za-z_-]{38}''']

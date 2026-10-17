@@ -1,35 +1,17 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { FormsModule } from '@angular/forms';
-
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
+
+import { LoginService } from 'src/app/services/auth/login.service';
+import { ProximamenteService } from 'src/app/services/proximamente.service';
+import { UserService } from 'src/app/services/user/user.service';
 import { NavComponent } from './nav.component';
 
-@Component({ selector: 'app-help-dialog', template: '' })
-class MockHelpDialogComponent {}
-
 class MockLoginService {
-  userLoginOn = of(false);
-  userRol = of(null);
+  userLoginOn = of(true);
+  userRol = of('Tatuador');
   logout = jasmine.createSpy('logout');
-}
-class MockUserService {
-  getLoggedInUsername = () => of('UsuarioTest');
-}
-class MockProximamenteService {
-  mostrarMensaje = jasmine.createSpy('mostrarMensaje');
 }
 
 describe('NavComponent', () => {
@@ -38,43 +20,32 @@ describe('NavComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [
-        RouterTestingModule,
-        MatFormFieldModule,
-        MatToolbarModule,
-        MatIconModule,
-        MatMenuModule,
-        MatSnackBarModule,
-        MatDialogModule,
-        MatButtonModule,
-        FormsModule,
-        NavComponent
-    ],
-    providers: [
-        { provide: 'LoginService', useClass: MockLoginService },
-        { provide: 'UserService', useClass: MockUserService },
-        { provide: 'ProximamenteService', useClass: MockProximamenteService },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
-});
+      imports: [NavComponent],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: LoginService, useClass: MockLoginService },
+        { provide: UserService, useValue: { getLoggedInUsername: () => of('UsuarioTest') } },
+        { provide: ProximamenteService, useValue: { mostrarMensaje: jasmine.createSpy('mostrarMensaje') } },
+      ],
+    });
 
     fixture = TestBed.createComponent(NavComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('con sesión, toma el nombre y el rol del usuario', () => {
+    expect(component.userLoginOn).toBeTrue();
+    expect(component.username).toBe('UsuarioTest');
+    expect(component.userRol).toBe('Tatuador');
   });
 
-  it('should toggle menuOpen when toggleMenu() is called', () => {
-  expect(component.menuOpen).toBeFalse(); // Estado inicial
-  component.toggleMenu();
-  expect(component.menuOpen).toBeTrue();  // Cambia
-  component.toggleMenu();
-  expect(component.menuOpen).toBeFalse(); // Vuelve a cerrar
-});
-
+  it('abre y cierra el menú', () => {
+    expect(component.menuOpen).toBeFalse();
+    component.toggleMenu();
+    expect(component.menuOpen).toBeTrue();
+    component.toggleMenu();
+    expect(component.menuOpen).toBeFalse();
+  });
 });

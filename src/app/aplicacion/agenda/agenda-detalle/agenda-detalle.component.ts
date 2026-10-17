@@ -1,23 +1,24 @@
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { TurnoMensaje } from 'src/app/models/turno/turno-mensaje.model';
 import { TurnoSesion } from 'src/app/models/turno/turno-sesion.model';
 import { LoginService } from 'src/app/services/auth/login.service';
 import { TurnosService } from 'src/app/services/turnos/turnos.service';
-import { EditarTurnoComponent } from '../editar-turno/editar-turno.component.js';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { EditarTurnoComponent } from '../editar-turno/editar-turno.component';
 import { MatDivider } from '@angular/material/divider';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { ServerUrlPipe } from 'src/app/pipes/server-url.pipe';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 import { environment } from 'src/environments/environment';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 export interface AgendaDetalleData {
   turno: TurnoSesion;
@@ -28,28 +29,23 @@ export interface AgendaDetalleData {
     selector: 'app-agenda-detalle',
     templateUrl: './agenda-detalle.component.html',
     styleUrl: './agenda-detalle.component.scss',
-    imports: [MatDivider, MatTabGroup, MatTab, CdkScrollable, MatDialogContent,
-              MatIconButton, MatTooltip, MatIcon, NgIf, NgFor,
-              MatFormField, MatLabel, MatInput, FormsModule, MatSuffix,
-              MatDialogActions, MatButton, DatePipe, ServerUrlPipe, NoDoubleSubmitDirective]
+    imports: [MatDivider, MatTabGroup, MatTab, CdkScrollable, MatDialogContent, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, MatDialogActions, MatButton, DatePipe, ServerUrlPipe, NoDoubleSubmitDirective]
 })
 export class AgendaDetalleComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<AgendaDetalleComponent>>(MatDialogRef);
+  data = inject<AgendaDetalleData>(MAT_DIALOG_DATA);
+  private turnosService = inject(TurnosService);
+  private loginService = inject(LoginService);
+  private dialog = inject(MatDialog);
+  private avisos = inject(AvisosService);
 
-  mensajes: any[] = [];
+
+  mensajes: TurnoMensaje[] = [];
   nuevoMensajeText = '';
   currentUserId: number | null = null;
   huboCambiosManuales = false;
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
-
-  constructor(
-    public dialogRef: MatDialogRef<AgendaDetalleComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AgendaDetalleData,
-    private turnosService: TurnosService,
-    private loginService: LoginService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.currentUserId = this.loginService.currentUserId;
@@ -61,7 +57,7 @@ export class AgendaDetalleComponent implements OnInit {
   }
 
   get tatuador() {
-    return this.data.turno.tatuadoresAsignados?.[0]?.tatuador;
+    return this.data.turno.tatuadores?.[0];
   }
 
   get statusInfo(): { icon: string; mensaje: string; clase: string } {
@@ -89,39 +85,33 @@ export class AgendaDetalleComponent implements OnInit {
     });
   }
 
-  actualizarTurnoManual(datosNuevos: any): void {
+  actualizarTurnoManual(datosNuevos: Parameters<TurnosService['updateTurno']>[1]): void {
     this.turnosService.updateTurno(this.data.turno.id!, datosNuevos).subscribe({
       next: (turnoActualizado) => {
         this.data.turno = turnoActualizado;
         this.huboCambiosManuales = true;
-        this.snackBar.open('Turno actualizado correctamente.', 'Cerrar', { duration: 3000 });
+        this.avisos.success('Turno actualizado correctamente.');
       },
-      error: (err) => {
-        const msg = err.error?.message || 'Ocurrió un error inesperado.';
-        if (err.status === 409) {
-          this.snackBar.open('El horario elegido se superpone con otro turno.', 'Entendido', { duration: 5000, panelClass: ['error-snackbar'] });
-        } else {
-          this.snackBar.open(`${msg}`, 'Cerrar', { duration: 5000 });
-        }
-      }
+      // Un 409 es un horario que se superpone con otro turno: el servidor manda el motivo.
+      error: (err) => this.avisos.fallo(err, 'No se pudo actualizar el turno.')
     });
   }
 
   cargarMensajes(): void {
     this.turnosService.getMensajesTurno(this.data.turno.id!).subscribe({
-      next: (msgs: any) => { this.mensajes = msgs; },
-      error: () => {}
+      next: (msgs) => { this.mensajes = msgs; },
+      error: (err) => this.avisos.fallo(err, 'No se pudieron cargar los mensajes.')
     });
   }
 
   enviarMensaje(): void {
     if (!this.nuevoMensajeText.trim()) return;
     this.turnosService.enviarMensaje(this.data.turno.id!, this.nuevoMensajeText).subscribe({
-      next: (mensajeCreado: any) => {
+      next: (mensajeCreado) => {
         this.mensajes.push(mensajeCreado);
         this.nuevoMensajeText = '';
       },
-      error: () => {}
+      error: (err) => this.avisos.fallo(err, 'No se pudo enviar el mensaje.')
     });
   }
 
@@ -137,8 +127,7 @@ export class AgendaDetalleComponent implements OnInit {
 
   get lightboxUrl(): string | null {
     if (this.lightboxIndex === null) return null;
-    const img = this.data.turno.imagenes![this.lightboxIndex];
-    const path = img.image_path;
+    const path = this.data.turno.imagenesRef![this.lightboxIndex];
     return path.startsWith('http') ? path : `${environment.urlImg}${path}`;
   }
 
@@ -152,13 +141,13 @@ export class AgendaDetalleComponent implements OnInit {
 
   lightboxPrev(): void {
     if (this.lightboxIndex === null) return;
-    const total = this.data.turno.imagenes!.length;
+    const total = this.data.turno.imagenesRef!.length;
     this.lightboxIndex = (this.lightboxIndex - 1 + total) % total;
   }
 
   lightboxNext(): void {
     if (this.lightboxIndex === null) return;
-    const total = this.data.turno.imagenes!.length;
+    const total = this.data.turno.imagenesRef!.length;
     this.lightboxIndex = (this.lightboxIndex + 1) % total;
   }
 }

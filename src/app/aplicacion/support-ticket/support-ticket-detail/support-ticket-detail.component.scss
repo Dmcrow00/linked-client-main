@@ -161,22 +161,10 @@
 }
 
 // ─── Formulario de gestión ────────────────────────────────────────────────────
-.field-group {
-  margin-bottom: 12px;
-}
-
-.field-label {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-secondary-color);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
-
-.field-full {
-  width: 100%;
+.gt-error {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: #d32f2f;
 }
 
 .field-hint {
@@ -211,8 +199,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  --mdc-protected-button-container-color: #2e7d32;
-  --mdc-protected-button-label-text-color: #ffffff;
+  --mat-button-protected-container-color: #2e7d32;
+  --mat-button-protected-label-text-color: #ffffff;
   font-weight: 600;
 
   mat-icon {

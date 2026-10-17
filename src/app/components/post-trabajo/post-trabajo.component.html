@@ -1,48 +1,56 @@
 <div class="post-tile mat-elevation-z2">
 
   <div class="image-wrapper">
-    <img [src]="trabajo.fotos[currentImageIndex].image_path | serverUrl"
-         class="tile-image"
-         loading="lazy"
-         (error)="hasError = true"
-         [hidden]="hasError"
-         alt="Tatuaje">
+    <img [src]="trabajo.fotos[currentImageIndex] | serverUrl"
+      class="tile-image"
+      loading="lazy"
+      (error)="hasError = true"
+      [hidden]="hasError"
+      alt="Tatuaje">
 
-    <div class="error-placeholder" *ngIf="hasError">
-      <mat-icon>image_not_supported</mat-icon>
-      <span>Imagen no disponible</span>
+      @if (hasError) {
+        <div class="error-placeholder">
+          <mat-icon>image_not_supported</mat-icon>
+          <span>Imagen no disponible</span>
+        </div>
+      }
+
+      @if (trabajo.fotos.length > 1) {
+        <button class="nav-btn prev" (click)="prevImage($event)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="nav-btn next" (click)="nextImage($event)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <div class="photo-counter">
+          {{ currentImageIndex + 1 }}/{{ trabajo.fotos.length }}
+        </div>
+      }
     </div>
 
-    <ng-container *ngIf="trabajo.fotos.length > 1">
-      <button class="nav-btn prev" (click)="prevImage($event)">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <button class="nav-btn next" (click)="nextImage($event)">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-      <div class="photo-counter">
-        {{ currentImageIndex + 1 }}/{{ trabajo.fotos.length }}
-      </div>
-    </ng-container>
-  </div>
-
-  <!-- Overlay de descripción (solo visible en hover en escritorio) -->
-  <div class="tile-overlay">
-    <p class="desc" *ngIf="trabajo.descripcion">{{ trabajo.descripcion | slice:0:40 }}...</p>
-  </div>
-
-  <!-- Barra inferior: siempre visible -->
-  <div class="bottom-bar">
-    <div class="artist-info" *ngIf="showArtistInfo" (click)="irAlPerfil($event)">
-      <img [src]="trabajo.tatuador?.profile_photo | serverUrl" class="mini-avatar">
-      <span class="artist-name">{{ trabajo.tatuador?.username }}</span>
+    <!-- Overlay de descripción (solo visible en hover en escritorio) -->
+    <div class="tile-overlay">
+      @if (trabajo.descripcion) {
+        <p class="desc">{{ trabajo.descripcion | slice:0:40 }}...</p>
+      }
     </div>
-    <div class="bar-spacer" *ngIf="!showArtistInfo"></div>
-    <button mat-icon-button class="btn-like"
-            (click)="onLike($event)"
-            [class.liked]="isLiked">
-      <mat-icon>{{ isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
-    </button>
-  </div>
 
-</div>
+    <!-- Barra inferior: siempre visible -->
+    <div class="bottom-bar">
+      @if (showArtistInfo) {
+        <div class="artist-info" (click)="irAlPerfil($event)" role="button" tabindex="0" (keydown.enter)="irAlPerfil($event)">
+          <img [src]="trabajo.tatuador?.profilePhoto | serverUrl" class="mini-avatar" alt="">
+          <span class="artist-name">{{ trabajo.tatuador?.username }}</span>
+        </div>
+      }
+      @if (!showArtistInfo) {
+        <div class="bar-spacer"></div>
+      }
+      <button mat-icon-button class="btn-like"
+        (click)="onLike($event)"
+        [class.liked]="isLiked">
+        <mat-icon>{{ isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      </button>
+    </div>
+
+  </div>

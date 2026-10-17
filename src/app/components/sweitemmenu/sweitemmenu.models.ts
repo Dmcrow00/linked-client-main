@@ -2,22 +2,21 @@ import { Page } from "src/app/models/pagination";
 
 export interface MenuItem {
     id: number;
+    idSupitemmenu?: number;
     title: string;
-    description: string;
-    idSupItemMenu: MenuItem;
-    roles_permitidos: string;
-    endpoint: string;
-    ordernumber: number;
-    creationtimestamp: Date;
-    creationuser: string;
-    modificationtimestamp: Date;
-    modificationuser: string;
-    subMenus: MenuItem[];
+    icon?: string;
+    // Ruta del cliente a la que navega el ítem.
+    route?: string;
+    orderNumber?: number;
+    // Roles separados por coma; vacío = visible para todos.
+    rolesPermitidos?: string;
+    status?: string;
+    subMenus?: MenuItem[];
     expanded?: boolean;
 }
 
 export class idRolesPorItemMenu {
-    idItemMenu: number = 0;
+    idItemMenu = 0;
     idRoles: number[] = [];
 }
 

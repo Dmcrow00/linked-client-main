@@ -14,47 +14,58 @@
   </div>
 </div>
 
-<div class="favs-stats" *ngIf="!isLoading && trabajosFavoritos.length > 0">
-  <div class="stat-pill">
-    <mat-icon>collections</mat-icon>
-    <span>{{ trabajosFavoritos.length }} publicación{{ trabajosFavoritos.length !== 1 ? 'es' : '' }}</span>
+@if (!isLoading && trabajosFavoritos.length > 0) {
+  <div class="favs-stats">
+    <div class="stat-pill">
+      <mat-icon>collections</mat-icon>
+      <span>{{ trabajosFavoritos.length }} publicación{{ trabajosFavoritos.length !== 1 ? 'es' : '' }}</span>
+    </div>
+    <div class="stat-pill">
+      <mat-icon>palette</mat-icon>
+      <span>{{ uniqueArtistsCount }} artista{{ uniqueArtistsCount !== 1 ? 's' : '' }}</span>
+    </div>
   </div>
-  <div class="stat-pill">
-    <mat-icon>palette</mat-icon>
-    <span>{{ uniqueArtistsCount }} artista{{ uniqueArtistsCount !== 1 ? 's' : '' }}</span>
-  </div>
-</div>
+}
 
 <div class="favs-screen">
 
   <!-- Skeleton loader -->
-  <div class="gallery-grid" *ngIf="isLoading">
-    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
-  </div>
+  @if (isLoading) {
+    <div class="gallery-grid">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="skeleton-card"></div>
+      }
+    </div>
+  }
 
   <!-- Grid de favoritos -->
-  <div class="gallery-grid" *ngIf="!isLoading && trabajosFavoritos.length > 0">
-    <app-post-trabajo
-      *ngFor="let trabajo of trabajosFavoritos"
-      [trabajo]="trabajo"
-      [isLiked]="favorites.has(trabajo.id)"
-      [showArtistInfo]="true"
-      (toggleLike)="onToggleLike($event)"
-      (click)="abrirDetalle(trabajo)">
-    </app-post-trabajo>
-  </div>
+  @if (!isLoading && trabajosFavoritos.length > 0) {
+    <div class="gallery-grid">
+      @for (trabajo of trabajosFavoritos; track trabajo) {
+        <app-post-trabajo
+          [trabajo]="trabajo"
+          [isLiked]="favorites.has(trabajo.id)"
+          [showArtistInfo]="true"
+          (toggleLike)="onToggleLike($event)"
+          (click)="abrirDetalle(trabajo)">
+        </app-post-trabajo>
+      }
+    </div>
+  }
 
   <!-- Estado vacío -->
-  <div class="empty-state" *ngIf="!isLoading && trabajosFavoritos.length === 0">
-    <div class="empty-icon-wrap">
-      <mat-icon>favorite_border</mat-icon>
+  @if (!isLoading && trabajosFavoritos.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon-wrap">
+        <mat-icon>favorite_border</mat-icon>
+      </div>
+      <h2 class="empty-title">Aún no tienes favoritos</h2>
+      <p class="empty-desc">
+        Explorá las publicaciones y presioná
+        <mat-icon class="inline-icon">favorite_border</mat-icon>
+        en las que más te gusten
+      </p>
     </div>
-    <h2 class="empty-title">Aún no tienes favoritos</h2>
-    <p class="empty-desc">
-      Explorá las publicaciones y presioná
-      <mat-icon class="inline-icon">favorite_border</mat-icon>
-      en las que más te gusten
-    </p>
-  </div>
+  }
 
 </div>

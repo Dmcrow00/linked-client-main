@@ -1,9 +1,8 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { RegisterService } from 'src/app/services/auth/register.service';
 import { Validators } from '@angular/forms';
-import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
+import { AvisosService } from 'src/app/core/avisos.service';
 import { User } from '../auth.models';
 import { EncryptionService } from 'src/app/services/auth/encryption.service';
 import { Router } from '@angular/router';
@@ -11,7 +10,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatPrefix, MatSuffix, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -22,16 +21,25 @@ import { catchError, debounceTime, distinctUntilChanged, filter, map, switchMap 
 import { Observable, of, timer } from 'rxjs';
 import { EspecialidadesService } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.service';
 import { Especialidad } from 'src/app/aplicacion/gestion-sistema/especialidades/especialidades.model';
-import { RecaptchaComponent } from 'ng-recaptcha-angular19';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 import { NoDoubleSubmitDirective } from 'src/app/shared/directives/no-double-submit.directive';
 
 @Component({
     selector: 'app-register',
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.scss'],
-    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatPrefix, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, NgIf, NgFor, MatError, MatIconButton, MatButton, MatProgressSpinner, MatTooltip, MatAutocompleteModule, MatChipsModule, RecaptchaComponent, NoDoubleSubmitDirective]
+    imports: [FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatPrefix, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatError, MatIconButton, MatButton, MatProgressSpinner, MatTooltip, MatAutocompleteModule, MatChipsModule, RecaptchaModule, NoDoubleSubmitDirective]
 })
 export class RegisterComponent implements OnInit {
+  private formBuilder = inject(FormBuilder);
+  private registerService = inject(RegisterService);
+  private avisos = inject(AvisosService);
+  private encryptionService = inject(EncryptionService);
+  private router = inject(Router);
+  private geocodingService = inject(GeocodingService);
+  private ngZone = inject(NgZone);
+  private especialidadesService = inject(EspecialidadesService);
+
   registerForm: FormGroup;
   user: User = new User();
   today: Date = new Date();
@@ -51,16 +59,7 @@ export class RegisterComponent implements OnInit {
   especialidades: Especialidad[] = [];
   especialidadesSeleccionadas: Especialidad[] = [];
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private registerService: RegisterService,
-    private dialog: MatDialog,
-    private encryptionService: EncryptionService,
-    private router: Router,
-    private geocodingService: GeocodingService,
-    private ngZone: NgZone,
-    private especialidadesService: EspecialidadesService,
-  ) {
+  constructor() {
     this.registerForm = this.formBuilder.group(
       {
         username: ['', [Validators.required], [this.usernameAvailabilityValidator()]],
@@ -88,8 +87,9 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.especialidadesService.getAllEspecialidades().subscribe(data => {
-      this.especialidades = data.filter(e => e.status);
+    this.especialidadesService.getAllEspecialidades().subscribe({
+      next: data => (this.especialidades = data.filter(e => e.status === 'true')),
+      error: err => this.avisos.fallo(err, 'No se pudieron cargar las especialidades.'),
     });
 
     this.registerForm.get('localidad')!.valueChanges.pipe(
@@ -196,12 +196,8 @@ export class RegisterComponent implements OnInit {
     this.user.realname = this.registerForm.controls['realname'].value;
     this.user.username = this.registerForm.controls['username'].value;
     this.user.email = this.registerForm.controls['email'].value;
-    this.user.creationuser = 'admin';
-    this.user.creationtimestamp = new Date();
-    this.user.modificationuser = 'admin';
-    this.user.modificationtimestamp = new Date();
-    this.user.status = true;
     this.user.password = await this.encryptionService.encrypt(this.registerForm.controls['password'].value);
+    this.user.recaptchaToken = this.captchaToken;
     const rawDate: Date = this.registerForm.controls['birth_date'].value;
     const birth_date = rawDate
       ? `${rawDate.getFullYear()}-${String(rawDate.getMonth() + 1).padStart(2, '0')}-${String(rawDate.getDate()).padStart(2, '0')}`
@@ -214,51 +210,22 @@ export class RegisterComponent implements OnInit {
     if (this.accountType === 'tatuador') {
       this.user.estudio = this.registerForm.controls['estudio'].value || undefined;
       this.user.especialidadIds = this.especialidadesSeleccionadas.map(e => e.id);
-      this.registerService.registerTatuador({ ...this.user, birth_date }).subscribe(
-        () => {
-          this.showSuccessDialogTatuador();
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-            this.dialog.closeAll();
-          }, 3000);
+      this.registerService.registerTatuador({ ...this.user, birth_date }).subscribe({
+        next: () => {
+          this.avisos.success('Solicitud enviada. Tu cuenta está pendiente de aprobación.');
+          void this.router.navigate(['/login']);
         },
-        (error) => {
-          this.showErrorDialog(error.error?.error?.message || 'Error desconocido');
-        }
-      );
+        error: (err) => this.avisos.fallo(err, 'No se pudo enviar la solicitud.'),
+      });
     } else {
-      this.registerService.register({ ...this.user, birth_date }).subscribe(
-        () => {
-          this.showSuccessDialog();
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-            this.dialog.closeAll();
-          }, 2500);
+      this.registerService.register({ ...this.user, birth_date }).subscribe({
+        next: () => {
+          this.avisos.success('Registro exitoso.');
+          void this.router.navigate(['/login']);
         },
-        (error) => {
-          console.error('Error al registrar: ', error);
-          this.showErrorDialog(error.error?.error?.message || 'Error desconocido');
-        }
-      );
+        error: (err) => this.avisos.fallo(err, 'No se pudo completar el registro.'),
+      });
     }
-  }
-
-  private showErrorDialog(errorMessage: string): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message: errorMessage, type: 'error' },
-    });
-  }
-
-  private showSuccessDialog(): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message: 'Registro exitoso', type: 'success' },
-    });
-  }
-
-  private showSuccessDialogTatuador(): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message: 'Solicitud enviada. Tu cuenta está pendiente de aprobación.', type: 'success' },
-    });
   }
 
   passwordMatchValidator(): ValidatorFn {
@@ -369,14 +336,15 @@ export class RegisterComponent implements OnInit {
     };
   }
 
-  onDateInput(event: any) {
-    let value: string = event.target.value.replace(/\D/g, '');
+  onDateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value: string = input.value.replace(/\D/g, '');
     if (value.length >= 2) {
       value = value.slice(0, 2) + '/' + value.slice(2);
     }
     if (value.length >= 5) {
       value = value.slice(0, 5) + '/' + value.slice(5, 9);
     }
-    event.target.value = value;
+    input.value = value;
   }
 }

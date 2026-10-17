@@ -386,8 +386,8 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   border-radius: 8px;
-  --mdc-protected-button-container-color: #2e7d32;
-  --mdc-protected-button-label-text-color: #ffffff;
+  --mat-button-protected-container-color: #2e7d32;
+  --mat-button-protected-label-text-color: #ffffff;
   box-shadow: 0 4px 14px rgba(46, 125, 50, 0.35);
   transition: box-shadow 0.2s, transform 0.1s;
   &:not(:disabled):hover {

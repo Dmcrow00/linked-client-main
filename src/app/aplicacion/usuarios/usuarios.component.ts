@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 import { UserService } from 'src/app/services/user/user.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,26 +13,55 @@ import { MatSelect, MatOption } from '@angular/material/select';
 import { MatInput } from '@angular/material/input';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { NgFor, NgIf, NgClass, Location } from '@angular/common';
+import { NgClass, Location } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
+import { AvisosService } from 'src/app/core/avisos.service';
 
 @Component({
     selector: 'app-usuarios',
     templateUrl: './usuarios.component.html',
     styleUrls: ['./usuarios.component.scss'],
     imports: [
-      MatIcon, FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput,
-      MatButton, MatIconButton, NgFor, NgIf, NgClass, MatTooltip, MatChipsModule,
-      MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell,
-      MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-      MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle,
-      MatSort, MatSortHeader
-    ]
+    MatIcon,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatInput,
+    MatButton,
+    MatIconButton,
+    NgClass,
+    MatTooltip,
+    MatChipsModule,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatHeaderCell,
+    MatCellDef,
+    MatCell,
+    MatHeaderRowDef,
+    MatHeaderRow,
+    MatRowDef,
+    MatRow,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatSort,
+    MatSortHeader
+]
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
+  private avisos = inject(AvisosService);
+  private userService = inject(UserService);
+  private solicitudService = inject(SolicitudTatuadorService);
+  private dialog = inject(MatDialog);
+  private location = inject(Location);
+
   usuarios: User[] = [];
   filteredUsuarios: User[] = [];
   availableRoles: RolApl[] = [];
@@ -41,23 +70,16 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   // Mapa: idUser → role IDs
-  userRolesMap: Map<number, number[]> = new Map();
+  userRolesMap = new Map<number, number[]>();
 
   // Filtros
   filterRolId: number | '' = '';
-  filterUsername: string = '';
+  filterUsername = '';
   filterEstado: 'todos' | 'pendiente_tatuador' | 'tatuador_activo' = 'todos';
 
   sortDir: 'asc' | 'desc' = 'asc';
 
   displayedColumns: string[] = ['user', 'roles', 'estado', 'actions'];
-
-  constructor(
-    private userService: UserService,
-    private solicitudService: SolicitudTatuadorService,
-    private dialog: MatDialog,
-    private location: Location
-  ) {}
 
   goBack(): void { this.location.back(); }
 
@@ -72,26 +94,30 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     ]);
     this.availableRoles = roles ?? [];
     this.solicitudesPendientes = (sols ?? []).filter(s => s.status === 'pendiente');
+
     this.loadUsuarios();
   }
 
   loadUsuarios(): void {
     this.userService.getAllUsers()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(async (data) => {
-        this.usuarios = data;
-        await this.loadAllUserRoles(data);
-        this.aplicarFiltro();
+      .subscribe({
+        next: async (data) => {
+          this.usuarios = data;
+          await this.loadAllUserRoles(data);
+          this.aplicarFiltro();
+        },
+        error: (err) => this.avisos.fallo(err, 'No se pudieron cargar los usuarios.'),
       });
   }
 
   private async loadAllUserRoles(users: User[]): Promise<void> {
     await Promise.all(users.map(async (u) => {
       try {
-        const ids = await this.userService.getAllUserRoles(u.idUser).toPromise();
-        this.userRolesMap.set(u.idUser, (ids ?? []).map(Number));
+        const ids = await this.userService.getAllUserRoles(u.id).toPromise();
+        this.userRolesMap.set(u.id, (ids ?? []).map(Number));
       } catch {
-        this.userRolesMap.set(u.idUser, []);
+        this.userRolesMap.set(u.id, []);
       }
     }));
   }
@@ -105,7 +131,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   isPendienteTatuador(idUser: number): boolean {
-    return this.solicitudesPendientes.some(s => s.idUser === idUser);
+    return this.solicitudesPendientes.some(s => s.user.id === idUser);
   }
 
   isTatuadorActivo(idUser: number): boolean {
@@ -133,13 +159,13 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         u.username?.toLowerCase().includes(this.filterUsername.toLowerCase());
 
       const coincideRol = this.filterRolId === '' ||
-        (this.userRolesMap.get(u.idUser) ?? []).includes(Number(this.filterRolId));
+        (this.userRolesMap.get(u.id) ?? []).includes(Number(this.filterRolId));
 
       let coincideEstado = true;
       if (this.filterEstado === 'pendiente_tatuador') {
-        coincideEstado = this.isPendienteTatuador(u.idUser) && !this.isTatuadorActivo(u.idUser);
+        coincideEstado = this.isPendienteTatuador(u.id) && !this.isTatuadorActivo(u.id);
       } else if (this.filterEstado === 'tatuador_activo') {
-        coincideEstado = this.isTatuadorActivo(u.idUser);
+        coincideEstado = this.isTatuadorActivo(u.id);
       }
 
       return coincideNombre && coincideRol && coincideEstado;
@@ -160,7 +186,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   openEditDialog(id: number): void {
-    this.userService.getUser(id).subscribe((user) => {
+    this.userService.getUser(id).subscribe({ error: (err) => this.avisos.fallo(err, 'No se pudo cargar el usuario.'), next: (user) => {
       const dialogRef = this.dialog.open(UpdateRolComponent, {
         width: '420px',
         disableClose: true,
@@ -176,7 +202,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
           this.loadUsuarios();
         }
       });
-    });
+    } });
   }
 
   ngOnDestroy(): void {

@@ -1,87 +1,63 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { Router, NavigationEnd } from '@angular/router';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
+import { Router, NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { ThemeService } from '@dmcrow00/ng-core/theme';
 import { LoginService } from './services/auth/login.service';
 import { LoadingService } from './services/loading.service';
-import { ThemeService } from './core/services/theme.service';
-import { UserService } from './services/user/user.service';
-import { RolApl } from './models/rol.models';
+import { AsyncPipe } from '@angular/common';
+import { HeaderComponent } from './shared/header/header.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
+import { SweItemMenuComponent } from './components/sweitemmenu/sweitemmenu.component';
+import { LoadingOverlayComponent } from './components/loading-overlay/loading-overlay.component';
+import { FooterComponent } from './shared/footer/footer.component';
+import { ConfirmacionComponent } from './core/ui/confirmacion/confirmacion.component';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  standalone: false
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    imports: [HeaderComponent, MatIconButton, RouterLink, MatIcon, ThemeToggleComponent, SweItemMenuComponent, LoadingOverlayComponent, RouterOutlet, FooterComponent, ConfirmacionComponent, AsyncPipe]
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
+  private loginService = inject(LoginService);
+  private loadingService = inject(LoadingService);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+
   title = 'linked-client';
-  isLoading$: Observable<boolean>;
+  isLoading$: Observable<boolean> = this.loadingService.loading$;
 
-  userLoginOn: boolean = false;
-  userIsAdmin: boolean = false;
-  userId: number | null = null;
-  showShell: boolean = true;
-
-  private authSub?: Subscription;
-  private routeSub?: Subscription;
+  userLoginOn = false;
+  userIsAdmin = false;
+  showShell = true;
 
   private readonly AUTH_ROUTES = ['/login', '/register', '/forgotPass', '/reset-password'];
 
-  constructor(
-    private loginService: LoginService,
-    private themeService: ThemeService,
-    private loadingService: LoadingService,
-    private userService: UserService,
-    private router: Router,
-  ) {
-    this.isLoading$ = this.loadingService.loading$;
+  constructor() {
+    // Aplica el tema guardado desde el arranque, aunque todavía no se vea el botón.
+    inject(ThemeService);
   }
 
   ngOnInit(): void {
-    this.routeSub = this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd)
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe((e) => {
       const url = (e as NavigationEnd).urlAfterRedirects;
       this.showShell = !this.AUTH_ROUTES.some(r => url.startsWith(r));
     });
 
-    this.authSub = this.loginService.userLoginOn.subscribe(async (isLoggedIn) => {
-      this.userLoginOn = isLoggedIn;
+    this.loginService.userLoginOn
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((isLoggedIn) => (this.userLoginOn = isLoggedIn));
 
-      if (isLoggedIn) {
-        await this.checkIfAdmin();
-      } else {
-        this.userIsAdmin = false;
-        this.userId = null;
-      }
-    });
-  }
-
-  async checkIfAdmin(): Promise<void> {
-    try {
-      this.userId = await firstValueFrom(this.userService.getUserId());
-      if (!this.userId) return;
-
-      const roles = await firstValueFrom(this.userService.getAllUserRoles(this.userId));
-
-      if (roles) {
-        for (const idRol of roles) {
-          const rol: RolApl = await firstValueFrom(this.userService.getUserRolByidRole(idRol.toString()));
-
-          if (rol.description === 'Administrador') {
-            this.userIsAdmin = true;
-            break;
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error al verificar los roles del usuario:', error);
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.authSub?.unsubscribe();
-    this.routeSub?.unsubscribe();
+    // El rol viene en el token, como en los guards: no hace falta pedir los roles al servidor.
+    this.loginService.userRol
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((rol) => (this.userIsAdmin = rol === 'Administrador'));
   }
 }
