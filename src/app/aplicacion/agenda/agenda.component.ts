@@ -273,12 +273,6 @@ export class AgendaComponent implements OnInit, OnDestroy {
     this.gestionarTurno(turno.id!, 'Confirmada');
   }
 
-  /*rechazarTurno(turno: TurnoSesion): void {
-    // TODO: Pedir un motivo
-    // Por ahora, lo rechazamos directamente
-    this.gestionarTurno(turno.id!, 'Rechazada');
-  }*/
-
   completarTurno(turno: TurnoSesion): void {
     this.gestionarTurno(turno.id!, 'Completada');
   }

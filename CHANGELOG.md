@@ -19,6 +19,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado
 
 ### Cambiado
 
+- CI: `@dmcrow00/ng-core` desde `develop` (antes, la rama del PR que la creó, ya mergeado) hasta que exista el tag
+  `v0.1.0`.
 - Angular 19.2 → 20.3 con `ng update` y las migraciones oficiales: componentes standalone sin NgModules
   (`app.config.ts` y `app.routes.ts`), control flow (`@if`/`@for`), `inject()` y builders de `@angular/build`.
 - reCAPTCHA: `ng-recaptcha-2` 16 (el mismo componente, compatible con Angular 20) en lugar de `ng-recaptcha-angular19`.
